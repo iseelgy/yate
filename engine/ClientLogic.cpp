@@ -1012,6 +1012,8 @@ static ClientContact* getContactFromParamContext(ClientAccountList* accounts, Na
     return c;
 }
 
+
+
 // Set the image parameter of a list
 static inline void setImageParam(NamedList& p, const char* param,
     const char* image, bool suffix = true)
@@ -11222,8 +11224,8 @@ bool DefaultLogic::handleChatContactAction(const String& name, Window* wnd)
     }
     // Show chat contact log
     if (name == s_chatShowLog) {
-	ClientContact* c = selectedChatContact(*m_accounts,wnd);
-	return logShow(c);
+	ClientContact* c1 = selectedChatContact(*m_accounts,wnd);
+	return logShow(c1);
     }
     // Edit chat contact
     if (name == s_chatEdit) {

@@ -34,6 +34,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 
 elseif(MSVC)
   set(MSVC_DISABLED_WARNINGS_LIST
+      "C4061"
       "C4100" # 'exarg' : unreferenced formal parameter
       "C4127" # conditional expression is constant
 	  "C4131" # 
@@ -280,6 +281,26 @@ SET_TARGET_PROPERTIES(msgsniff PROPERTIES PREFIX "")
 # 安装
 # Note: may not work on windows
 INSTALL (TARGETS msgsniff  DESTINATION modules )
+
+##==========================================================	
+
+
+
+ADD_LIBRARY(demo SHARED
+    modules/demo.cpp
+)
+
+## 链接Yate库
+TARGET_LINK_LIBRARIES( demo Libyate )
+
+## 设置插件的后缀为.yate 
+SET_TARGET_PROPERTIES(demo PROPERTIES SUFFIX ".yate")
+
+SET_TARGET_PROPERTIES(demo PROPERTIES PREFIX "")
+	 	 
+# 安装
+# Note: may not work on windows
+INSTALL (TARGETS demo DESTINATION modules )
 
 ##==========================================================	
 

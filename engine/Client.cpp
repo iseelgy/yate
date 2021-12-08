@@ -458,6 +458,18 @@ static inline void flashItem(bool on, const String& name, const String& item,
 }
 
 
+const char* ClientResource::statusName() const
+{
+	return lookup(m_status, s_statusName);
+}
+
+const char* ClientResource::statusDisplayText(int status, const char* defVal )
+{
+	return lookup(status, s_statusName, defVal);
+}
+
+
+
 /**
  * Window
  */
@@ -1091,6 +1103,22 @@ bool Client::isClientMsg(Message& msg)
 	ClientDriver::self()->name() == *module;
 }
 
+Client* Client::self()
+{
+	return s_client;
+}
+void Client::setSelf(Client* client)
+{
+	s_client = client;
+}
+
+
+bool Client:: changing()
+{
+	return (s_changing > 0);
+}
+
+
 // retrieve the window named by the value of "name" from the client's list of windows
 Window* Client::getWindow(const String& name)
 {
@@ -1161,6 +1189,12 @@ bool Client::getActive(const String& name)
     Window* w = Client::self() ? Client::self()->getWindow(name) : 0;
     return w && w->active();
 }
+
+bool Client::exiting()
+{
+	return s_exiting;
+}
+
 
 // Create the default logic
 ClientLogic* Client::createDefaultLogic()
@@ -2911,6 +2945,12 @@ Client::ClientToggle Client::getBoolOpt(const String& name)
     return OptCount;
 }
 
+void Client::setLogicsTick()
+{
+	s_idleLogicsTick = true;
+}
+
+
 // Append URI escaped String items to a String buffer
 void Client::appendEscape(String& buf, ObjList& list, char sep, bool force)
 {
@@ -3868,6 +3908,23 @@ void ClientChannel::dropReconnPeer(const char* reason)
 	ClientDriver::dropChan(tmp,reason);
 }
 
+int ClientChannel::lookup(const char* notif, int def)
+{
+	return TelEngine::lookup(notif, s_notification, def);
+}
+
+const char* ClientChannel::lookup(int notif, const char* def)
+{
+	return TelEngine::lookup(notif, s_notification, def);
+}
+
+int ClientChannel::lookupSlaveType(const char* notif, int def)
+{
+	return TelEngine::lookup(notif, s_slaveTypes, def);
+}
+
+
+
 
 /**
  * ClientDriver
@@ -3988,6 +4045,21 @@ ClientChannel* ClientDriver::findLine(int line)
     }
     return 0;
 }
+
+ClientDriver* ClientDriver::self()
+{
+	return s_driver;
+}
+
+/**
+ * Get the current audio device's name
+ * @return The current audio device's name
+ */
+const String& ClientDriver::device()
+{
+	return s_device;
+}
+
 
 // Drop all calls belonging to the active driver
 void ClientDriver::dropCalls(const char* reason)
@@ -5936,6 +6008,17 @@ void MucRoom::destroyed()
     destroyChatWindow();
     TelEngine::destruct(m_resource);
     ClientContact::destroyed();
+}
+
+
+void ClientSound::device(const char* dev)
+{
+	Lock lock(s_soundsMutex); m_device = dev;
+}
+
+void ClientSound::file(const char* filename, bool stereo)
+{
+	Lock lock(s_soundsMutex); m_file = filename; m_stereo = stereo;
 }
 
 

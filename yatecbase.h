@@ -1532,10 +1532,10 @@ public:
     void moveRelated(const Window* wnd, int dx, int dy);
     inline bool initialized() const
 	{ return m_initialized; }
-    inline static Client* self()
-	{ return s_client; }
-    inline static void setSelf(Client* client)
-	{ s_client = client; }
+	static Client* self();
+	//{ return s_client; }
+	static void setSelf(Client* client);
+	//{ s_client = client; }
 
     /**
      * Check if the client object still exists and the client or engine is not exiting
@@ -1551,8 +1551,8 @@ public:
      */
     static bool isClientMsg(Message& msg);
 
-    inline static bool changing()
-	{ return (s_changing > 0); }
+	static bool changing();
+	//{ return (s_changing > 0); }
     static Window* getWindow(const String& name);
     static bool setVisible(const String& name, bool show = true, bool activate = false);
     static bool getVisible(const String& name);
@@ -1754,8 +1754,8 @@ public:
      * Check if the client is exiting
      * @return True if the client therad is exiting
      */
-    static inline bool exiting()
-	{ return s_exiting; }
+	static bool exiting();
+	//{ return s_exiting; }
 
     /**
      * Retrieve the active state of a window
@@ -1859,8 +1859,8 @@ public:
     /**
      * Set the flag indicating that the client should tick the logics
      */
-    static inline void setLogicsTick()
-	{ s_idleLogicsTick = true; }
+	static void setLogicsTick();
+	//{ s_idleLogicsTick = true; }
 
     /**
      * Append URI escaped String items to a String buffer
@@ -2427,8 +2427,8 @@ public:
      * @param def Default value to return if not found
      * @return The result
      */
-    static int lookup(const char* notif, int def = Unknown)
-	{ return TelEngine::lookup(notif,s_notification,def); }
+	static int lookup(const char* notif, int def = Unknown);
+	//{ return TelEngine::lookup(notif,s_notification,def); }
 
     /**
      * Lookup for a notification name
@@ -2436,8 +2436,8 @@ public:
      * @param def Default value to return if not found
      * @return The result
      */
-    static const char* lookup(int notif, const char* def = 0)
-	{ return TelEngine::lookup(notif,s_notification,def); }
+	static const char* lookup(int notif, const char* def = 0);
+	//{ return TelEngine::lookup(notif,s_notification,def); }
 
     /**
      * Lookup for a slave type
@@ -2445,8 +2445,8 @@ public:
      * @param def Default value to return if not found
      * @return The result
      */
-    static int lookupSlaveType(const char* notif, int def = SlaveNone)
-	{ return TelEngine::lookup(notif,s_slaveTypes,def); }
+	static int lookupSlaveType(const char* notif, int def = SlaveNone);
+	//{ return TelEngine::lookup(notif,s_slaveTypes,def); }
 
     /**
      * Channel notifications dictionary
@@ -2541,15 +2541,15 @@ public:
      * Get the global client driver object's address
      * @return The global client driver object's address
      */
-    inline static ClientDriver* self()
-	{ return s_driver; }
+	static ClientDriver* self();
+	//{ return s_driver; }
 
     /**
      * Get the current audio device's name
      * @return The current audio device's name
      */
-    inline static const String& device()
-	{ return s_device; }
+	static const String& device();
+	//{ return s_device; }
 
     /**
      * Drop all calls belonging to the active driver
@@ -5003,8 +5003,8 @@ public:
      * Retrieve resource status name
      * @return Resource status name
      */
-    inline const char* statusName() const
-	{ return lookup(m_status,s_statusName); }
+	const char* statusName() const;
+	//{ return lookup(m_status,s_statusName); }
 
     /**
      * Retrieve resource status text or associated status display text
@@ -5078,8 +5078,8 @@ public:
      * @param defVal Text to return if none found
      * @return Status display text or the default value if not found
      */
-    static inline const char* statusDisplayText(int status, const char* defVal = 0)
-	{ return lookup(status,s_statusName,defVal); }
+	static inline const char* statusDisplayText(int status, const char* defVal = 0);
+	//{ return lookup(status,s_statusName,defVal); }
 
     /**
      * Resource status names
@@ -5636,8 +5636,8 @@ public:
      * Set the device used to play this sound
      * @param dev The device used to play sound
      */
-    inline void device(const char* dev)
-	{ Lock lock(s_soundsMutex); m_device = dev; }
+	void device(const char* dev);
+	//{ Lock lock(s_soundsMutex); m_device = dev; }
 
     /**
      * Get the file played by this sound
@@ -5652,8 +5652,8 @@ public:
      * @param filename The new file played by this sound
      * @param stereo True if the file contains 2 channel audio
      */
-    inline void file(const char* filename, bool stereo)
-	{ Lock lock(s_soundsMutex); m_file = filename; m_stereo = stereo; }
+	void file(const char* filename, bool stereo);
+	//{ Lock lock(s_soundsMutex); m_file = filename; m_stereo = stereo; }
 
     /**
      * Set the repeat counter.
