@@ -1,0 +1,112 @@
+#!/bin/bash
+#
+# control tool for maintaining Kamailio
+#
+#===================================================================
+
+PID_FILE=./yate.pid
+LOG_FILE=./yate.log
+
+EGREP="egrep"
+OSERBIN="./run"
+
+## LD_LIBRARY_PATH="$wd":$LD_LIBRARY_PATH
+
+#
+##### ------------------------------------------------ #####
+### yate_start
+#
+yate_start() {
+	echo
+	echo "Starting yate : "
+	if [ -r $PID_FILE ] ; then
+		ps axw | $EGREP yate
+		# ls -l $PID_FILE
+		echo "PID file exists ($PID_FILE)! yate already running?"
+		exit 1
+	fi
+	
+	if [ ! -x "$OSERBIN" ] ; then
+		echo
+		echo "yate binaries not found at $OSERBIN"
+		echo "set OSERBIN to the path of yate in $0"
+		exit 1
+	fi
+	
+	## $OSERBIN -d -vv -p $PID_FILE -l $LOG_FILE 
+	
+	$OSERBIN -d -vv -s -r -p $PID_FILE -l $LOG_FILE 
+
+	sleep 3
+	
+	if [ ! -s $PID_FILE ] ; then
+		echo
+		echo "PID file $PID_FILE does not exist -- yate start failed"
+		exit 1
+	fi
+	
+	echo "started (pid: `cat $PID_FILE`)"
+}
+
+#
+##### ------------------------------------------------ #####
+### yate_stop
+#
+yate_stop() {
+	echo
+	if [ -r $PID_FILE ] ; then
+		echo "Stopping yate (pid: `cat $PID_FILE`)"
+		kill `cat $PID_FILE`
+		echo "stopped"
+		rm "$PID_FILE"
+	else
+		echo
+		echo "No PID file found ($PID_FILE)! yate probably not running"
+		echo "check with 'ps axw | $EGREP yate'"
+		exit 1
+	fi
+}
+
+usage() {
+	
+	echo ""
+	echo "Existing commands:"
+	echo "    -- command 'start|stop|restart'"
+	echo ""
+	echo "    restart .............. restart yate"
+	echo "    start ................ start yate"
+	echo "    stop ................. stop yate"
+
+}
+
+##### ================================================ #####
+### main command switch
+#
+case $1 in
+
+	restart)
+		yate_stop
+		sleep 2
+		yate_start
+		;;
+	
+	start)
+		yate_start
+		;;
+
+	stop)
+		yate_stop
+		;;
+
+	version)
+		echo  "$0 $VERSION"
+		;;
+		
+	*)
+		usage
+		exit 1
+		;;
+esac
+
+
+
