@@ -458,16 +458,6 @@ static inline void flashItem(bool on, const String& name, const String& item,
 }
 
 
-const char* ClientResource::statusName() const
-{
-	return lookup(m_status, s_statusName);
-}
-
-const char* ClientResource::statusDisplayText(int status, const char* defVal )
-{
-	return lookup(status, s_statusName, defVal);
-}
-
 
 
 /**

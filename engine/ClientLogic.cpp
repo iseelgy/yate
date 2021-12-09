@@ -903,6 +903,19 @@ static String s_dirUp = "..";
 // Dynamic load
 static bool s_loadIAX = true;
 
+
+const char* ClientResource::statusName() const
+{
+	return lookup(m_status, s_statusName);
+}
+
+const char* ClientResource::statusDisplayText(int status, const char* defVal )
+{
+	return lookup(status, s_statusName, defVal);
+}
+
+
+
 // Check for protocol or target
 // Load a module is needed
 static void checkLoadModule(const NamedList* params, const String* target = 0)
