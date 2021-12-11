@@ -903,19 +903,6 @@ static String s_dirUp = "..";
 // Dynamic load
 static bool s_loadIAX = true;
 
-
-const char* ClientResource::statusName() const
-{
-	return lookup(m_status, s_statusName);
-}
-
-const char* ClientResource::statusDisplayText(int status, const char* defVal )
-{
-	return lookup(status, s_statusName, defVal);
-}
-
-
-
 // Check for protocol or target
 // Load a module is needed
 static void checkLoadModule(const NamedList* params, const String* target = 0)
@@ -1024,8 +1011,6 @@ static ClientContact* getContactFromParamContext(ClientAccountList* accounts, Na
 	c = accounts->findContact(wnd->context());
     return c;
 }
-
-
 
 // Set the image parameter of a list
 static inline void setImageParam(NamedList& p, const char* param,
@@ -11237,8 +11222,8 @@ bool DefaultLogic::handleChatContactAction(const String& name, Window* wnd)
     }
     // Show chat contact log
     if (name == s_chatShowLog) {
-	ClientContact* c1 = selectedChatContact(*m_accounts,wnd);
-	return logShow(c1);
+	ClientContact* c = selectedChatContact(*m_accounts,wnd);
+	return logShow(c);
     }
     // Edit chat contact
     if (name == s_chatEdit) {

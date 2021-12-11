@@ -1,11 +1,6 @@
 
-
-#rm linux/CMakeCache.txt
-
-rm -rf build
+rm build/CMakeCache.txt
 
 cmake 	-B build \
-		-DCMAKE_INSTALL_PREFIX=build/install \
+		-DCMAKE_INSTALL_PREFIX=build/bin \
 		./
-
-

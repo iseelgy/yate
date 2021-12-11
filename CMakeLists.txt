@@ -4,37 +4,25 @@ PROJECT(yate)
 
 # include (${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
 
+IF(CROSS_COMPILE_HIMIX100) 
 
-set(INSTALL_BIN_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Installation directory for executables")
-set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "Installation directory for libraries")
-set(INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Installation directory for headers")
+	#告知当前使用的是交叉编译方式，必须配置
+	SET(CMAKE_SYSTEM_NAME Linux)
+
+	#设置编译链工具 
+	SET(TOOLCHAIN_DIR "aarch64-himix100-linux-")
+
+	SET(CMAKE_CXX_COMPILER ${TOOLCHAIN_DIR}g++)
+	SET(CMAKE_C_COMPILER   ${TOOLCHAIN_DIR}gcc)
+			
+ENDIF(CROSS_COMPILE_HIMIX100)
 
 
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+if(MSVC)
 
-  SET(GNU_FLAGS "-Wall -O2 -fno-builtin -fpermissive ")
-  SET(CMAKE_CXX_FLAGS "-lm ${GNU_FLAGS} ")
-  SET(CMAKE_C_FLAGS "${GNU_FLAGS}  ")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DEX2" CACHE STRING "Set C++ Compiler Flags" FORCE)
+    INCLUDE_DIRECTORIES(windows)
 
-  set(CMAKE_C_FLAGS_RELEASE "-DNDEBUG")
-  set(CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG")
-  set(CMAKE_C_FLAGS_DEBUG "-g")
-  set(CMAKE_CXX_FLAGS_DEBUG "-g")
-
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 ${C_CXX_FLAGS} -Wmissing-declarations")
-##  # Clang's integerated assembler does not support debug symbols.
-  if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  	set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -Wa,-g")
-  endif()
-
-  ADD_DEFINITIONS(  
-	-DHAVE_GCC_FORMAT_CHECK 
-	-DHAVE_POLL)
-
-elseif(MSVC)
-  set(MSVC_DISABLED_WARNINGS_LIST
-      "C4061"
+	set(MSVC_DISABLED_WARNINGS_LIST
       "C4100" # 'exarg' : unreferenced formal parameter
       "C4127" # conditional expression is constant
 	  "C4131" # 
@@ -82,54 +70,53 @@ elseif(MSVC)
 	  "C5026" #
       "C5027" # move assignment operator was implicitly defined as deleted
       )
-  set(MSVC_LEVEL4_WARNINGS_LIST
+  
+	set(MSVC_LEVEL4_WARNINGS_LIST
       # See https://connect.microsoft.com/VisualStudio/feedback/details/1217660/warning-c4265-when-using-functional-header
       "C4265" # class has virtual functions, but destructor is not virtual
       )
-  string(REPLACE "C" " -wd" MSVC_DISABLED_WARNINGS_STR
+  
+	string(REPLACE "C" " -wd" MSVC_DISABLED_WARNINGS_STR
                             ${MSVC_DISABLED_WARNINGS_LIST})
-  string(REPLACE "C" " -w4" MSVC_LEVEL4_WARNINGS_STR
+	string(REPLACE "C" " -w4" MSVC_LEVEL4_WARNINGS_STR
                             ${MSVC_LEVEL4_WARNINGS_LIST})
-  set(CMAKE_C_FLAGS   "-Wall ${MSVC_DISABLED_WARNINGS_STR} ${MSVC_LEVEL4_WARNINGS_STR}")
-  set(CMAKE_CXX_FLAGS "-Wall ${MSVC_DISABLED_WARNINGS_STR} ${MSVC_LEVEL4_WARNINGS_STR}")
-  set(CMAKE_ASM_NASM_FLAGS "-g cv8")
-#  add_definitions(-D_HAS_EXCEPTIONS=0)
-#  add_definitions(-DWIN32_LEAN_AND_MEAN)
-
-  add_definitions(-DLIBYATE_EXPORTS)
-  add_definitions(-D__STDC__)
-  add_definitions(-DHAVE_STRING_H)
-  add_definitions(-DREGEX_MALLOC)
-  add_definitions(-DSTDC_HEADERS)
-  add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
-  add_definitions(-DATOMIC_OPS)
-  add_definitions(-DHAVE_DNS_NAPTR_DATA)
-##add_definitions(-D)
-
-#  add_definitions(-DOS_WIN)
-#  add_definitions(-D_CRT_SECURE_NO_WARNINGS) # Allow use of fopen
-#  ADD_DEFINITIONS(-DREGEX_MALLOC -D__STDC__ -DLIBYATE_EXPORTS -D_CRT_SECURE_NO_WARNINGS)	
-
-  INCLUDE_DIRECTORIES(windows)
-   
-  set(CMAKE_CXX_FLAGS_RELEASE "/MT")
-  set(CMAKE_CXX_FLAGS_DEBUG "/MTd")
-#  set(CMAKE_CXX_FLAGS_DEBUG "/MTd")
   
-  #set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS OFF)
+	set(CMAKE_C_FLAGS   "-Wall ${MSVC_DISABLED_WARNINGS_STR} ${MSVC_LEVEL4_WARNINGS_STR}")
+	set(CMAKE_CXX_FLAGS "-Wall ${MSVC_DISABLED_WARNINGS_STR} ${MSVC_LEVEL4_WARNINGS_STR}")
+	set(CMAKE_ASM_NASM_FLAGS "-g cv8")
+
+	set(CMAKE_CXX_FLAGS_RELEASE "/MT")
+	set(CMAKE_CXX_FLAGS_DEBUG "/MTd")
   
-#  -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE -DBUILD_SHARED_LIBS=TRUE
+	SET(CMAKE_CXX_FLAGS "/EHsc")
+
+	add_definitions(-DATOMIC_OPS)
+	add_definitions(-DHAVE_DNS_NAPTR_DATA)
+
+	ADD_DEFINITIONS(-DREGEX_MALLOC 
+		-DSTDC_HEADERS 
+		-D__STDC__ 
+		-DLIBYATE_EXPORTS 
+		-D_CRT_SECURE_NO_WARNINGS)	
+else()
+
+	SET(GNU_FLAGS "-Wall -O2 -fno-builtin -fpermissive ")
+	SET(CMAKE_CXX_FLAGS "-lm ${GNU_FLAGS} ")
+	SET(CMAKE_C_FLAGS "${GNU_FLAGS}  ")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DEX2" CACHE STRING "Set C++ Compiler Flags" FORCE)
+
+	ADD_DEFINITIONS( -DHAVE_STRING_H 
+		-DDEBUG 
+		-DSTDC_HEADERS 
+		-DHAVE_GCC_FORMAT_CHECK 
+		-DHAVE_BLOCK_RETURN 
+		-DATOMIC_OPS
+		-DHAVE_GMTOFF 
+		-DHAVE_INT_TZ
+		-DHAVE_POLL)
 
 endif()
-
 		
-ADD_DEFINITIONS( -DHAVE_STRING_H 
-	-DSTDC_HEADERS 
-#	-DHAVE_BLOCK_RETURN 
-#	-DATOMIC_OPS
-#	-DHAVE_GMTOFF 
-	-DHAVE_INT_TZ
-	)
 
 if(WIN32)
 	LINK_LIBRARIES(ws2_32 advapi32 dnsapi)	
@@ -142,36 +129,11 @@ endif(WIN32)
 ## 头文件目录
 INCLUDE_DIRECTORIES( ./ engine/regex  engine/tables)
 
-
 set(BUILD_SHARED_LIBS ON)
-## set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS True)
 
 
-SET( YATE_PUBLIC_HDRS 
-
-	Aux_type.h
-	Aux_yate_hal.h
-	yatecbase.h
-	yateclass.h
-	yatemath.h
-	yatemime.h
-	yatengine.h
-	yatepaths.h
-	yatephone.h
-	yateversn.h
-	yatewin32.h
-	yatewiresniff.h
-	yatexml.h
-)
-
-
-## 源文件
-ADD_LIBRARY(Libyate  
-
-	${YATE_PUBLIC_HDRS}
-
+SET( YATE_SRC 
     engine/regex/regex.c
-
 	engine/Array.cpp
 	engine/Base64.cpp
 	engine/Channel.cpp
@@ -203,9 +165,38 @@ ADD_LIBRARY(Libyate
 	engine/YMD5.cpp
 	engine/YSHA1.cpp
 	engine/YSHA256.cpp
+	
 	Aux_yate_hal.cpp
 )
 
+## 源文件
+ADD_LIBRARY(yateengine  
+
+	${YATE_SRC}
+	
+	Aux_type.h
+	Aux_yate_hal.h
+	yatecbase.h
+	yateclass.h
+	yatemath.h
+	yatemime.h
+	yatengine.h
+	yatepaths.h
+	yatephone.h
+	yateversn.h
+	yatewin32.h
+	yatewiresniff.h
+	yatexml.h	
+	
+)
+
+
+ADD_LIBRARY(yateengine_static  
+
+	STATIC 
+	
+	${YATE_SRC}		
+)
 
 # TARGET_LINK_LIBRARIES( yate.s liblog4cpp.a)
 
@@ -213,7 +204,7 @@ ADD_LIBRARY(Libyate
 
 # Library
 # Note: may not work on windows
-INSTALL (TARGETS Libyate DESTINATION .)
+INSTALL (TARGETS yateengine DESTINATION .)
 	
 		 
 ####### ====================================================================
@@ -224,10 +215,7 @@ ADD_EXECUTABLE(yate
 )
 
 # 链接Yate库
-TARGET_LINK_LIBRARIES( yate Libyate )
-
-
-install(FILES ${YATE_PUBLIC_HDRS} DESTINATION "${INSTALL_INC_DIR}")
+TARGET_LINK_LIBRARIES( yate yateengine )
 
 # 安装二进制文件，Binaries
 INSTALL (TARGETS yate DESTINATION .)
@@ -271,7 +259,7 @@ ADD_LIBRARY(msgsniff SHARED
 )
 
 ## 链接Yate库
-TARGET_LINK_LIBRARIES( msgsniff Libyate )
+TARGET_LINK_LIBRARIES( msgsniff yateengine )
 
 ## 设置插件的后缀为.yate 
 SET_TARGET_PROPERTIES(msgsniff PROPERTIES SUFFIX ".yate")
@@ -280,27 +268,7 @@ SET_TARGET_PROPERTIES(msgsniff PROPERTIES PREFIX "")
 	 	 
 # 安装
 # Note: may not work on windows
-INSTALL (TARGETS msgsniff  DESTINATION modules )
-
-##==========================================================	
-
-
-
-ADD_LIBRARY(demo SHARED
-    modules/demo.cpp
-)
-
-## 链接Yate库
-TARGET_LINK_LIBRARIES( demo Libyate )
-
-## 设置插件的后缀为.yate 
-SET_TARGET_PROPERTIES(demo PROPERTIES SUFFIX ".yate")
-
-SET_TARGET_PROPERTIES(demo PROPERTIES PREFIX "")
-	 	 
-# 安装
-# Note: may not work on windows
-INSTALL (TARGETS demo DESTINATION modules )
+INSTALL (TARGETS msgsniff  LIBRARY DESTINATION modules )
 
 ##==========================================================	
 
@@ -309,7 +277,7 @@ ADD_LIBRARY(ysockschan SHARED
 )
 
 ## 链接Yate库
-TARGET_LINK_LIBRARIES( ysockschan Libyate )
+TARGET_LINK_LIBRARIES( ysockschan yateengine )
 
 ## 设置插件的后缀为.yate 
 SET_TARGET_PROPERTIES(ysockschan PROPERTIES SUFFIX ".yate")
@@ -318,7 +286,8 @@ SET_TARGET_PROPERTIES(ysockschan PROPERTIES PREFIX "")
 	 	 
 # 安装
 # Note: may not work on windows
-INSTALL (TARGETS ysockschan DESTINATION modules )
+INSTALL (TARGETS ysockschan
+    LIBRARY DESTINATION modules )
 	
 ##==========================================================	
 
@@ -327,7 +296,7 @@ ADD_LIBRARY(ystunchan SHARED
 )
 
 ## 链接Yate库
-TARGET_LINK_LIBRARIES( ystunchan Libyate )
+TARGET_LINK_LIBRARIES( ystunchan yateengine )
 
 ## 设置插件的后缀为.yate 
 SET_TARGET_PROPERTIES(ystunchan PROPERTIES SUFFIX ".yate")
@@ -336,7 +305,7 @@ SET_TARGET_PROPERTIES(ystunchan PROPERTIES PREFIX "")
 	 	 
 # 安装
 # Note: may not work on windows
-INSTALL (TARGETS ystunchan DESTINATION modules )
+INSTALL (TARGETS ystunchan LIBRARY DESTINATION modules )
 
 
 	

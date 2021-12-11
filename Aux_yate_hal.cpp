@@ -7,36 +7,34 @@ bool b64_decode(const char * in, TelEngine::DataBlock& dest)
 	return b64Decode.decode(dest);
 }
 
-
-
-void show_data(unsigned char * data, int size)
+void show_data(void * data, int size)
 {
 	int i;
 	std::string info;
 	char show[64];
+	u8* buf = (u8*)data;
 	for (i = 0; i < size; i++) {
 		if ((i % 16) == 0) {
 			info += "\r\n""        ";
 		}
-		::sprintf(show, "%02X ", data[i]);
+		::sprintf(show, "%02X ", buf[i]);
 		info += show;
 	}
 	info += "\r\n";
-
 	TE::Output( "%s", info.c_str() );
-
 }
 
-void show_data_x(unsigned char * data, int size)
+void show_data_x(void * data, int size)
 {
 	int i;
 	std::string info;
 	char show[64];
+	u8 * buf = (u8*)data;
 	for (i = 0; i < size; i++) {
 		if ((i % 16) == 0) {
 			info += "\r\n""        ";
 		}
-		::sprintf(show, "0x%02X, ", data[i]);
+		::sprintf(show, "0x%02X, ", buf[i]);
 		info += show;
 	}
 	info += "\r\n";
