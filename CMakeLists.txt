@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 3.6)
 
 PROJECT(yate)
 
@@ -23,6 +23,7 @@ if(MSVC)
     INCLUDE_DIRECTORIES(windows)
 
 	set(MSVC_DISABLED_WARNINGS_LIST
+	  "C4061"
       "C4100" # 'exarg' : unreferenced formal parameter
       "C4127" # conditional expression is constant
 	  "C4131" # 
@@ -45,12 +46,15 @@ if(MSVC)
       "C4365" # '=' : conversion from 'size_t' to 'int',
               # signed/unsigned mismatch
       "C4389" # '!=' : signed/unsigned mismatch
+	  "C4456"
+	  "C4457"
       "C4464" # relative include path contains '..'
       "C4510" # 'argument' : default constructor could not be generated
       "C4512" # 'argument' : assignment operator could not be generated
       "C4514" # 'function': unreferenced inline function has been removed
       "C4548" # expression before comma has no effect; expected expression with
               # side-effect" caused by FD_* macros.
+      "C4577" 
       "C4610" # struct 'argument' can never be instantiated - user defined
               # constructor required.
       "C4623" # default constructor was implicitly defined as deleted
@@ -68,6 +72,7 @@ if(MSVC)
               # (performance warning)
       "C4820" # 'bytes' bytes padding added after construct 'member_name'
 	  "C5026" #
+	  "C5045" 
       "C5027" # move assignment operator was implicitly defined as deleted
       )
   
@@ -85,10 +90,9 @@ if(MSVC)
 	set(CMAKE_CXX_FLAGS "-Wall ${MSVC_DISABLED_WARNINGS_STR} ${MSVC_LEVEL4_WARNINGS_STR}")
 	set(CMAKE_ASM_NASM_FLAGS "-g cv8")
 
-	set(CMAKE_CXX_FLAGS_RELEASE "/MT")
-	set(CMAKE_CXX_FLAGS_DEBUG "/MTd")
-  
-	SET(CMAKE_CXX_FLAGS "/EHsc")
+#	set(CMAKE_CXX_FLAGS_RELEASE "/MT")
+#	set(CMAKE_CXX_FLAGS_DEBUG "/MTd")  
+#	SET(CMAKE_CXX_FLAGS "/EHsc")
 
 	add_definitions(-DATOMIC_OPS)
 	add_definitions(-DHAVE_DNS_NAPTR_DATA)
