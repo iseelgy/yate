@@ -23,73 +23,29 @@
 typedef int                 BOOL;
 #endif
 
-#ifndef U8
-#define U8 unsigned char
-#endif
+typedef char S8;
+typedef unsigned char U8;
 
-#ifndef S8
-#define S8 char
-#endif
+typedef short S16;
+typedef unsigned short U16;
 
+typedef int S32;
+typedef unsigned int U32;
 
-#ifndef U16
-#define U16 unsigned short
-#endif
+typedef long long S64 ;
+typedef unsigned long long U64 ;
 
-#ifndef S16
-#define S16 short
-#endif
+typedef char s8;
+typedef unsigned char u8;
 
+typedef short s16;
+typedef unsigned short u16;
 
-#ifndef U32
-#define U32 unsigned int
-#endif
+typedef int s32;
+typedef unsigned int u32;
 
-#ifndef S32
-#define S32 int
-#endif
-
-
-#ifndef S64
-#define S64 long long
-#endif
-
-#ifndef U64
-#define U64 unsigned long long
-#endif
-
-
-#ifndef u8
-#define u8 unsigned char 
-#endif
-
-#ifndef s8
-#define s8 char
-#endif
-
-#ifndef u16
-#define u16 unsigned short
-#endif
-
-#ifndef s16
-#define s16 short
-#endif
-
-#ifndef u32
-#define u32 unsigned int
-#endif
-
-#ifndef s32
-#define s32 int
-#endif
-
-#ifndef s64
-#define s64 long long
-#endif
-
-#ifndef u64
-#define u64 unsigned long long
-#endif
+typedef long long s64;
+typedef unsigned long long u64 ;
 
 #ifndef BYTE
 typedef unsigned char BYTE;
