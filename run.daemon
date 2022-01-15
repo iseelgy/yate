@@ -8,7 +8,7 @@ PID_FILE=./yate.pid
 LOG_FILE=./yate.log
 
 EGREP="egrep"
-OSERBIN="./run"
+OSERBIN="./run.cmake"
 
 ## LD_LIBRARY_PATH="$wd":$LD_LIBRARY_PATH
 
