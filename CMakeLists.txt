@@ -256,7 +256,7 @@ INSTALL(DIRECTORY conf.d
 		)
 	
 
-##==========================================================	
+##==========================================================
 	
 ADD_LIBRARY(msgsniff SHARED
     modules/msgsniff.cpp
@@ -274,7 +274,7 @@ SET_TARGET_PROPERTIES(msgsniff PROPERTIES PREFIX "")
 # Note: may not work on windows
 INSTALL (TARGETS msgsniff  LIBRARY DESTINATION modules )
 
-##==========================================================	
+##==========================================================
 
 ADD_LIBRARY(ysockschan SHARED
     modules/ysockschan.cpp
@@ -293,7 +293,7 @@ SET_TARGET_PROPERTIES(ysockschan PROPERTIES PREFIX "")
 INSTALL (TARGETS ysockschan
     LIBRARY DESTINATION modules )
 	
-##==========================================================	
+##==========================================================
 
 ADD_LIBRARY(ystunchan SHARED
     modules/ystunchan.cpp
