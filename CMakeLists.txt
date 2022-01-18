@@ -2,6 +2,10 @@ cmake_minimum_required (VERSION 3.6)
 
 PROJECT(yate)
 
+# set cmake default folder name
+SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
+SET_PROPERTY(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "cmake")
+
 # include (${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
 
 IF(CROSS_COMPILE_HIMIX100) 
@@ -194,6 +198,7 @@ ADD_LIBRARY(yateengine
 	
 )
 
+SET_PROPERTY(TARGET yateengine PROPERTY FOLDER "libs")
 
 ADD_LIBRARY(yateengine_static  
 
@@ -201,6 +206,10 @@ ADD_LIBRARY(yateengine_static
 	
 	${YATE_SRC}		
 )
+
+# add yateengine_static to a virtual project group
+SET_PROPERTY(TARGET yateengine_static PROPERTY FOLDER "libs")
+
 
 # TARGET_LINK_LIBRARIES( yate.s liblog4cpp.a)
 
@@ -217,6 +226,8 @@ INSTALL (TARGETS yateengine DESTINATION .)
 ADD_EXECUTABLE(yate
     main.cpp
 )
+
+SET_PROPERTY(TARGET yate PROPERTY FOLDER "apps")
 
 # 链接Yate库
 TARGET_LINK_LIBRARIES( yate yateengine )
@@ -262,6 +273,8 @@ ADD_LIBRARY(msgsniff SHARED
     modules/msgsniff.cpp
 )
 
+SET_PROPERTY(TARGET msgsniff PROPERTY FOLDER "modules")
+
 ## 链接Yate库
 TARGET_LINK_LIBRARIES( msgsniff yateengine )
 
@@ -279,6 +292,8 @@ INSTALL (TARGETS msgsniff  LIBRARY DESTINATION modules )
 ADD_LIBRARY(ysockschan SHARED
     modules/ysockschan.cpp
 )
+
+SET_PROPERTY(TARGET ysockschan PROPERTY FOLDER "modules")
 
 ## 链接Yate库
 TARGET_LINK_LIBRARIES( ysockschan yateengine )
@@ -298,6 +313,8 @@ INSTALL (TARGETS ysockschan
 ADD_LIBRARY(ystunchan SHARED
     modules/ystunchan.cpp
 )
+
+SET_PROPERTY(TARGET ystunchan PROPERTY FOLDER "modules")
 
 ## 链接Yate库
 TARGET_LINK_LIBRARIES( ystunchan yateengine )
