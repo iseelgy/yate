@@ -333,6 +333,8 @@ ADD_LIBRARY(rmanager SHARED
     modules/rmanager.cpp
 )
 
+SET_PROPERTY(TARGET rmanager PROPERTY FOLDER "modules")
+
 ## 链接Yate库
 TARGET_LINK_LIBRARIES( rmanager yateengine )
 
