@@ -910,6 +910,12 @@ bool EngineCommand::received(Message &msg)
 		ok = true;
 		if (reload) {
 		    if (s->unload(true)) {
+
+			Message * notify = new Message("Yateshop.notify", "ok", true);
+			notify->setParam("Op", "unload module");
+			notify->setParam("module", s->safe());
+			Engine::enqueue(notify);
+
 			Engine::self()->m_libs.remove(s);
 			ok = false;
 		    }
@@ -931,6 +937,12 @@ bool EngineCommand::received(Message &msg)
 	    if (!s)
 		msg.retValue() = "Module not loaded: " + arg + "\r\n";
 	    else if (s->unload(true)) {
+
+		Message * notify = new Message("Yateshop.notify", "ok", true);
+		notify->setParam("Op", "unload module");
+		notify->setParam("module", s->safe());
+		Engine::enqueue(notify);
+
 		Engine::self()->m_libs.remove(s);
 		msg.retValue() = "Unloaded module: " + arg + "\r\n";
 	    }

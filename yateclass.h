@@ -29,7 +29,6 @@
 #include <limits.h>
 #include <sys/types.h>
 #include <stddef.h>
-#include <unistd.h>
 #include <errno.h>
 #include <stdarg.h>
 
@@ -146,6 +145,7 @@ typedef unsigned long in_addr_t;
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <unistd.h>
 
 /**
  * Non-Windows definitions for commonly used types
