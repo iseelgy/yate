@@ -26,6 +26,8 @@
 
 #ifdef _WINDOWS
 
+#define LIBYJABBER_STATIC
+
 #ifdef LIBYJABBER_EXPORTS
 #define YJABBER_API __declspec(dllexport)
 #else

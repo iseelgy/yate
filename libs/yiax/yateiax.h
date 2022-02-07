@@ -25,6 +25,8 @@
 
 #ifdef _WINDOWS
 
+#define LIBYIAX_STATIC
+
 #ifdef LIBYIAX_EXPORTS
 #define YIAX_API __declspec(dllexport)
 #else

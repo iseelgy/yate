@@ -26,6 +26,8 @@
 
 #ifdef _WINDOWS
 
+#define LIBYASN_STATIC
+
 #ifdef LIBYASN_EXPORTS
 #define YASN_API __declspec(dllexport)
 #else

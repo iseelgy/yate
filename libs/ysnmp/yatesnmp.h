@@ -7,6 +7,8 @@
 
 #ifdef _WINDOWS
 
+#define LIBYSNMP_STATIC
+
 #ifdef LIBYSNMP_EXPORTS
 #define YSNMP_API __declspec(dllexport)
 #else

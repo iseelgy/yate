@@ -23,6 +23,8 @@
 
 #ifdef _WINDOWS
 
+#define LIBYPBX_STATIC
+
 #ifdef LIBYPBX_EXPORTS
 #define YPBX_API __declspec(dllexport)
 #else

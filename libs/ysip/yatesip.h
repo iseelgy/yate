@@ -26,6 +26,8 @@
 
 #ifdef _WINDOWS
 
+#define LIBYSIP_STATIC
+
 #ifdef LIBYSIP_EXPORTS
 #define YSIP_API __declspec(dllexport)
 #else

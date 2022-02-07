@@ -25,6 +25,8 @@
 
 #ifdef _WINDOWS
 
+#define LIBYRTP_STATIC
+
 #ifdef LIBYRTP_EXPORTS
 #define YRTP_API __declspec(dllexport)
 #else

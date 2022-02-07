@@ -26,6 +26,8 @@
 
 #ifdef _WINDOWS
 
+#define LIBYMGCP_STATIC
+
 #ifdef LIBYMGCP_EXPORTS
 #define YMGCP_API __declspec(dllexport)
 #else

@@ -1,5 +1,5 @@
 
-del vs2017/CMakeCache.txt
+del vs2017\CMakeCache.txt
 
 cmake 	-B vs2017 ^
 		-G "Visual Studio 15 2017" ^
