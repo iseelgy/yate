@@ -8429,8 +8429,12 @@ public:
     /**
      * Resolver type names
      */
-    static const TokenDict s_types[];
+    // static const TokenDict s_types[];
+
+	static const TokenDict * get_s_types();
 };
+
+//YATE_API const TokenDict Resolver_s_types[];
 
 /**
  * The Cipher class provides an abstraction for data encryption classes

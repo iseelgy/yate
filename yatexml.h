@@ -200,7 +200,7 @@ public:
      * @return The error string
      */
     static inline const char* getError(int code, const char* defVal = "Xml error")
-	{ return lookup(code,s_errorString,defVal); }
+	{ return lookup(code,get_s_errorString(),defVal); }
 
     /**
      * Check if the given character is blank
@@ -249,7 +249,9 @@ public:
     /**
      * Errors dictionary
      */
-    static const TokenDict s_errorString[];
+    //static const TokenDict s_errorString[];
+
+	static const TokenDict *  get_s_errorString();
 
     /**
      * Escaped strings dictionary

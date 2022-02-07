@@ -30,6 +30,7 @@
  */
 
 #include <yatephone.h>
+#include <yatewin32.h>
 
 #include <sys/stat.h>
 #include <sys/wait.h>

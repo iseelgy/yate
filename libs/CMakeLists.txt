@@ -1,4 +1,9 @@
 
+if(MSVC)
+	SET( LIB_BUILD_TYPE STATIC )
+endif()
+
+
 ADD_SUBDIRECTORY(ilbc)
 
 ADD_SUBDIRECTORY(miniwebrtc)
