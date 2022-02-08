@@ -52,7 +52,7 @@ ADD_LIBRARY(callfork SHARED
     callfork.cpp
 )
 
-yate_modules( callfork modules-base modules )
+yate_modules( callfork modules-sip modules )
 
 
 ##==========================================================
@@ -61,7 +61,7 @@ ADD_LIBRARY(cdrbuild SHARED
     cdrbuild.cpp
 )
 
-yate_modules( cdrbuild modules-base modules )
+yate_modules( cdrbuild modules-sip modules )
 
 
 ##==========================================================
@@ -70,7 +70,7 @@ ADD_LIBRARY(cdrcombine SHARED
     cdrcombine.cpp
 )
 
-yate_modules( cdrcombine modules-base modules )
+yate_modules( cdrcombine modules-sip modules )
 
 ##==========================================================
 
@@ -78,7 +78,7 @@ ADD_LIBRARY(cdrfile SHARED
     cdrfile.cpp
 )
 
-yate_modules( cdrfile modules-base modules )
+yate_modules( cdrfile modules-sip modules )
 
 
 ##==========================================================
@@ -87,7 +87,7 @@ ADD_LIBRARY(conference SHARED
     conference.cpp
 )
 
-yate_modules( conference modules-base modules )
+yate_modules( conference modules-sip modules )
 
 ##==========================================================
 
@@ -95,16 +95,7 @@ ADD_LIBRARY(dumbchan SHARED
     dumbchan.cpp
 )
 
-yate_modules( dumbchan modules-base modules )
-
-##==========================================================
-
-ADD_LIBRARY(extmodule SHARED
-    extmodule.cpp
-)
-
-yate_modules( extmodule modules-base modules )
-
+yate_modules( dumbchan modules-sip modules )
 
 ##==========================================================
 
@@ -112,7 +103,7 @@ ADD_LIBRARY(filetransfer SHARED
     filetransfer.cpp
 )
 
-yate_modules( filetransfer modules-base modules )
+yate_modules( filetransfer modules-sip modules )
 
 ##==========================================================
 
@@ -120,7 +111,7 @@ ADD_LIBRARY(fileinfo SHARED
     fileinfo.cpp
 )
 
-yate_modules( fileinfo modules-base modules )
+yate_modules( fileinfo modules-sip modules )
 
 ##==========================================================
 
@@ -128,7 +119,7 @@ ADD_LIBRARY(gvoice SHARED
     gvoice.cpp
 )
 
-yate_modules( gvoice modules-base modules )
+yate_modules( gvoice modules-sip modules )
 
 ##==========================================================
 
@@ -155,7 +146,7 @@ ADD_LIBRARY(moh SHARED
     moh.cpp
 )
 
-yate_modules( moh modules-base modules )
+yate_modules( moh modules-sip modules )
 
 endif()
 
@@ -166,7 +157,7 @@ ADD_LIBRARY(mux SHARED
     mux.cpp
 )
 
-yate_modules( mux modules-base modules )
+yate_modules( mux modules-sip modules )
 
 
 ##==========================================================
@@ -175,42 +166,25 @@ ADD_LIBRARY(pbx SHARED
     pbx.cpp
 )
 
-yate_modules( pbx modules-base modules )
+yate_modules( pbx modules-sip modules )
 
 ##==========================================================
-	
-ADD_LIBRARY(msgsniff SHARED
-    msgsniff.cpp
-)
-
-yate_modules( msgsniff modules-base modules )
-
-
-##==========================================================
-	
+		
 ADD_LIBRARY(regexroute SHARED
     regexroute.cpp
 )
 
-yate_modules( regexroute modules-base modules )
+yate_modules( regexroute modules-sip modules )
 
 
 ##==========================================================
 
-ADD_LIBRARY(rmanager SHARED
-    rmanager.cpp
-)
-
-yate_modules( rmanager modules-base modules )
-
-
-##==========================================================
 
 ADD_LIBRARY(tonegen SHARED
     tonegen.cpp
 )
 
-yate_modules( tonegen modules-base modules )
+yate_modules( tonegen modules-sip modules )
 
 ##==========================================================
 
@@ -218,27 +192,11 @@ ADD_LIBRARY(tonedetect SHARED
     tonedetect.cpp
 )
 
-yate_modules( tonedetect modules-base modules )
+yate_modules( tonedetect modules-sip modules )
 
 
 ##==========================================================
 
-ADD_LIBRARY(ysockschan SHARED
-    ysockschan.cpp
-)
-
-yate_modules( ysockschan modules-base modules )
-
-	
-##==========================================================
-
-ADD_LIBRARY(ystunchan SHARED
-    ystunchan.cpp
-)
-
-yate_modules( ystunchan modules-base modules )
-
-##==========================================================
 
 ADD_LIBRARY(yrtpchan SHARED
     yrtpchan.cpp
@@ -248,7 +206,7 @@ TARGET_INCLUDE_DIRECTORIES(yrtpchan PUBLIC ../libs/yrtp )
 
 TARGET_LINK_LIBRARIES( yrtpchan yrtp)
 
-yate_modules( yrtpchan modules-base modules )
+yate_modules( yrtpchan modules-sip modules )
 
 ##==========================================================
 
@@ -260,7 +218,7 @@ TARGET_INCLUDE_DIRECTORIES(ysipchan PUBLIC ../libs/ysip ../libs/ysdp)
 
 TARGET_LINK_LIBRARIES( ysipchan ysip ysdp)
 
-yate_modules( ysipchan modules-base modules )
+yate_modules( ysipchan modules-sip modules )
 
 ##==========================================================
 
@@ -272,7 +230,7 @@ TARGET_INCLUDE_DIRECTORIES(yiaxchan PUBLIC ../libs/yiax )
 
 TARGET_LINK_LIBRARIES( yiaxchan yiax )
 
-yate_modules( yiaxchan modules-base modules )
+yate_modules( yiaxchan modules-sip modules )
 
 
 ##==========================================================
@@ -294,7 +252,7 @@ ADD_LIBRARY(wavefile SHARED
     wavefile.cpp
 )
 
-yate_modules( wavefile modules-base modules )
+yate_modules( wavefile modules-sip modules )
 
 
 
@@ -304,7 +262,7 @@ ADD_LIBRARY(callgen SHARED
     callgen.cpp
 )
 
-yate_modules( callgen modules-base modules )
+yate_modules( callgen modules-sip modules )
 
 
 ##==========================================================
@@ -313,17 +271,9 @@ ADD_LIBRARY(analyzer SHARED
     analyzer.cpp
 )
 
-yate_modules( analyzer modules-base modules )
+yate_modules( analyzer modules-sip modules )
 
 
 ##==========================================================
 
-ADD_LIBRARY(wiresniff SHARED
-    wiresniff.cpp
-)
-
-yate_modules( wiresniff modules-base modules )
-
-
-##==========================================================
 

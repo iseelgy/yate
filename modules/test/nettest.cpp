@@ -25,7 +25,6 @@
 #include <string.h>
 #include <stdio.h>
 
-#include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -742,7 +741,9 @@ void NTWriter::run()
 {
     if (!initSocket())
 	return;
-    unsigned char buf[m_test->packetLen()];
+
+	DataBlock blk(0, m_test->packetLen());
+    unsigned char * buf = (unsigned char *)blk.data();
     buf[0] = 1;
     while (true) {
 	u_int64_t now = Time::msecNow();
@@ -790,7 +791,8 @@ void NTReader::run()
 {
     if (!initSocket())
 	return;
-    unsigned char buf[m_test->packetLen()];
+	DataBlock blk(0, m_test->packetLen());
+	unsigned char * buf = (unsigned char *)blk.data();
     SocketAddr addr;
     while (true) {
 	if (m_timeToDie && (Time::msecNow() > m_timeToDie))
@@ -858,7 +860,8 @@ void NTSelectReader::run()
     if (!m_count || !m_test || m_test->send())
 	return;
     DDebug(m_container,DebugAll,"Select reader worker started");
-    unsigned char buf[m_test->packetLen()];
+	DataBlock blk(0, m_test->packetLen());
+	unsigned char * buf = (unsigned char *)blk.data();
     SocketAddr addr;
     int ok = 0;
     FDSetSelect set;

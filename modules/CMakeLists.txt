@@ -53,12 +53,48 @@ function(yate_modules ymodule yfolder yinstall )
 endfunction()
 
 
-include(CMake_base.cmake)
+OPTION(YATE_BUILD_ALL "Build all moudles" OFF)
 
-include(CMake_client.cmake)
+OPTION(YATE_BUILD_TEST "Build tests moudles" OFF)
 
-include(CMake_server.cmake)
+OPTION(YATE_BUILD_SIP "Build with sip base moudles" OFF)
 
+OPTION(YATE_BUILD_CLIENT "Build with sip client moudles" OFF)
+
+OPTION(YATE_BUILD_SERVER "Build with sip server moduels " OFF)
+
+OPTION(YATE_BUILD_QT4 "Build with qt moduels " OFF)
+
+
+if(YATE_BUILD_ALL)
+	set( YATE_BUILD_TEST ON )
+	set( YATE_BUILD_SIP ON )
+	set( YATE_BUILD_CLIENT ON )
+	set( YATE_BUILD_SERVER ON )
+	set( YATE_BUILD_QT4 ON )
+endif()
+
+include(CMake_engine.cmake)
+
+if(YATE_BUILD_SIP)
+	include(CMake_sip.cmake)
+endif()
+
+if(YATE_BUILD_CLIENT)
+	include(CMake_client.cmake)
+endif()
+
+if(YATE_BUILD_SERVER)
+	include(CMake_server.cmake)
+endif()
+
+if(YATE_BUILD_TEST)
+	include(CMake_test.cmake)
+endif()
+
+if(YATE_BUILD_QT4)
+	include(CMake_qt4.cmake)
+endif()
 
 
 
