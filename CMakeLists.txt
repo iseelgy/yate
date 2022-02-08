@@ -124,8 +124,6 @@ endif(WIN32)
 ## 头文件目录
 INCLUDE_DIRECTORIES( ./ engine/regex  engine/tables)
 
-set(BUILD_SHARED_LIBS ON)
-
 
 SET( YATE_SRC 
     engine/regex/regex.c
