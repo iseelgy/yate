@@ -40,19 +40,14 @@
 using namespace TelEngine;
 
 // Resolver type names
-const TokenDict Resolver_s_types[] = {
-    { "SRV", Resolver::Srv },
-    { "NAPTR", Resolver::Naptr },
-    { "A", Resolver::A4 },
-    { "AAAA", Resolver::A6 },
-    { "TXT", Resolver::Txt },
+const TokenDict Resolver::s_types[] = {
+    { "SRV", Srv },
+    { "NAPTR", Naptr },
+    { "A", A4 },
+    { "AAAA", A6 },
+    { "TXT", Txt },
     { 0, 0 },
 };
-
-const TokenDict * Resolver::get_s_types()
-{
-	return Resolver_s_types;
-}
 
 #ifdef _WINDOWS
 
@@ -100,7 +95,7 @@ static int printResult(int type, int code, const char* dname, ObjList& result, S
 	if (s)
 	    s << "\r\n-----";
 	Debug(DebugAll,"%s query for '%s' got %d records%s",
-	    lookup(type,Resolver_s_types),dname,result.count(),s.safe());
+	    lookup(type,Resolver::s_types),dname,result.count(),s.safe());
     }
     else {
 	String dummy;
@@ -113,7 +108,7 @@ static int printResult(int type, int code, const char* dname, ObjList& result, S
 #endif
 	}
 	Debug(DebugNote,"%s query for '%s' failed with code %d error=%s",
-	    lookup(type,Resolver_s_types),dname,code,TelEngine::c_safe(error));
+	    lookup(type,Resolver::s_types),dname,code,TelEngine::c_safe(error));
     }
 #endif
     return code;
@@ -434,7 +429,7 @@ int Resolver::query(Type type, const char* dname, ObjList& result, String* error
 int Resolver::srvQuery(const char* dname, ObjList& result, String* error)
 {
     int code = 0;
-    XDebug(DebugAll,"Starting %s query for '%s'",lookup(Srv, Resolver_s_types),dname);
+    XDebug(DebugAll,"Starting %s query for '%s'",lookup(Srv,s_types),dname);
 #ifdef _WINDOWS
     DNS_RECORD* srv = 0;
     code = (int)::DnsQuery_UTF8(dname,DNS_TYPE_SRV,DNS_QUERY_STANDARD,NULL,&srv,NULL);
@@ -515,7 +510,7 @@ int Resolver::srvQuery(const char* dname, ObjList& result, String* error)
 int Resolver::naptrQuery(const char* dname, ObjList& result, String* error)
 {
     int code = 0;
-    XDebug(DebugAll,"Starting %s query for '%s'",lookup(Naptr, Resolver_s_types),dname);
+    XDebug(DebugAll,"Starting %s query for '%s'",lookup(Naptr,s_types),dname);
 #ifdef _WINDOWS
     DNS_RECORD* naptr = 0;
     if (available(Naptr))
@@ -631,7 +626,7 @@ int Resolver::naptrQuery(const char* dname, ObjList& result, String* error)
 int Resolver::a4Query(const char* dname, ObjList& result, String* error)
 {
     int code = 0;
-    XDebug(DebugAll,"Starting %s query for '%s'",lookup(A4, Resolver_s_types),dname);
+    XDebug(DebugAll,"Starting %s query for '%s'",lookup(A4,s_types),dname);
 #ifdef _WINDOWS
     DNS_RECORD* adr = 0;
     code = (int)::DnsQuery_UTF8(dname,DNS_TYPE_A,DNS_QUERY_STANDARD,NULL,&adr,NULL);
@@ -705,7 +700,7 @@ int Resolver::a4Query(const char* dname, ObjList& result, String* error)
 int Resolver::a6Query(const char* dname, ObjList& result, String* error)
 {
     int code = 0;
-    XDebug(DebugAll,"Starting %s query for '%s'",lookup(A6, Resolver_s_types),dname);
+    XDebug(DebugAll,"Starting %s query for '%s'",lookup(A6,s_types),dname);
     if (!available(A6))
 	return printResult(A6,code,dname,result,error);
 #ifdef _WINDOWS
@@ -781,7 +776,7 @@ int Resolver::a6Query(const char* dname, ObjList& result, String* error)
 int Resolver::txtQuery(const char* dname, ObjList& result, String* error)
 {
     int code = 0;
-    XDebug(DebugAll,"Starting %s query for '%s'",lookup(Txt, Resolver_s_types),dname);
+    XDebug(DebugAll,"Starting %s query for '%s'",lookup(Txt,s_types),dname);
 #ifdef _WINDOWS
     DNS_RECORD* adr = 0;
     code = (int)::DnsQuery_UTF8(dname,DNS_TYPE_TEXT,DNS_QUERY_STANDARD,NULL,&adr,NULL);

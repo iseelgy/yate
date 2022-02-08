@@ -20,7 +20,6 @@
  */
 
 #include <yatengine.h>
-#include <yatewin32.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>

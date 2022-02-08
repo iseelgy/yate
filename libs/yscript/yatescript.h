@@ -25,8 +25,6 @@
 
 #ifdef _WINDOWS
 
-#define LIBYSCRIPT_STATIC
-
 #ifdef LIBYSCRIPT_EXPORTS
 #define YSCRIPT_API __declspec(dllexport)
 #else

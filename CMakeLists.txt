@@ -8,6 +8,19 @@ SET_PROPERTY(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "cmake")
 
 # include (${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
 
+IF(CROSS_COMPILE_HIMIX100) 
+
+	#告知当前使用的是交叉编译方式，必须配置
+	SET(CMAKE_SYSTEM_NAME Linux)
+
+	#设置编译链工具 
+	SET(TOOLCHAIN_DIR "aarch64-himix100-linux-")
+
+	SET(CMAKE_CXX_COMPILER ${TOOLCHAIN_DIR}g++)
+	SET(CMAKE_C_COMPILER   ${TOOLCHAIN_DIR}gcc)
+			
+ENDIF(CROSS_COMPILE_HIMIX100)
+
 
 if(MSVC)
 
@@ -124,6 +137,8 @@ endif(WIN32)
 ## 头文件目录
 INCLUDE_DIRECTORIES( ./ engine/regex  engine/tables)
 
+set(BUILD_SHARED_LIBS ON)
+
 
 SET( YATE_SRC 
     engine/regex/regex.c
@@ -185,11 +200,26 @@ ADD_LIBRARY(yateengine
 
 SET_PROPERTY(TARGET yateengine PROPERTY FOLDER "libs")
 
+ADD_LIBRARY(yateengine_static  
+
+	STATIC 
+	
+	${YATE_SRC}		
+)
+
+# add yateengine_static to a virtual project group
+SET_PROPERTY(TARGET yateengine_static PROPERTY FOLDER "libs")
+
+
+# TARGET_LINK_LIBRARIES( yate.s liblog4cpp.a)
+
+# TARGET_LINK_LIBRARIES( yateengine liblog4cpp.a)
 
 # Library
 # Note: may not work on windows
 INSTALL (TARGETS yateengine DESTINATION .)
-			 
+	
+		 
 ####### ====================================================================
 ## 应用
 
@@ -202,41 +232,23 @@ SET_PROPERTY(TARGET yate PROPERTY FOLDER "apps")
 # 链接Yate库
 TARGET_LINK_LIBRARIES( yate yateengine )
 
-####### ====================================================================
-## 库
-
-ADD_SUBDIRECTORY(libs)
-
-####### ====================================================================
-## 库
-
-ADD_SUBDIRECTORY(modules)
-
-
-####### ====================================================================
-## 安装
-
-
 # 安装二进制文件，Binaries
 INSTALL (TARGETS yate DESTINATION .)
-
-if(NOT MSVC )
 	
-	# 安装运行脚本	
-	INSTALL( PROGRAMS run.cmake
-		DESTINATION .
-		PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
-			  GROUP_EXECUTE GROUP_READ	
-		)
-		
-	# 安装运行脚本	
-	INSTALL( PROGRAMS run.daemon         
-		DESTINATION .
-	   PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
-			  GROUP_EXECUTE GROUP_READ	
-		)
+# 安装运行脚本	
+INSTALL( PROGRAMS run.cmake
+	DESTINATION .
+    PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+          GROUP_EXECUTE GROUP_READ	
+	)
 	
-endif()
+# 安装运行脚本	
+INSTALL( PROGRAMS run.daemon         
+	DESTINATION .
+   PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+          GROUP_EXECUTE GROUP_READ	
+	)
+	
 		
 ## 安装share目录下文件		
 INSTALL(DIRECTORY share 
@@ -254,4 +266,85 @@ INSTALL(DIRECTORY conf.d
                     GROUP_READ
 		)
 	
+
+##==========================================================
+	
+ADD_LIBRARY(msgsniff SHARED
+    modules/msgsniff.cpp
+)
+
+SET_PROPERTY(TARGET msgsniff PROPERTY FOLDER "modules")
+
+## 链接Yate库
+TARGET_LINK_LIBRARIES( msgsniff yateengine )
+
+## 设置插件的后缀为.yate 
+SET_TARGET_PROPERTIES(msgsniff PROPERTIES SUFFIX ".yate")
+
+SET_TARGET_PROPERTIES(msgsniff PROPERTIES PREFIX "")
+	 	 
+# 安装
+# Note: may not work on windows
+INSTALL (TARGETS msgsniff LIBRARY DESTINATION modules )
+
+##==========================================================
+
+ADD_LIBRARY(ysockschan SHARED
+    modules/ysockschan.cpp
+)
+
+SET_PROPERTY(TARGET ysockschan PROPERTY FOLDER "modules")
+
+## 链接Yate库
+TARGET_LINK_LIBRARIES( ysockschan yateengine )
+
+## 设置插件的后缀为.yate 
+SET_TARGET_PROPERTIES(ysockschan PROPERTIES SUFFIX ".yate")
+
+SET_TARGET_PROPERTIES(ysockschan PROPERTIES PREFIX "")
+	 	 
+# 安装
+# Note: may not work on windows
+INSTALL (TARGETS ysockschan LIBRARY DESTINATION modules )
+	
+##==========================================================
+
+ADD_LIBRARY(ystunchan SHARED
+    modules/ystunchan.cpp
+)
+
+SET_PROPERTY(TARGET ystunchan PROPERTY FOLDER "modules")
+
+## 链接Yate库
+TARGET_LINK_LIBRARIES( ystunchan yateengine )
+
+## 设置插件的后缀为.yate 
+SET_TARGET_PROPERTIES(ystunchan PROPERTIES SUFFIX ".yate")
+
+SET_TARGET_PROPERTIES(ystunchan PROPERTIES PREFIX "")
+	 	 
+# 安装
+# Note: may not work on windows
+INSTALL (TARGETS ystunchan LIBRARY DESTINATION modules )
+
+##==========================================================
+
+ADD_LIBRARY(rmanager SHARED
+    modules/rmanager.cpp
+)
+
+SET_PROPERTY(TARGET rmanager PROPERTY FOLDER "modules")
+
+## 链接Yate库
+TARGET_LINK_LIBRARIES( rmanager yateengine )
+
+## 设置插件的后缀为.yate 
+SET_TARGET_PROPERTIES(rmanager PROPERTIES SUFFIX ".yate")
+
+SET_TARGET_PROPERTIES(rmanager PROPERTIES PREFIX "")
+	 	 
+# 安装
+# Note: may not work on windows
+INSTALL (TARGETS rmanager LIBRARY DESTINATION modules )
+
 

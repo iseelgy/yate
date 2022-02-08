@@ -26,8 +26,6 @@
 
 #ifdef _WINDOWS
 
-#define LIBYMODEM_STATIC
-
 #ifdef LIBYMODEM_EXPORTS
 #define YMODEM_API __declspec(dllexport)
 #else

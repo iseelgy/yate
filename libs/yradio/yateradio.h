@@ -27,8 +27,6 @@
 
 #ifdef _WINDOWS
 
-#define LIBYRADIO_STATIC
-
 #ifdef LIBYRADIO_EXPORTS
 #define YRADIO_API __declspec(dllexport)
 #else

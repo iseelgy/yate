@@ -4925,7 +4925,7 @@ bool JsDNS::runNative(ObjList& stack, const ExpOperation& oper, GenObject* conte
 	else
 	    return false;
 	type.toUpper();
-	int qType = lookup(type, Resolver::get_s_types(),-1);
+	int qType = lookup(type,Resolver::s_types,-1);
 	if ((qType < 0) || JsParser::isEmpty(arg))
 	    ExpEvaluator::pushOne(stack,new ExpWrapper(0,"DNS"));
 	else {
@@ -5080,7 +5080,7 @@ void JsDNS::runQuery(ObjList& stack, const String& name, Resolver::Type type, Ge
 		break;
 	}
     }
-    ExpEvaluator::pushOne(stack,new ExpWrapper(jsa,lookup(type,Resolver::get_s_types())));
+    ExpEvaluator::pushOne(stack,new ExpWrapper(jsa,lookup(type,Resolver::s_types)));
 }
 
 void JsDNS::initialize(ScriptContext* context)

@@ -74,30 +74,26 @@ static inline void addAuth(String& buf, const String& comp, const String& value,
 /*
  * XmlSaxParser
  */
-const TokenDict XmlSaxParser_s_errorString[] = {
-	{"No error",                      XmlSaxParser::NoError},
-	{"Error",                         XmlSaxParser::Unknown},
-	{"Not well formed",               XmlSaxParser::NotWellFormed},
-	{"I/O error",                     XmlSaxParser::IOError},
-	{"Error parsing Element",         XmlSaxParser::ElementParse},
-	{"Failed to read Element name",   XmlSaxParser::ReadElementName},
-	{"Bad element name",              XmlSaxParser::InvalidElementName},
-	{"Error reading Attributes",      XmlSaxParser::ReadingAttributes},
-	{"Error reading end tag",         XmlSaxParser::ReadingEndTag},
-	{"Error parsing Comment",         XmlSaxParser::CommentParse},
-	{"Error parsing Declaration",     XmlSaxParser::DeclarationParse},
-	{"Error parsing Definition",      XmlSaxParser::DefinitionParse},
-	{"Error parsing CDATA",           XmlSaxParser::CDataParse},
-	{"Incomplete",                    XmlSaxParser::Incomplete},
-	{"Invalid encoding",              XmlSaxParser::InvalidEncoding},
-	{"Unsupported encoding",          XmlSaxParser::UnsupportedEncoding},
-	{"Unsupported version",           XmlSaxParser::UnsupportedVersion},
+const TokenDict XmlSaxParser::s_errorString[] = {
+	{"No error",                      NoError},
+	{"Error",                         Unknown},
+	{"Not well formed",               NotWellFormed},
+	{"I/O error",                     IOError},
+	{"Error parsing Element",         ElementParse},
+	{"Failed to read Element name",   ReadElementName},
+	{"Bad element name",              InvalidElementName},
+	{"Error reading Attributes",      ReadingAttributes},
+	{"Error reading end tag",         ReadingEndTag},
+	{"Error parsing Comment",         CommentParse},
+	{"Error parsing Declaration",     DeclarationParse},
+	{"Error parsing Definition",      DefinitionParse},
+	{"Error parsing CDATA",           CDataParse},
+	{"Incomplete",                    Incomplete},
+	{"Invalid encoding",              InvalidEncoding},
+	{"Unsupported encoding",          UnsupportedEncoding},
+	{"Unsupported version",           UnsupportedVersion},
 	{0,0}
 };
-
-const TokenDict * XmlSaxParser::get_s_errorString(){
-	return XmlSaxParser_s_errorString;
-}
 
 const XmlEscape XmlSaxParser::s_escape[] = {
 	{"&lt;",   '<'},
