@@ -3871,7 +3871,7 @@ private:
     // Handle file share info changed notification
     void handleFileSharedChanged(ClientAccount* a, const String& contact,
 	const String& inst);
-
+public:
     ClientAccountList* m_accounts;       // Accounts list (always valid)
     FtManager* m_ftManager;              // Private file manager
 };
@@ -4330,7 +4330,7 @@ public:
      */
     virtual void removeAccount(const String& id);
 
-protected:
+public:
     ObjList m_accounts;
 
 private:
