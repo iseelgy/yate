@@ -13,10 +13,67 @@
       <UniqueIdentifier>{5f5a231b-3e84-4aca-b296-451c35114d3f}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
+    <Filter Include="gsm">
+      <UniqueIdentifier>{372495d5-bdcb-4f32-a9ba-99baff8f4a4f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\modules\gsmcodec.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\gsm\src\add.c">
+      <Filter>gsm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\gsm\src\code.c">
+      <Filter>gsm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\gsm\src\debug.c">
+      <Filter>gsm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\gsm\src\decode.c">
+      <Filter>gsm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\gsm\src\gsm_create.c">
+      <Filter>gsm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\gsm\src\gsm_decode.c">
+      <Filter>gsm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\gsm\src\gsm_destroy.c">
+      <Filter>gsm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\gsm\src\gsm_encode.c">
+      <Filter>gsm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\gsm\src\gsm_explode.c">
+      <Filter>gsm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\gsm\src\gsm_implode.c">
+      <Filter>gsm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\gsm\src\gsm_option.c">
+      <Filter>gsm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\gsm\src\gsm_print.c">
+      <Filter>gsm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\gsm\src\long_term.c">
+      <Filter>gsm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\gsm\src\lpc.c">
+      <Filter>gsm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\gsm\src\preprocess.c">
+      <Filter>gsm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\gsm\src\rpe.c">
+      <Filter>gsm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\gsm\src\short_term.c">
+      <Filter>gsm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\gsm\src\table.c">
+      <Filter>gsm</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

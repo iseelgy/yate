@@ -109,7 +109,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>.;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;$(ProjectDir)..\modules\gsm\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -127,7 +127,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>libgsmd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)/modules/gsmcodec.yate</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -147,6 +147,24 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="..\modules\gsm\src\add.c" />
+    <ClCompile Include="..\modules\gsm\src\code.c" />
+    <ClCompile Include="..\modules\gsm\src\debug.c" />
+    <ClCompile Include="..\modules\gsm\src\decode.c" />
+    <ClCompile Include="..\modules\gsm\src\gsm_create.c" />
+    <ClCompile Include="..\modules\gsm\src\gsm_decode.c" />
+    <ClCompile Include="..\modules\gsm\src\gsm_destroy.c" />
+    <ClCompile Include="..\modules\gsm\src\gsm_encode.c" />
+    <ClCompile Include="..\modules\gsm\src\gsm_explode.c" />
+    <ClCompile Include="..\modules\gsm\src\gsm_implode.c" />
+    <ClCompile Include="..\modules\gsm\src\gsm_option.c" />
+    <ClCompile Include="..\modules\gsm\src\gsm_print.c" />
+    <ClCompile Include="..\modules\gsm\src\long_term.c" />
+    <ClCompile Include="..\modules\gsm\src\lpc.c" />
+    <ClCompile Include="..\modules\gsm\src\preprocess.c" />
+    <ClCompile Include="..\modules\gsm\src\rpe.c" />
+    <ClCompile Include="..\modules\gsm\src\short_term.c" />
+    <ClCompile Include="..\modules\gsm\src\table.c" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="version.rc">
