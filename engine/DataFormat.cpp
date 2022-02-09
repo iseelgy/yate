@@ -1308,7 +1308,7 @@ void DataTranslator::compose(TranslatorFactory* factory)
 			XDebug(DebugAll,"Can already convert '%s' to '%s'",c->src->name,c2->dest->name);
 			continue;
 		    }
-		    DDebug(DebugInfo,"Building chain (%s)%s%s -> (%s) -> %s%s(%s)",
+		    DDebug(DebugAll,"Building chain (%s)%s%s -> (%s) -> %s%s(%s)",
 			c->src->name,
 			factory->intermediate() ? " -> " : "",
 			factory->intermediate() ? factory->intermediate()->name : "",

@@ -3443,7 +3443,7 @@ int YateSIPUDPTransport::process()
 	return retVal;
     }
     if (res < 72) {
-	DDebug(&plugin,DebugInfo,
+	DDebug(&plugin,DebugAll,
 	    "Transport(%s) received short SIP message of %d bytes from %s [%p]",
 	    m_id.c_str(),res,m_remote.addr().c_str(),this);
 	return 0;

@@ -109,7 +109,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>.;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..;$(ProjectDir)..\modules\3gpp_c_code\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -127,7 +127,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>libamrnbd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)/modules/amrnbcodec.yate</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -141,6 +141,12 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\modules\3gpp_c_code\decoder.c" />
+    <ClCompile Include="..\modules\3gpp_c_code\encoder.c" />
+    <ClCompile Include="..\modules\3gpp_c_code\interf_dec.c" />
+    <ClCompile Include="..\modules\3gpp_c_code\interf_enc.c" />
+    <ClCompile Include="..\modules\3gpp_c_code\sp_dec.c" />
+    <ClCompile Include="..\modules\3gpp_c_code\sp_enc.c" />
     <ClCompile Include="..\modules\amrnbcodec.cpp">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -159,6 +165,16 @@
       <Project>{254c6f00-6de5-44a6-ad44-acaba8912381}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\modules\3gpp_c_code\interf_dec.h" />
+    <ClInclude Include="..\modules\3gpp_c_code\interf_enc.h" />
+    <ClInclude Include="..\modules\3gpp_c_code\interf_rom.h" />
+    <ClInclude Include="..\modules\3gpp_c_code\rom_dec.h" />
+    <ClInclude Include="..\modules\3gpp_c_code\rom_enc.h" />
+    <ClInclude Include="..\modules\3gpp_c_code\sp_dec.h" />
+    <ClInclude Include="..\modules\3gpp_c_code\sp_enc.h" />
+    <ClInclude Include="..\modules\3gpp_c_code\typedef.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
