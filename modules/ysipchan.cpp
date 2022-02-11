@@ -44,7 +44,7 @@ class YateSIPEndPoint;                   // Endpoint processor
 class SIPDriver;
 
 #define EXPIRES_MIN 60
-#define EXPIRES_DEF 600
+#define EXPIRES_DEF 3600
 #define EXPIRES_MAX 3600
 
 // TCP transport idle values in seconds
