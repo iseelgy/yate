@@ -8,19 +8,8 @@ SET_PROPERTY(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "cmake")
 
 # include (${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
 
-IF(CROSS_COMPILE_HIMIX100) 
-
-	#告知当前使用的是交叉编译方式，必须配置
-	SET(CMAKE_SYSTEM_NAME Linux)
-
-	#设置编译链工具 
-	SET(TOOLCHAIN_DIR "aarch64-himix100-linux-")
-
-	SET(CMAKE_CXX_COMPILER ${TOOLCHAIN_DIR}g++)
-	SET(CMAKE_C_COMPILER   ${TOOLCHAIN_DIR}gcc)
-			
-ENDIF(CROSS_COMPILE_HIMIX100)
-
+# Generate position-independent code (-fPIC on UNIX)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if(MSVC)
 
