@@ -11,6 +11,8 @@ if(PROJECT_NAME STREQUAL CMAKE_PROJECT_NAME)
     set(YATE_ON_TOP ON)
 endif()
 
+# Generate position-independent code (-fPIC on UNIX)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if(MSVC)
 
