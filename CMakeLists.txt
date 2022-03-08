@@ -6,20 +6,10 @@ PROJECT(yate)
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 SET_PROPERTY(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "cmake")
 
-# include (${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
 
-IF(CROSS_COMPILE_HIMIX100) 
-
-	#告知当前使用的是交叉编译方式，必须配置
-	SET(CMAKE_SYSTEM_NAME Linux)
-
-	#设置编译链工具 
-	SET(TOOLCHAIN_DIR "aarch64-himix100-linux-")
-
-	SET(CMAKE_CXX_COMPILER ${TOOLCHAIN_DIR}g++)
-	SET(CMAKE_C_COMPILER   ${TOOLCHAIN_DIR}gcc)
-			
-ENDIF(CROSS_COMPILE_HIMIX100)
+if(PROJECT_NAME STREQUAL CMAKE_PROJECT_NAME)
+    set(YATE_ON_TOP ON)
+endif()
 
 
 if(MSVC)
@@ -200,19 +190,23 @@ ADD_LIBRARY(yateengine
 
 SET_PROPERTY(TARGET yateengine PROPERTY FOLDER "libs")
 
-ADD_LIBRARY(yateengine_static  
 
-	STATIC 
-	
-	${YATE_SRC}		
-)
+if( YATE_ON_TOP )
 
-# add yateengine_static to a virtual project group
-SET_PROPERTY(TARGET yateengine_static PROPERTY FOLDER "libs")
+	ADD_LIBRARY(yateengine_static  
+
+		STATIC 
+		
+		${YATE_SRC}		
+	)
+
+	# add yateengine_static to a virtual project group
+	SET_PROPERTY(TARGET yateengine_static PROPERTY FOLDER "libs")
+
+endif()
 
 
 # TARGET_LINK_LIBRARIES( yate.s liblog4cpp.a)
-
 # TARGET_LINK_LIBRARIES( yateengine liblog4cpp.a)
 
 # Library
