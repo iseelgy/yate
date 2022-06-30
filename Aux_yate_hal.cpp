@@ -91,7 +91,7 @@ int Aux_cmd_line::format(const char * cmd)
 	#define COMMAND_LINE_LENGTH 64*1024
 
 	int argc;           /* My argc value */
-	char *argv[MAX_ARGV_NUM];     /* Collected argv[] array */
+	char *argv[MAX_ARGV_NUM+6];     /* Collected argv[] array */
 	char * buf;      /* Command buffer */
 
 	char *svptr;        /* strtok_r() updates this */
