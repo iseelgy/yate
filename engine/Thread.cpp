@@ -391,7 +391,11 @@ void ThreadPrivate::run()
 	threadInfo.szName = m_name;
 	threadInfo.dwThreadID = (DWORD)-1;
 	threadInfo.dwFlags = 0;
-	__try { RaiseException(0x406D1388, 0, sizeof(threadInfo)/sizeof(DWORD), (DWORD*)&threadInfo); }
+	__try { 
+	
+		RaiseException(0x406D1388, 0, sizeof(threadInfo)/sizeof(DWORD), (ULONG_PTR*)&threadInfo); 
+	
+	}
 	__except (EXCEPTION_CONTINUE_EXECUTION) { }
     }
 #endif

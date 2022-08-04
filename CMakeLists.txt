@@ -193,19 +193,17 @@ ADD_LIBRARY(yateengine
 SET_PROPERTY(TARGET yateengine PROPERTY FOLDER "libs")
 
 
-if( YATE_ON_TOP )
 
-	ADD_LIBRARY(yateengine_static  
+ADD_LIBRARY(yateengine_static  
 
 		STATIC 
 		
-		${YATE_SRC}		
-	)
+		${YATE_SRC}
+)
 
 	# add yateengine_static to a virtual project group
-	SET_PROPERTY(TARGET yateengine_static PROPERTY FOLDER "libs")
+SET_PROPERTY(TARGET yateengine_static PROPERTY FOLDER "libs")
 
-endif()
 
 
 # TARGET_LINK_LIBRARIES( yate.s liblog4cpp.a)
