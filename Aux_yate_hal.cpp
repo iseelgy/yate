@@ -1,5 +1,22 @@
 #include "Aux_yate_hal.h"
 
+#include <string>
+
+//#include <fmt/core.h>
+#include <fmt/format.h>
+#include <spdlog/spdlog.h>
+#include <spdlog/async.h>
+#include <spdlog/logger.h>
+
+#include <spdlog/fmt/fmt.h>
+#include <spdlog/fmt/bundled/printf.h>
+#include "spdlog/sinks/rotating_file_sink.h"
+
+#include <spdlog/sinks/basic_file_sink.h>
+//#include <spdlog/sinks/daily_file_sink.h>
+//#include <spdlog/sinks/msvc_sink.h>
+//#include <spdlog/sinks/stdout_sinks.h>
+//#include <spdlog/sinks/stdout_color_sinks.h>
 
 bool b64_decode(const char * in, TelEngine::DataBlock& dest)
 {
@@ -126,8 +143,15 @@ int Aux_cmd_line::format(const char * cmd)
 void logStartup()
 {
 
-	//logFail("111", "%s", "Hi");
+	TelEngine::logger::get().set_level(spdlog::level::trace);
+	STM_DEBUG() << "YATE_STM_DEBUG" << 1;
+	PRINT_WARN("YATE_PRINT_WARN, %d", 1);
+	LOG_INFO("YATE_LOG_INFO {}", 1);
 
+	TelEngine::logger::get().set_level(spdlog::level::info);
+	STM_DEBUG() << "YATE_STM_DEBUG " << 2;
+	PRINT_WARN("YATE_PRINT_WARN, %d", 2);
+	LOG_INFO("YATE_LOG_INFO {}", 2);
 }
 
 void logShutdown()
@@ -161,3 +185,70 @@ void yateLog(const char * file, const char * function, int line, const char * ca
 
 }
 
+namespace TelEngine {
+
+	void log_stream::flush()
+	{
+		logger::get().log(loc, lvl, (prefix + str()).c_str());
+	}
+
+	logger::logger()
+	{
+
+		auto max_size = 1024 * 1024 * 5;
+		auto max_files = 5;
+
+
+		_loger = spdlog::rotating_logger_mt("skf", "logs/yate.spd.log", max_size, max_files);
+
+
+	}
+
+	template <typename... Args>
+	void logger::log(const source_loc& loc, level_enum lvl, const char* fmt, const Args &... args)
+	{
+		if (_loger) {
+			spdlog::source_loc sloc = {};
+			_loger->log(sloc, (spdlog::level::level_enum)lvl, fmt, args...);
+		}
+	}
+
+	template <typename... Args>
+	void logger::printf(const source_loc& loc, level_enum lvl, const char* fmt, const Args &... args)
+	{
+		if (_loger) {
+			//_loger->info(fmt, args);
+			//std::string s = fmt::sprintf(fmt, args...);
+			spdlog::source_loc sloc = {};
+
+			//_loger->log(sloc, (spdlog::level::level_enum)lvl, "Hi");
+
+			_loger->log(sloc, (spdlog::level::level_enum)lvl, fmt::sprintf(fmt, args...).c_str());
+		}
+	}
+
+	void logger::set_level(level_enum lvl) {
+		_log_level = lvl;
+		if (_loger) {
+			_loger->set_level((spdlog::level::level_enum)lvl);
+		}
+
+	}
+
+	void logger::set_level(int lvl) {
+		_log_level = (level_enum)lvl;
+		if (_loger) {
+			_loger->set_level((spdlog::level::level_enum)lvl);
+		}
+
+	}
+
+
+	void logger::set_flush_on(level_enum lvl) {
+		if (_loger) {
+			_loger->flush_on((spdlog::level::level_enum)lvl);
+		}
+	}
+
+
+}

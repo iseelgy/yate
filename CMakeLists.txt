@@ -6,13 +6,46 @@ PROJECT(yate)
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 SET_PROPERTY(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "cmake")
 
+#set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
+
+# Generate position-independent code (-fPIC on UNIX)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 
 if(PROJECT_NAME STREQUAL CMAKE_PROJECT_NAME)
     set(YATE_ON_TOP ON)
 endif()
 
-# Generate position-independent code (-fPIC on UNIX)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+##find_package(fmt REQUIRED)
+
+##find_package(spdlog REQUIRED)
+
+ADD_SUBDIRECTORY(3rlibs/fmt-8.1.1)
+
+
+ADD_SUBDIRECTORY(3rlibs/spdlog-1.10.0)
+
+#MESSAGE( STATUS "fmt_INCLUDE_DIRS: " ${fmt_INCLUDE_DIRS} )
+#MESSAGE( STATUS "fmt_LIBRARIES: " ${fmt_LIBRARIES} )
+
+#MESSAGE( STATUS "fmt_LIBRARIES: " fmt:fmt )
+
+
+#MESSAGE( STATUS "spdlog_INCLUDE_DIRS: " ${spdlog_INCLUDE_DIRS} )
+#MESSAGE( STATUS "spdlog_LIBRARIES: " ${spdlog_LIBRARIES} )
+
+
+# ${LIBEVENT_LIBRARIES}
+
+# ADD_DEFINITIONS( -DFMT_HEADER_ONLY )
+
+
+INCLUDE_DIRECTORIES( ./ 			
+	3rlibs/fmt-8.1.1/include
+	3rlibs/spdlog-1.10.0/include
+)
+
 
 if(MSVC)
 
@@ -190,9 +223,25 @@ ADD_LIBRARY(yateengine
 	
 )
 
+
+## 链接Yate库
+TARGET_LINK_LIBRARIES( yateengine 
+	#fmtd
+	#spdlog	
+
+	fmt::fmt 
+	spdlog::spdlog
+
+	)
+
+
 SET_PROPERTY(TARGET yateengine PROPERTY FOLDER "libs")
 
+# Library
+# Note: may not work on windows
+INSTALL (TARGETS yateengine DESTINATION .)
 
+#[[
 
 ADD_LIBRARY(yateengine_static  
 
@@ -204,14 +253,11 @@ ADD_LIBRARY(yateengine_static
 	# add yateengine_static to a virtual project group
 SET_PROPERTY(TARGET yateengine_static PROPERTY FOLDER "libs")
 
-
+]]
 
 # TARGET_LINK_LIBRARIES( yate.s liblog4cpp.a)
 # TARGET_LINK_LIBRARIES( yateengine liblog4cpp.a)
 
-# Library
-# Note: may not work on windows
-INSTALL (TARGETS yateengine DESTINATION .)
 	
 		 
 ####### ====================================================================
