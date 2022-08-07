@@ -163,6 +163,8 @@ endif()
 
 add_library(spdlog::spdlog ALIAS spdlog)
 
+SET_PROPERTY(TARGET spdlog PROPERTY FOLDER "libs")
+
 target_compile_definitions(spdlog PUBLIC SPDLOG_COMPILED_LIB)
 target_include_directories(spdlog PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
                                          "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")

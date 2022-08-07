@@ -83,7 +83,7 @@ namespace TelEngine{
 	#define SPDLOG_LEVEL_OFF 6
 
 
-	enum level_enum : int
+	enum YATE_API level_enum : int
 	{
 		trace = SPDLOG_LEVEL_TRACE,
 		debug = SPDLOG_LEVEL_DEBUG,
@@ -192,28 +192,33 @@ namespace TelEngine{
 }
 
 
-#define LOG_TRACE(msg,...) { if (TelEngine::logger::get().level() == TelEngine::level_enum::trace) spdlog::log({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::trace, msg, ##__VA_ARGS__); };
-#define LOG_DEBUG(msg,...) TelEngine::logger::get().log({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::debug, msg, ##__VA_ARGS__)
-#define LOG_INFO(msg,...)  TelEngine::logger::get().log({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::info, msg, ##__VA_ARGS__)
-#define LOG_WARN(msg,...)  TelEngine::logger::get().log({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::warn, msg, ##__VA_ARGS__)
-#define LOG_ERROR(msg,...) TelEngine::logger::get().log({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::err, msg, ##__VA_ARGS__)
-#define LOG_FATAL(msg,...) TelEngine::logger::get().log({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::critical, msg, ##__VA_ARGS__)
+#define l_trace(msg,...) { \
+		if (TelEngine::logger::get().level() == TelEngine::level_enum::trace) \
+		spdlog::log({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::trace, msg, ##__VA_ARGS__); \
+		};
 
-// use like sprintf, e.g. PRINT_WARN("warn log, %d-%d", 1, 2);
-#define PRINT_TRACE(msg,...) TelEngine::logger::get().printf({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::trace, msg, ##__VA_ARGS__);
-#define PRINT_DEBUG(msg,...) TelEngine::logger::get().printf({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::debug, msg, ##__VA_ARGS__);
-#define PRINT_INFO(msg,...)  TelEngine::logger::get().printf({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::info, msg, ##__VA_ARGS__);
-#define PRINT_WARN(msg,...)  TelEngine::logger::get().printf({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::warn, msg, ##__VA_ARGS__);
-#define PRINT_ERROR(msg,...) TelEngine::logger::get().printf({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::err, msg, ##__VA_ARGS__);
-#define PRINT_FATAL(msg,...) TelEngine::logger::get().printf({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::critical, msg, ##__VA_ARGS__);
+// FMT ∏Ò Ω
+#define f_debug(msg,...) TelEngine::logger::get().log({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::debug, msg, ##__VA_ARGS__)
+#define f_info(msg,...)  TelEngine::logger::get().log({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::info, msg, ##__VA_ARGS__)
+#define f_warn(msg,...)  TelEngine::logger::get().log({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::warn, msg, ##__VA_ARGS__)
+#define f_error(msg,...) TelEngine::logger::get().log({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::err, msg, ##__VA_ARGS__)
+#define f_fatal(msg,...) TelEngine::logger::get().log({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::critical, msg, ##__VA_ARGS__)
 
-// use like stream , e.g. STM_WARN() << "warn log: " << 1;
-#define STM_TRACE() TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::trace, "")
-#define STM_DEBUG() TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::debug, "")
-#define STM_INFO()	TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::info, "")
-#define STM_WARN()	TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::warn, "")
-#define STM_ERROR() TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::err, "")
-#define STM_FATAL() TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::critical, "")
+// use like sprintf, e.g. p_warn("warn log, %d-%d", 1, 2);
+#define p_trace(msg,...) TelEngine::logger::get().printf({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::trace, msg, ##__VA_ARGS__);
+#define p_debug(msg,...) TelEngine::logger::get().printf({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::debug, msg, ##__VA_ARGS__);
+#define p_info(msg,...)  TelEngine::logger::get().printf({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::info, msg, ##__VA_ARGS__);
+#define p_warn(msg,...)  TelEngine::logger::get().printf({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::warn, msg, ##__VA_ARGS__);
+#define p_error(msg,...) TelEngine::logger::get().printf({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::err, msg, ##__VA_ARGS__);
+#define p_fatal(msg,...) TelEngine::logger::get().printf({__FILE__, __LINE__, __FUNCTION__}, TelEngine::level_enum::critical, msg, ##__VA_ARGS__);
+
+// use like stream , e.g. s_warn() << "warn log: " << 1;
+#define s_trace() TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::trace, "")
+#define s_debug() TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::debug, "")
+#define s_info()	TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::info, "")
+#define s_warn()	TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::warn, "")
+#define s_error() TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::err, "")
+#define s_fatal() TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::critical, "")
 
 
 #endif

@@ -244,6 +244,8 @@ endif ()
 add_library(fmt ${FMT_SOURCES} ${FMT_HEADERS} README.rst ChangeLog.rst)
 add_library(fmt::fmt ALIAS fmt)
 
+SET_PROPERTY(TARGET fmt PROPERTY FOLDER "libs")
+
 if (HAVE_STRTOD_L)
   target_compile_definitions(fmt PUBLIC FMT_LOCALE)
 endif ()

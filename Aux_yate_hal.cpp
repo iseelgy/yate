@@ -12,6 +12,7 @@
 #include <spdlog/fmt/bundled/printf.h>
 #include "spdlog/sinks/rotating_file_sink.h"
 
+#include <spdlog/sinks/base_sink.h>
 #include <spdlog/sinks/basic_file_sink.h>
 //#include <spdlog/sinks/daily_file_sink.h>
 //#include <spdlog/sinks/msvc_sink.h>
@@ -144,14 +145,19 @@ void logStartup()
 {
 
 	TelEngine::logger::get().set_level(spdlog::level::trace);
-	STM_DEBUG() << "YATE_STM_DEBUG" << 1;
-	PRINT_WARN("YATE_PRINT_WARN, %d", 1);
-	LOG_INFO("YATE_LOG_INFO {}", 1);
 
-	TelEngine::logger::get().set_level(spdlog::level::info);
-	STM_DEBUG() << "YATE_STM_DEBUG " << 2;
-	PRINT_WARN("YATE_PRINT_WARN, %d", 2);
-	LOG_INFO("YATE_LOG_INFO {}", 2);
+	// Debug()
+
+	TelEngine::Debug(TelEngine::DebugFail, "**********************************************************************");
+
+	s_debug() << "YATE_STM_DEBUG" << 1;
+	p_warn("YATE_PRINT_WARN, %d", 1);
+	f_info("YATE_LOG_INFO {}", 1);
+
+	//TelEngine::logger::get().set_level(spdlog::level::info);
+	//STM_DEBUG() << "YATE_STM_DEBUG " << 2;
+	//PRINT_WARN("YATE_PRINT_WARN, %d", 2);
+	//LOG_INFO("YATE_LOG_INFO {}", 2);
 }
 
 void logShutdown()
@@ -185,7 +191,73 @@ void yateLog(const char * file, const char * function, int line, const char * ca
 
 }
 
+namespace spdlog {
+
+	namespace sinks {
+
+		template<class Mutex>
+		class test_sink : public base_sink<Mutex>
+		{
+			const size_t lines_to_save = 100;
+
+			int eol_len;
+
+		public:
+			test_sink() {
+				eol_len = strlen(details::os::default_eol);
+			}
+
+			size_t msg_counter()
+			{
+				std::lock_guard<Mutex> lock(base_sink<Mutex>::mutex_);
+				return msg_counter_;
+			}
+
+			size_t flush_counter()
+			{
+				std::lock_guard<Mutex> lock(base_sink<Mutex>::mutex_);
+				return flush_counter_;
+			}
+
+			void set_delay(std::chrono::milliseconds delay)
+			{
+				std::lock_guard<Mutex> lock(base_sink<Mutex>::mutex_);
+				delay_ = delay;
+			}
+
+		protected:
+			void sink_it_(const spdlog::details::log_msg &msg) override
+			{
+				memory_buf_t formatted;
+				base_sink<Mutex>::formatter_->format(msg, formatted);
+
+				// save the line without the eol
+				std::string out;
+				out.assign(formatted.begin(), formatted.end()-eol_len);
+				TE::Output(out.c_str());
+
+				msg_counter_++;
+				//std::this_thread::sleep_for(delay_);
+			}
+
+			void flush_() override
+			{
+				flush_counter_++;
+			}
+
+			size_t msg_counter_{ 0 };
+			size_t flush_counter_{ 0 };
+			std::chrono::milliseconds delay_{ std::chrono::milliseconds::zero() };
+
+		};
+
+	}
+}
+
+using abc_sink_mt = spdlog::sinks::test_sink<std::mutex>;
+
 namespace TelEngine {
+
 
 	void log_stream::flush()
 	{
@@ -194,21 +266,16 @@ namespace TelEngine {
 
 	logger::logger()
 	{
-
-		auto max_size = 1024 * 1024 * 5;
-		auto max_files = 5;
-
-
-		_loger = spdlog::rotating_logger_mt("skf", "logs/yate.spd.log", max_size, max_files);
-
-
+		auto abc_sink = std::make_shared<abc_sink_mt>();
+		_loger = std::make_shared< spdlog::logger>( "yate", abc_sink);
+		_loger->set_pattern("[%L %D %T.%e %P %t] %s(%#) %v");
 	}
 
 	template <typename... Args>
 	void logger::log(const source_loc& loc, level_enum lvl, const char* fmt, const Args &... args)
 	{
 		if (_loger) {
-			spdlog::source_loc sloc = {};
+			spdlog::source_loc sloc(loc.filename, loc.line, loc.funcname);
 			_loger->log(sloc, (spdlog::level::level_enum)lvl, fmt, args...);
 		}
 	}
@@ -217,12 +284,7 @@ namespace TelEngine {
 	void logger::printf(const source_loc& loc, level_enum lvl, const char* fmt, const Args &... args)
 	{
 		if (_loger) {
-			//_loger->info(fmt, args);
-			//std::string s = fmt::sprintf(fmt, args...);
-			spdlog::source_loc sloc = {};
-
-			//_loger->log(sloc, (spdlog::level::level_enum)lvl, "Hi");
-
+			spdlog::source_loc sloc(loc.filename, loc.line, loc.funcname);
 			_loger->log(sloc, (spdlog::level::level_enum)lvl, fmt::sprintf(fmt, args...).c_str());
 		}
 	}
