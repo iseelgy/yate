@@ -41,7 +41,7 @@ ADD_SUBDIRECTORY(3rlibs/spdlog-1.10.0)
 # ADD_DEFINITIONS( -DFMT_HEADER_ONLY )
 
 
-INCLUDE_DIRECTORIES( ./ 			
+INCLUDE_DIRECTORIES( ./
 	3rlibs/fmt-8.1.1/include
 	3rlibs/spdlog-1.10.0/include
 )
@@ -209,6 +209,7 @@ ADD_LIBRARY(yateengine
 	
 	Aux_type.h
 	Aux_yate_hal.h
+
 	yatecbase.h
 	yateclass.h
 	yatemath.h
