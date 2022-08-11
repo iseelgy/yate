@@ -144,15 +144,15 @@ int Aux_cmd_line::format(const char * cmd)
 void logStartup()
 {
 
-	TelEngine::logger::get().set_level(spdlog::level::trace);
+	//TelEngine::logger::get().set_level(spdlog::level::trace);
 
 	// Debug()
 
-	TelEngine::Debug(TelEngine::DebugFail, "**********************************************************************");
+	// TelEngine::Debug(TelEngine::DebugFail, "**********************************************************************");
 
-	s_debug() << "YATE_STM_DEBUG" << 1;
-	p_warn("YATE_PRINT_WARN, %d", 1);
-	f_info("YATE_LOG_INFO {}", 1);
+	//s_debug() << "YATE_STM_DEBUG" << 1;
+	//p_warn("YATE_PRINT_WARN, %d", 1);
+	//f_info("YATE_LOG_INFO {}", 1);
 
 	//TelEngine::logger::get().set_level(spdlog::level::info);
 	//STM_DEBUG() << "YATE_STM_DEBUG " << 2;
