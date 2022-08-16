@@ -218,6 +218,7 @@ ADD_LIBRARY(yateengine
 	
 	Aux_type.h
 	Aux_yate_hal.h
+	Aux_yate_log.h
 
 	yatecbase.h
 	yateclass.h
