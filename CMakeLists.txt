@@ -2,6 +2,15 @@ cmake_minimum_required (VERSION 3.6)
 
 PROJECT(yate)
 
+# Disable in-source builds to prevent source tree corruption.
+if("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
+  message(FATAL_ERROR "
+FATAL: In-source builds are not allowed.
+       You should create a separate directory for build files.
+")
+endif()
+
+
 # set cmake default folder name
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 SET_PROPERTY(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "cmake")
