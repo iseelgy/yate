@@ -1,6 +1,24 @@
 #ifndef _AUX_YATE_LOG_H_
 #define _AUX_YATE_LOG_H_
 
+#include <string>
+#include <iostream>
+#include <time.h>
+#include <cstdlib>
+#include <cstring>
+#include <list>
+#include <vector>
+#include <map>
+#include <set>
+#include <string>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <sstream>
+#include <memory>
+
+
+
 #include "3rlibs/fmt-8.1.1/include/fmt/format.h"
 #include "3rlibs/fmt-8.1.1/include/fmt/xchar.h"
 #include "3rlibs/fmt-8.1.1/include/fmt/printf.h"

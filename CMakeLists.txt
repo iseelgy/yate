@@ -230,7 +230,7 @@ ADD_LIBRARY(yateengine
 	yateversn.h
 	yatewin32.h
 	yatewiresniff.h
-	yatexml.h	
+	yatexml.h
 	
 )
 
@@ -294,14 +294,14 @@ INSTALL( PROGRAMS run.cmake
 	)
 	
 # 安装运行脚本	
-INSTALL( PROGRAMS run.daemon         
+INSTALL( PROGRAMS run.daemon
 	DESTINATION .
    PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
-          GROUP_EXECUTE GROUP_READ	
+          GROUP_EXECUTE GROUP_READ
 	)
 	
 		
-## 安装share目录下文件		
+## 安装share目录下文件
 INSTALL(DIRECTORY share/sounds 
 		DESTINATION .
 		PATTERN "CVS" EXCLUDE
@@ -309,7 +309,7 @@ INSTALL(DIRECTORY share/sounds
                     GROUP_READ
 		)
 	
-## 安装conf.d目录下文件		
+## 安装conf.d目录下文件
 INSTALL(DIRECTORY conf.d 
 		DESTINATION .
 		PATTERN "CVS" EXCLUDE
