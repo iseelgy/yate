@@ -250,7 +250,7 @@ bool BitVector::pack(ByteVector& dest) const
 	return false;
     }
     YBITVECTOR_VALID("pack()",0,length());
-    dest.bzero(0,n);
+    dest.y_bzero(0,n);
     const uint8_t* src = data();
     // Full bytes
     for (const uint8_t* last = end(src,full * 8); src != last; ++d) {

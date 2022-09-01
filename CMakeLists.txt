@@ -165,7 +165,11 @@ endif()
 if(WIN32)
 	LINK_LIBRARIES(ws2_32 advapi32 dnsapi)	
 else()
-	LINK_LIBRARIES(m dl c pthread resolv)
+	if(ANDROID)
+		LINK_LIBRARIES(m dl c)
+	else()
+		LINK_LIBRARIES(m dl c pthread resolv)
+	endif()
 endif(WIN32)
 
 
