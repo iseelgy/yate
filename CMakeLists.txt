@@ -179,6 +179,41 @@ INCLUDE_DIRECTORIES( ./ engine/regex  engine/tables)
 
 set(BUILD_SHARED_LIBS ON)
 
+SET( YFMT_HEADER 
+	yfmt/args.h
+	yfmt/chrono.h
+	yfmt/color.h
+	yfmt/compile.h
+	yfmt/core.h
+	yfmt/format-inl.h
+	yfmt/format.h
+	yfmt/locale.h
+	yfmt/os.h
+	yfmt/ostream.h
+	yfmt/printf.h
+	yfmt/ranges.h
+	yfmt/xchar.h
+)
+
+SET( YATE_HEADER
+
+	Aux_type.h
+	Aux_yate_hal.h
+	Aux_yate_log.h
+
+	yatecbase.h
+	yateclass.h
+	yatemath.h
+	yatemime.h
+	yatengine.h
+	yatepaths.h
+	yatephone.h
+	yateversn.h
+	yatewin32.h
+	yatewiresniff.h
+	yatexml.h
+
+)
 
 SET( YATE_SRC 
     engine/regex/regex.c
@@ -221,42 +256,20 @@ SET( YATE_SRC
 ADD_LIBRARY(yateengine  
 
 	${YATE_SRC}
-	
-	Aux_type.h
-	Aux_yate_hal.h
-	Aux_yate_log.h
 
-	yatecbase.h
-	yateclass.h
-	yatemath.h
-	yatemime.h
-	yatengine.h
-	yatepaths.h
-	yatephone.h
-	yateversn.h
-	yatewin32.h
-	yatewiresniff.h
-	yatexml.h
-	
+	${YATE_HEADER}
+		
 )
 
 
 ## 链接Yate库
 TARGET_LINK_LIBRARIES( yateengine 
-	#fmtd
-	#spdlog	
-
 	fmt::fmt 
 	spdlog::spdlog
-
-	)
+)
 
 
 SET_PROPERTY(TARGET yateengine PROPERTY FOLDER "libs")
-
-# Library
-# Note: may not work on windows
-INSTALL (TARGETS yateengine DESTINATION .)
 
 #[[
 
@@ -291,6 +304,21 @@ TARGET_LINK_LIBRARIES( yate yateengine )
 
 # 安装二进制文件，Binaries
 INSTALL (TARGETS yate DESTINATION .)
+
+# Library
+# Note: may not work on windows
+INSTALL (TARGETS yateengine DESTINATION .)
+
+INSTALL (TARGETS yateengine DESTINATION lib)
+
+INSTALL(FILES ${YATE_HEADER}
+	DESTINATION include 
+)
+
+INSTALL(FILES ${YFMT_HEADER}
+	DESTINATION include/yfmt 
+)
+
 	
 # 安装运行脚本	
 INSTALL( PROGRAMS run.cmake
@@ -323,6 +351,8 @@ INSTALL(DIRECTORY conf.d
                     GROUP_READ
 		)
 	
+
+
 
 ##==========================================================
 	
