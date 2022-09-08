@@ -161,6 +161,10 @@ else()
 
 endif()
 		
+if(ANDROID)
+	ADD_DEFINITIONS(-D_OS_ANDROID_)
+endif()
+
 
 if(WIN32)
 	LINK_LIBRARIES(ws2_32 advapi32 dnsapi)	
@@ -365,8 +369,10 @@ SET_PROPERTY(TARGET msgsniff PROPERTY FOLDER "modules")
 ## 链接Yate库
 TARGET_LINK_LIBRARIES( msgsniff yateengine )
 
-## 设置插件的后缀为.yate 
-SET_TARGET_PROPERTIES(msgsniff PROPERTIES SUFFIX ".yate")
+if(NOT ANDROID)
+	## 设置插件的后缀为.yate 
+	SET_TARGET_PROPERTIES(msgsniff PROPERTIES SUFFIX ".yate")
+endif()
 
 SET_TARGET_PROPERTIES(msgsniff PROPERTIES PREFIX "")
 	 	 
@@ -385,8 +391,10 @@ SET_PROPERTY(TARGET ysockschan PROPERTY FOLDER "modules")
 ## 链接Yate库
 TARGET_LINK_LIBRARIES( ysockschan yateengine )
 
-## 设置插件的后缀为.yate 
-SET_TARGET_PROPERTIES(ysockschan PROPERTIES SUFFIX ".yate")
+if(NOT ANDROID)
+	## 设置插件的后缀为.yate 
+	SET_TARGET_PROPERTIES(ysockschan PROPERTIES SUFFIX ".yate")
+endif()
 
 SET_TARGET_PROPERTIES(ysockschan PROPERTIES PREFIX "")
 	 	 
@@ -405,8 +413,10 @@ SET_PROPERTY(TARGET ystunchan PROPERTY FOLDER "modules")
 ## 链接Yate库
 TARGET_LINK_LIBRARIES( ystunchan yateengine )
 
-## 设置插件的后缀为.yate 
-SET_TARGET_PROPERTIES(ystunchan PROPERTIES SUFFIX ".yate")
+if(NOT ANDROID)
+	## 设置插件的后缀为.yate 
+	SET_TARGET_PROPERTIES(ystunchan PROPERTIES SUFFIX ".yate")
+endif()
 
 SET_TARGET_PROPERTIES(ystunchan PROPERTIES PREFIX "")
 	 	 
@@ -425,8 +435,10 @@ SET_PROPERTY(TARGET rmanager PROPERTY FOLDER "modules")
 ## 链接Yate库
 TARGET_LINK_LIBRARIES( rmanager yateengine )
 
-## 设置插件的后缀为.yate 
-SET_TARGET_PROPERTIES(rmanager PROPERTIES SUFFIX ".yate")
+if(NOT ANDROID)
+	## 设置插件的后缀为.yate 
+	SET_TARGET_PROPERTIES(rmanager PROPERTIES SUFFIX ".yate")
+endif()
 
 SET_TARGET_PROPERTIES(rmanager PROPERTIES PREFIX "")
 	 	 
