@@ -27,6 +27,9 @@
 #include "yfmt/printf.h"
 #include "yfmt/chrono.h"
 
+
+#ifndef DISABLE_YATE_STREAM_LOG
+
 #ifdef _WIN32
 
 	#ifdef LIBYATE_EXPORTS
@@ -216,5 +219,6 @@ const char * get_yate_module_name();
 #define m_error(a) TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::err, get_yate_module_name())
 #define m_fatal(a) TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::critical, get_yate_module_name())
 
+#endif // #ifndef DISABLE_YATE_STREAM_LOG
 
 #endif  // _AUX_YATE_LOG_H_
