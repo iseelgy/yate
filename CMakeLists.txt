@@ -11,6 +11,20 @@ FATAL: In-source builds are not allowed.
 ")
 endif()
 
+
+# ---------------------------------------------------------------------------------------
+# Set SPDLOG_MASTER_PROJECT to ON if we are building spdlog
+# ---------------------------------------------------------------------------------------
+# Check if spdlog is being used directly or via add_subdirectory, but allow overriding
+if(NOT DEFINED YATE_MASTER_PROJECT)
+    if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+        set(YATE_MASTER_PROJECT ON)
+    else()
+        set(YATE_MASTER_PROJECT OFF)
+    endif()
+endif()
+
+
 SET_PROPERTY(GLOBAL PROPERTY YATE_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
 # set cmake default folder name
@@ -23,26 +37,17 @@ set(CMAKE_CXX_STANDARD 11)
 # Generate position-independent code (-fPIC on UNIX)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-
-if(PROJECT_NAME STREQUAL CMAKE_PROJECT_NAME)
-    set(YATE_ON_TOP ON)
-endif()
+SET(SPDLOG_INSTALL ON)
 
 ##find_package(fmt REQUIRED)
-
 ##find_package(spdlog REQUIRED)
 
-ADD_SUBDIRECTORY(3rlibs/fmt-8.1.1)
-
-
-ADD_SUBDIRECTORY(3rlibs/spdlog-1.10.0)
+ADD_SUBDIRECTORY(3rlibs/fmt-8.1.1 EXCLUDE_FROM_ALL)
+ADD_SUBDIRECTORY(3rlibs/spdlog-1.10.0 EXCLUDE_FROM_ALL)
 
 #MESSAGE( STATUS "fmt_INCLUDE_DIRS: " ${fmt_INCLUDE_DIRS} )
 #MESSAGE( STATUS "fmt_LIBRARIES: " ${fmt_LIBRARIES} )
-
 #MESSAGE( STATUS "fmt_LIBRARIES: " fmt:fmt )
-
-
 #MESSAGE( STATUS "spdlog_INCLUDE_DIRS: " ${spdlog_INCLUDE_DIRS} )
 #MESSAGE( STATUS "spdlog_LIBRARIES: " ${spdlog_LIBRARIES} )
 
@@ -204,6 +209,7 @@ SET( YATE_HEADER
 	Aux_type.h
 	Aux_yate_hal.h
 	Aux_yate_log.h
+	Aux_cmd_define.h
 
 	yatecbase.h
 	yateclass.h
@@ -259,41 +265,24 @@ SET( YATE_SRC
 ## 源文件
 ADD_LIBRARY(yateengine  
 
-	${YATE_SRC}
+	SHARED
 
+	${YATE_SRC}
 	${YATE_HEADER}
 		
 )
 
+#target_link_libraries(yateengine PRIVATE fmt-header-only)
+#target_link_libraries(yateengine PRIVATE $<BUILD_INTERFACE:fmt::fmt-header-only>)
 
 ## 链接Yate库
 TARGET_LINK_LIBRARIES( yateengine 
-	fmt::fmt 
-	spdlog::spdlog
+	PRIVATE	fmt::fmt 
+	PUBLIC spdlog::spdlog
 )
-
 
 SET_PROPERTY(TARGET yateengine PROPERTY FOLDER "libs")
-
-#[[
-
-ADD_LIBRARY(yateengine_static  
-
-		STATIC 
-		
-		${YATE_SRC}
-)
-
-	# add yateengine_static to a virtual project group
-SET_PROPERTY(TARGET yateengine_static PROPERTY FOLDER "libs")
-
-]]
-
-# TARGET_LINK_LIBRARIES( yate.s liblog4cpp.a)
-# TARGET_LINK_LIBRARIES( yateengine liblog4cpp.a)
-
-	
-		 
+			 
 ####### ====================================================================
 ## 应用
 
@@ -309,11 +298,50 @@ TARGET_LINK_LIBRARIES( yate yateengine )
 # 安装二进制文件，Binaries
 INSTALL (TARGETS yate DESTINATION .)
 
+
+
+####### ====================================================================
+
+SET ( PackageName "Yate" )
+SET ( INCLUDE_INSTALL_DIR include )
+SET ( LIB_INSTALL_DIR lib  )
+SET ( LIB_NAME "yateengine" )
+
 # Library
 # Note: may not work on windows
 INSTALL (TARGETS yateengine DESTINATION .)
 
-INSTALL (TARGETS yateengine DESTINATION lib)
+INSTALL (TARGETS yateengine  EXPORT ${PackageName}Targets DESTINATION lib)
+
+
+SET ( dest ${LIB_INSTALL_DIR}/cmake/${PackageName} )
+
+INCLUDE ( CMakePackageConfigHelpers )
+CONFIGURE_PACKAGE_CONFIG_FILE ( ${PackageName}Config.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/${PackageName}Config.cmake
+  INSTALL_DESTINATION ${dest}
+  PATH_VARS INCLUDE_INSTALL_DIR
+)
+  
+WRITE_BASIC_PACKAGE_VERSION_FILE(
+  ${CMAKE_CURRENT_BINARY_DIR}/${PackageName}ConfigVersion.cmake
+  VERSION 1.2.3
+  COMPATIBILITY AnyNewerVersion
+)
+
+INSTALL ( 
+    EXPORT ${PackageName}Targets
+    NAMESPACE YateSpace::
+    DESTINATION ${dest}
+)
+
+
+INSTALL (
+    FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/${PackageName}Config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/${PackageName}ConfigVersion.cmake
+    DESTINATION ${dest}
+)
 
 INSTALL(FILES ${YATE_HEADER}
 	DESTINATION include 
