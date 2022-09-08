@@ -2160,7 +2160,7 @@ const Configuration& Engine::config()
 
 bool Engine::Register(const Plugin* plugin, bool reg)
 {
-    DDebug(DebugInfo,"Engine::Register(%p,%d)",plugin,reg);
+    DDebug(DebugInfo,"Engine::Register(%p,%d,%s)",plugin,reg, plugin->name().safe());
     ObjList *p = plugins.find(plugin);
     if (reg) {
 	if (p)

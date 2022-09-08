@@ -1,6 +1,10 @@
 #ifndef _AUX_YATE_LOG_H_
 #define _AUX_YATE_LOG_H_
 
+#ifdef _MSC_VER
+#pragma warning ( disable : 4251 )
+#endif 
+
 #include <string>
 #include <iostream>
 #include <time.h>
@@ -16,6 +20,7 @@
 
 #include <sstream>
 #include <memory>
+
 
 #include "yfmt/format.h"
 #include "yfmt/xchar.h"
@@ -95,9 +100,10 @@ namespace TelEngine {
 	public:
 		log_stream(const source_loc& _loc, level_enum _lvl, const std::string& _prefix)
 			: loc(_loc)
-			, lvl(_lvl)
-			, prefix(_prefix)
-		{
+			, lvl(_lvl){
+			if(_prefix.length()>0){
+				prefix = "["+_prefix + "] ";
+			}
 		}
 
 		~log_stream()
@@ -200,6 +206,15 @@ namespace TelEngine {
 #define h_warn(a)  TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::warn, a)
 #define h_error(a) TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::err, a)
 #define h_fatal(a) TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::critical, a)
+
+const char * get_yate_module_name();
+
+#define m_trace(a) TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::trace, get_yate_module_name())
+#define m_debug(a) TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::debug, get_yate_module_name())
+#define m_info(a)  TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::info, get_yate_module_name())
+#define m_warn(a)  TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::warn, get_yate_module_name())
+#define m_error(a) TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::err, get_yate_module_name())
+#define m_fatal(a) TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::critical, get_yate_module_name())
 
 
 #endif  // _AUX_YATE_LOG_H_
