@@ -302,6 +302,8 @@ INSTALL (TARGETS yate DESTINATION .)
 
 ####### ====================================================================
 
+include(CMakeFindDependencyMacro)
+
 SET ( PackageName "Yate" )
 SET ( INCLUDE_INSTALL_DIR include )
 SET ( LIB_INSTALL_DIR lib  )
@@ -313,6 +315,7 @@ INSTALL (TARGETS yateengine DESTINATION .)
 
 INSTALL (TARGETS yateengine  EXPORT ${PackageName}Targets DESTINATION lib)
 
+## find_dependency(spdlog::spdlog)
 
 SET ( dest ${LIB_INSTALL_DIR}/cmake/${PackageName} )
 
