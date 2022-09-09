@@ -281,19 +281,21 @@ SET_PROPERTY(TARGET yateengine PROPERTY FOLDER "libs")
 ####### ====================================================================
 ## 应用
 
-ADD_EXECUTABLE(yate
-    main.cpp
-)
+if( NOT ANDROID )
 
-SET_PROPERTY(TARGET yate PROPERTY FOLDER "apps")
+	ADD_EXECUTABLE(yate
+		main.cpp
+	)
 
-# 链接Yate库
-TARGET_LINK_LIBRARIES( yate yateengine )
+	SET_PROPERTY(TARGET yate PROPERTY FOLDER "apps")
 
-# 安装二进制文件，Binaries
-INSTALL (TARGETS yate DESTINATION .)
+	# 链接Yate库
+	TARGET_LINK_LIBRARIES( yate yateengine )
 
+	# 安装二进制文件，Binaries
+	INSTALL (TARGETS yate DESTINATION .)
 
+endif()
 
 ####### ====================================================================
 

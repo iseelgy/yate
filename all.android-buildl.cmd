@@ -30,8 +30,8 @@ del android-%arch%\CMakeCache.txt
 cmake.exe -G "Unix Makefiles" ^
 		-B android-%arch% ^
 		-DCMAKE_PREFIX_PATH=/install/android/%arch% ^
-		-DCMAKE_STAGING_PREFIX=/install/android/%arch%/yate ^
-		-DCMAKE_INSTALL_PREFIX=/install/android/%arch%/yate ^
+		-DCMAKE_STAGING_PREFIX=/install/android/%arch% ^
+		-DCMAKE_INSTALL_PREFIX=/install/android/%arch% ^
 		-DCMAKE_TOOLCHAIN_FILE=%MY_ANDROID_NDK%/build/cmake/android.toolchain.cmake ^
 		-DCMAKE_MAKE_PROGRAM="%MY_ANDROID_NDK%/prebuilt/windows-x86_64/bin/make.exe" ^
 		-DANDROID_ABI="%arch%" ^
@@ -68,8 +68,8 @@ del android-%arch%\CMakeCache.txt
 cmake.exe -G "Unix Makefiles"	^
 		-B android-%arch% ^
 		-DCMAKE_PREFIX_PATH=/install/android/%arch% ^
-		-DCMAKE_STAGING_PREFIX=/install/android/%arch%/yate ^
-		-DCMAKE_INSTALL_PREFIX=/install/android/%arch%/yate ^
+		-DCMAKE_STAGING_PREFIX=/install/android/%arch% ^
+		-DCMAKE_INSTALL_PREFIX=/install/android/%arch% ^
 		-DCMAKE_TOOLCHAIN_FILE=%MY_ANDROID_NDK%/build/cmake/android.toolchain.cmake ^
 		-DCMAKE_MAKE_PROGRAM="%MY_ANDROID_NDK%/prebuilt/windows-x86_64/bin/make.exe" ^
 		-DANDROID_ABI="%arch%" ^

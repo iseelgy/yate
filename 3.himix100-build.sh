@@ -7,5 +7,5 @@ cmake 	-B out-himix100 \
 		-DCMAKE_C_COMPILER=aarch64-himix100-linux-gcc \
 		-DCMAKE_CXX_COMPILER=aarch64-himix100-linux-g++ \
 		-DCMAKE_PREFIX_PATH=/mnt/e/install/out-himix100 \
-		-DCMAKE_INSTALL_PREFIX=/mnt/e/install/out-himix100/yate \
+		-DCMAKE_INSTALL_PREFIX=/mnt/e/install/out-himix100 \
 		./
