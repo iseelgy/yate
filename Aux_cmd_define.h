@@ -98,6 +98,48 @@ typedef long HRESULT;
 	const static int ARG1_YATE_SKF_DEVICE_REMOVE = 20;   //
 #endif
 
+
+#define ZMQ_SKF										60		// Skf 
+#define ZMQ_SKF_CALLBACK							70		// Skf服务回调客户端
+#define ZMQ_SKF_NOTIFY								80		// Skf服务通知
+#define ZMQ_SKF_VTOKEN								90		// Skf 
+#define ZMQ_WORKSHOP								99
+
+
+#ifdef ZMQ_WORKSHOP
+
+	#define SKF_CLEINT_TYPE_UNKNOW					0	//   
+	#define SKF_CLEINT_TYPE_SKF						1	// CSP    
+	#define SKF_CLEINT_TYPE_TOOL					2   // 管理工具
+	#define SKF_CLEINT_TYPE_DEBUG					3   // 调试工具
+
+	const static int ARG1_ZMQ_REGISTER = 10;	// 注册
+	const static int ARG1_ZMQ_UNREGISTER = 20;	// 注消
+
+#endif
+
+
+#define CMD_OP_TEST					1		
+#define CMD_OP_REMOVE_CLIENT		100  // 移除客户端
+#define CMD_OP_CLIENT_TIMER			101
+#define CMD_OP_CALLBACK_ERROR		200
+#define CMD_OP_DEVICE_CHANGE		300
+#define CMD_OP_DEVICE_CHANGE_TIMEOUT	301
+#define CMD_OP_CHECK_DEVICE			400
+
+
+const static int ARG1_SKF_NOTIFY_STOP = 10;	// 服务关闭
+const static int ARG1_SKF_NOTIFY_DEVICE_CHANGE = 20;	// 设备变化
+
+const static int ARG1_SKF_NOTIFY_DELETE_APP = 30;	// 删除应用
+
+const static int ARG1_SKF_NOTIFY_CREATE_CONT = 40;	// 生成容器
+const static int ARG1_SKF_NOTIFY_DELETE_CONT = 50;	// 删除容器
+
+const static int ARG1_SKF_NOTIFY_CREATE_KEYPARE = 60;	// 生成密钥对
+const static int ARG1_SKF_NOTIFY_IMPORT_CERT = 70;	// 导入证书
+
+
 //=====================================================================================================================
 //=====================================================================================================================
 //=====================================================================================================================

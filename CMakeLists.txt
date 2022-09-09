@@ -12,6 +12,10 @@ FATAL: In-source builds are not allowed.
 endif()
 
 
+if( NOT yate_engine_lib )
+	SET( yate_engine_lib yateengine )
+endif()
+
 # ---------------------------------------------------------------------------------------
 # Set SPDLOG_MASTER_PROJECT to ON if we are building spdlog
 # ---------------------------------------------------------------------------------------
@@ -37,8 +41,10 @@ set(CMAKE_CXX_STANDARD 11)
 # Generate position-independent code (-fPIC on UNIX)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-SET(SPDLOG_INSTALL ON)
-
+if( YATE_MASTER_PROJECT )
+	SET(SPDLOG_INSTALL ON)
+	SET(FMT_MASTER_PROJECT ON)
+endif()
 ##find_package(fmt REQUIRED)
 ##find_package(spdlog REQUIRED)
 
@@ -263,7 +269,7 @@ SET( YATE_SRC
 )
 
 ## 源文件
-ADD_LIBRARY(yateengine  
+ADD_LIBRARY( ${yate_engine_lib}  
 
 	SHARED
 
@@ -272,17 +278,14 @@ ADD_LIBRARY(yateengine
 		
 )
 
-#target_link_libraries(yateengine PRIVATE fmt-header-only)
-#target_link_libraries(yateengine PRIVATE $<BUILD_INTERFACE:fmt::fmt-header-only>)
-
 ## 链接Yate库
-TARGET_LINK_LIBRARIES( yateengine 
-	PRIVATE	fmt::fmt 
-	PUBLIC spdlog::spdlog
+TARGET_LINK_LIBRARIES( ${yate_engine_lib} 
+	PUBLIC fmt::fmt-header-only 
+	PRIVATE spdlog::spdlog_header_only
 )
 
-SET_PROPERTY(TARGET yateengine PROPERTY FOLDER "libs")
-			 
+SET_PROPERTY(TARGET ${yate_engine_lib} PROPERTY FOLDER "libs")
+
 ####### ====================================================================
 ## 应用
 
@@ -293,7 +296,7 @@ ADD_EXECUTABLE(yate
 SET_PROPERTY(TARGET yate PROPERTY FOLDER "apps")
 
 # 链接Yate库
-TARGET_LINK_LIBRARIES( yate yateengine )
+TARGET_LINK_LIBRARIES( yate ${yate_engine_lib} )
 
 # 安装二进制文件，Binaries
 INSTALL (TARGETS yate DESTINATION .)
@@ -302,49 +305,65 @@ INSTALL (TARGETS yate DESTINATION .)
 
 ####### ====================================================================
 
+
 include(CMakeFindDependencyMacro)
+INCLUDE ( CMakePackageConfigHelpers )
 
 SET ( PackageName "Yate" )
 SET ( INCLUDE_INSTALL_DIR include )
 SET ( LIB_INSTALL_DIR lib  )
-SET ( LIB_NAME "yateengine" )
+SET ( LIB_NAME ${yate_engine_lib} )
 
 # Library
 # Note: may not work on windows
-INSTALL (TARGETS yateengine DESTINATION .)
+INSTALL (TARGETS ${yate_engine_lib} DESTINATION .)
 
-INSTALL (TARGETS yateengine  EXPORT ${PackageName}Targets DESTINATION lib)
+INSTALL (TARGETS ${yate_engine_lib}  EXPORT ${PackageName}Targets DESTINATION lib)
 
 ## find_dependency(spdlog::spdlog)
 
-SET ( dest ${LIB_INSTALL_DIR}/cmake/${PackageName} )
+if( YATE_MASTER_PROJECT )
 
-INCLUDE ( CMakePackageConfigHelpers )
-CONFIGURE_PACKAGE_CONFIG_FILE ( ${PackageName}Config.cmake.in
-  ${CMAKE_CURRENT_BINARY_DIR}/${PackageName}Config.cmake
-  INSTALL_DESTINATION ${dest}
-  PATH_VARS INCLUDE_INSTALL_DIR
-)
+
+	SET ( dest ${LIB_INSTALL_DIR}/cmake/${PackageName} )
+
+	CONFIGURE_PACKAGE_CONFIG_FILE ( ${PackageName}Config.cmake.in
+	  ${CMAKE_CURRENT_BINARY_DIR}/${PackageName}Config.cmake
+	  INSTALL_DESTINATION ${dest}
+	  PATH_VARS INCLUDE_INSTALL_DIR
+	)
   
-WRITE_BASIC_PACKAGE_VERSION_FILE(
-  ${CMAKE_CURRENT_BINARY_DIR}/${PackageName}ConfigVersion.cmake
-  VERSION 1.2.3
-  COMPATIBILITY AnyNewerVersion
-)
+	WRITE_BASIC_PACKAGE_VERSION_FILE(
+	  ${CMAKE_CURRENT_BINARY_DIR}/${PackageName}ConfigVersion.cmake
+	  VERSION 1.2.3
+	  COMPATIBILITY AnyNewerVersion
+	)
 
-INSTALL ( 
-    EXPORT ${PackageName}Targets
-    NAMESPACE YateSpace::
-    DESTINATION ${dest}
-)
+	INSTALL ( 
+		EXPORT ${PackageName}Targets
+		NAMESPACE YateSpace::
+		DESTINATION ${dest}
+	)
 
 
-INSTALL (
-    FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/${PackageName}Config.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/${PackageName}ConfigVersion.cmake
-    DESTINATION ${dest}
-)
+	INSTALL (
+		FILES
+		${CMAKE_CURRENT_BINARY_DIR}/${PackageName}Config.cmake
+		${CMAKE_CURRENT_BINARY_DIR}/${PackageName}ConfigVersion.cmake
+		DESTINATION ${dest}
+	)
+
+	add_dependencies(${yate_engine_lib}  fmt::fmt-header-only)
+	add_dependencies(${yate_engine_lib}  spdlog::spdlog_header_only)
+
+	# here is the missing line:
+	#install(EXPORT spdlog-config DESTINATION lib/spdlog/cmake)
+
+	# here is the missing line:
+	# install(EXPORT fmt::fmt-header-only-config DESTINATION lib/fmt::fmt-header-only/cmake)
+
+
+endif()
 
 INSTALL(FILES ${YATE_HEADER}
 	DESTINATION include 
@@ -398,7 +417,7 @@ ADD_LIBRARY(msgsniff SHARED
 SET_PROPERTY(TARGET msgsniff PROPERTY FOLDER "modules")
 
 ## 链接Yate库
-TARGET_LINK_LIBRARIES( msgsniff yateengine )
+TARGET_LINK_LIBRARIES( msgsniff ${yate_engine_lib} )
 
 if(NOT ANDROID)
 	## 设置插件的后缀为.yate 
@@ -420,7 +439,7 @@ ADD_LIBRARY(ysockschan SHARED
 SET_PROPERTY(TARGET ysockschan PROPERTY FOLDER "modules")
 
 ## 链接Yate库
-TARGET_LINK_LIBRARIES( ysockschan yateengine )
+TARGET_LINK_LIBRARIES( ysockschan ${yate_engine_lib} )
 
 if(NOT ANDROID)
 	## 设置插件的后缀为.yate 
@@ -442,7 +461,7 @@ ADD_LIBRARY(ystunchan SHARED
 SET_PROPERTY(TARGET ystunchan PROPERTY FOLDER "modules")
 
 ## 链接Yate库
-TARGET_LINK_LIBRARIES( ystunchan yateengine )
+TARGET_LINK_LIBRARIES( ystunchan ${yate_engine_lib} )
 
 if(NOT ANDROID)
 	## 设置插件的后缀为.yate 
@@ -464,7 +483,7 @@ ADD_LIBRARY(rmanager SHARED
 SET_PROPERTY(TARGET rmanager PROPERTY FOLDER "modules")
 
 ## 链接Yate库
-TARGET_LINK_LIBRARIES( rmanager yateengine )
+TARGET_LINK_LIBRARIES( rmanager ${yate_engine_lib} )
 
 if(NOT ANDROID)
 	## 设置插件的后缀为.yate 

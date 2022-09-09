@@ -212,12 +212,12 @@ namespace TelEngine {
 
 const char * get_yate_module_name();
 
-#define m_trace(a) TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::trace, get_yate_module_name())
-#define m_debug(a) TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::debug, get_yate_module_name())
-#define m_info(a)  TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::info, get_yate_module_name())
-#define m_warn(a)  TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::warn, get_yate_module_name())
-#define m_error(a) TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::err, get_yate_module_name())
-#define m_fatal(a) TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::critical, get_yate_module_name())
+#define y_trace(a) TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::trace, get_yate_module_name())
+#define y_debug(a) TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::debug, get_yate_module_name())
+#define y_info(a)  TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::info, get_yate_module_name())
+#define y_warn(a)  TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::warn, get_yate_module_name())
+#define y_error(a) TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::err, get_yate_module_name())
+#define y_fatal(a) TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  TelEngine::level_enum::critical, get_yate_module_name())
 
 #endif // #ifndef DISABLE_YATE_STREAM_LOG
 
