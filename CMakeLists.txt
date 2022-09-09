@@ -37,10 +37,15 @@ set(CMAKE_CXX_STANDARD 11)
 # Generate position-independent code (-fPIC on UNIX)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-SET(SPDLOG_INSTALL ON)
+#SET(SPDLOG_INSTALL ON)
 
 ##find_package(fmt REQUIRED)
 ##find_package(spdlog REQUIRED)
+
+## 设置支持fmt安装
+set(FMT_INSTALL ON)
+
+# ADD_DEFINITIONS( -DFMT_HEADER_ONLY )
 
 ADD_SUBDIRECTORY(3rlibs/fmt-8.1.1 EXCLUDE_FROM_ALL)
 ADD_SUBDIRECTORY(3rlibs/spdlog-1.10.0 EXCLUDE_FROM_ALL)
@@ -50,12 +55,6 @@ ADD_SUBDIRECTORY(3rlibs/spdlog-1.10.0 EXCLUDE_FROM_ALL)
 #MESSAGE( STATUS "fmt_LIBRARIES: " fmt:fmt )
 #MESSAGE( STATUS "spdlog_INCLUDE_DIRS: " ${spdlog_INCLUDE_DIRS} )
 #MESSAGE( STATUS "spdlog_LIBRARIES: " ${spdlog_LIBRARIES} )
-
-
-# ${LIBEVENT_LIBRARIES}
-
-# ADD_DEFINITIONS( -DFMT_HEADER_ONLY )
-
 
 INCLUDE_DIRECTORIES( ./
 	3rlibs/fmt-8.1.1/include
@@ -272,12 +271,8 @@ ADD_LIBRARY(yateengine
 		
 )
 
-#target_link_libraries(yateengine PRIVATE fmt-header-only)
-#target_link_libraries(yateengine PRIVATE $<BUILD_INTERFACE:fmt::fmt-header-only>)
-
-## 链接Yate库
 TARGET_LINK_LIBRARIES( yateengine 
-	PRIVATE	fmt::fmt-header-only 
+	PUBLIC fmt::fmt-header-only
 	PRIVATE spdlog::spdlog_header_only
 )
 
@@ -308,9 +303,6 @@ SET ( PackageName "Yate" )
 SET ( INCLUDE_INSTALL_DIR include )
 SET ( LIB_INSTALL_DIR lib  )
 SET ( LIB_NAME "yateengine" )
-
-# Library
-# Note: may not work on windows
 INSTALL (TARGETS yateengine DESTINATION .)
 
 INSTALL (TARGETS yateengine  EXPORT ${PackageName}Targets DESTINATION lib)
@@ -319,6 +311,9 @@ INSTALL (TARGETS yateengine  EXPORT ${PackageName}Targets DESTINATION lib)
 
 if( YATE_MASTER_PROJECT )
 
+
+# Library
+# Note: may not work on windows
 	SET ( dest ${LIB_INSTALL_DIR}/cmake/${PackageName} )
 
 	INCLUDE ( CMakePackageConfigHelpers )
@@ -348,7 +343,7 @@ if( YATE_MASTER_PROJECT )
 		DESTINATION ${dest}
 	)
 	
-	#ADD_DEPENDENCIES(yateengine  fmt::fmt-header-only)
+	ADD_DEPENDENCIES(yateengine  fmt::fmt-header-only)
 	#add_dependencies(yateengine  spdlog::spdlog_header_only)
 	
 
