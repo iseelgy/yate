@@ -246,7 +246,7 @@ ThreadPrivate* ThreadPrivate::create(Thread* t,const char* name,Thread::Priority
 		    break;
 	    }
 	    if (pr != THREAD_PRIORITY_NORMAL)
-		::SetThreadPriority(reinterpret_cast<HANDLE>(t),pr);
+		::SetThreadPriority(reinterpret_cast<Y_HANDLE>(t),pr);
 	}
 #else /* _WINDOWS */
 	e = ::pthread_create(&p->thread,&attr,startFunc,p);
@@ -434,7 +434,7 @@ bool ThreadPrivate::cancel(bool hard)
 #ifdef _WINDOWS
 	    Debug(DebugCrit,"ThreadPrivate '%s' terminating win32 thread %lu [%p]",
 		m_name,thread,this);
-	    ret = ::TerminateThread(reinterpret_cast<HANDLE>(thread),0) != 0;
+	    ret = ::TerminateThread(reinterpret_cast<Y_HANDLE>(thread),0) != 0;
 #else
 #ifdef PTHREAD_CANCEL_ASYNCHRONOUS
 	    Debug(critical ? DebugInfo : DebugWarn,"ThreadPrivate '%s' terminating pthread %p [%p]",
@@ -505,7 +505,7 @@ int ThreadPrivate::setAffinity(ThreadPrivate* t, const DataBlock& cpuMask)
 	      cpuMask.length() * 8, sizeof(DWORD_PTR) * 8);
     for (unsigned int i = 0; i < sizeof(mask) && i < cpuMask.length(); i++)
 	mask |= (cpuMask.at(i) << (i << 3));
-    if (!(mask = ::SetThreadAffinityMask(t ?reinterpret_cast<HANDLE>(t->thread) : ::GetCurrentThread(),mask)))
+    if (!(mask = ::SetThreadAffinityMask(t ?reinterpret_cast<Y_HANDLE>(t->thread) : ::GetCurrentThread(),mask)))
 	return ::GetLastError();
     if (t)
 	t->m_affinityMask = mask;
@@ -556,7 +556,7 @@ int ThreadPrivate::getAffinity(ThreadPrivate* t, DataBlock& outMask)
 
 #ifdef _WINDOWS
 
-    HANDLE thr = t ? reinterpret_cast<HANDLE>(t->thread) : ::GetCurrentThread();
+	Y_HANDLE thr = t ? reinterpret_cast<Y_HANDLE>(t->thread) : ::GetCurrentThread();
     DWORD_PTR setMask = 0;
     if (t) {
 	setMask = t->m_affinityMask;

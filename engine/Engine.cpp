@@ -706,7 +706,7 @@ void completeModule(String& ret, const String& part, ObjList& mods, bool reload,
     DDebug(DebugInfo,"completeModule path='%s' rdir='%s'",path.c_str(),rdir.c_str());
 #ifdef _WINDOWS
     WIN32_FIND_DATA entry;
-    HANDLE hf = ::FindFirstFile(path + PATH_SEP "*",&entry);
+	Y_HANDLE hf = ::FindFirstFile(path + PATH_SEP "*",&entry);
     if (hf == INVALID_HANDLE_VALUE)
 	return;
     do {
@@ -2261,7 +2261,7 @@ bool Engine::loadPluginDir(const String& relPath)
 	path = path.substr(0,path.length()-1);
 #ifdef _WINDOWS
     WIN32_FIND_DATA entry;
-    HANDLE hf = ::FindFirstFile(path + PATH_SEP "*",&entry);
+	Y_HANDLE hf = ::FindFirstFile(path + PATH_SEP "*",&entry);
     if (hf == INVALID_HANDLE_VALUE) {
 	Debug(DebugWarn,"Engine::loadPlugins() failed directory '%s'",path.safe());
 	return false;
