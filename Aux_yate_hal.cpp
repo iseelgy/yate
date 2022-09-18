@@ -311,7 +311,7 @@ namespace TelEngine {
 
 	void log_stream::flush()
 	{
-		logger::get().log(loc, lvl, (prefix + str()).c_str());
+		logger::get().log(loc, lvl, (prefix + _stream.str()).c_str());
 	}
 
 	logger::logger()

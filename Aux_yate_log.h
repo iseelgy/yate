@@ -98,7 +98,7 @@ namespace TelEngine {
 
 
 
-	struct YATE_API log_stream : public std::ostringstream
+	struct YATE_API log_stream 
 	{
 	public:
 		log_stream(const source_loc& _loc, level_enum _lvl, const std::string& _prefix)
@@ -123,7 +123,16 @@ namespace TelEngine {
 		}
 		*/
 
+		template<class T>
+		log_stream& operator<<(const T& msg)
+		{
+			(_stream) << msg;
+			return *this;
+		}
+
+
 	private:
+		std::ostringstream _stream;
 		source_loc loc;
 		level_enum lvl = level_enum::info;
 		std::string prefix;
