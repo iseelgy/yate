@@ -29,7 +29,7 @@
 #ifdef LIBYSIP_EXPORTS
 #define YSIP_API __declspec(dllexport)
 #else
-#ifndef LIBYSIP_STATIC
+#ifdef LIBYSIP_NO_STATIC
 #define YSIP_API __declspec(dllimport)
 #endif
 #endif

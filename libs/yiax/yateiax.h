@@ -28,7 +28,7 @@
 #ifdef LIBYIAX_EXPORTS
 #define YIAX_API __declspec(dllexport)
 #else
-#ifndef LIBYIAX_STATIC
+#ifdef LIBYIAX_NO_STATIC
 #define YIAX_API __declspec(dllimport)
 #endif
 #endif

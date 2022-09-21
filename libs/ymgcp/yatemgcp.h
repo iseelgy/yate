@@ -29,7 +29,7 @@
 #ifdef LIBYMGCP_EXPORTS
 #define YMGCP_API __declspec(dllexport)
 #else
-#ifndef LIBYMGCP_STATIC
+#ifdef LIBYMGCP_NO_STATIC
 #define YMGCP_API __declspec(dllimport)
 #endif
 #endif

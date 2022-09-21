@@ -29,7 +29,7 @@
 #ifdef LIBYASN_EXPORTS
 #define YASN_API __declspec(dllexport)
 #else
-#ifndef LIBYASN_STATIC
+#ifdef LIBYASN_NO_STATIC
 #define YASN_API __declspec(dllimport)
 #endif
 #endif

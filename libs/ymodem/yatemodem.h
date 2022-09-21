@@ -29,7 +29,7 @@
 #ifdef LIBYMODEM_EXPORTS
 #define YMODEM_API __declspec(dllexport)
 #else
-#ifndef LIBYMODEM_STATIC
+#ifdef LIBYMODEM_NO_STATIC
 #define YMODEM_API __declspec(dllimport)
 #endif
 #endif

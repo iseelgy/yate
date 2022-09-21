@@ -10,7 +10,7 @@
 #ifdef LIBYSNMP_EXPORTS
 #define YSNMP_API __declspec(dllexport)
 #else
-#ifndef LIBYSNMP_STATIC
+#ifdef LIBYSNMP_NO_STATIC
 #define YSNMP_API __declspec(dllimport)
 #endif
 #endif

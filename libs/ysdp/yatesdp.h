@@ -34,7 +34,7 @@
 #ifdef LIBYSDP_EXPORTS
 #define YSDP_API __declspec(dllexport)
 #else
-#ifndef LIBYSDP_STATIC
+#ifdef LIBYSDP_NO_STATIC
 #define YSDP_API __declspec(dllimport)
 #endif
 #endif

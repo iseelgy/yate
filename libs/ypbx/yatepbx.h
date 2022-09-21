@@ -26,7 +26,7 @@
 #ifdef LIBYPBX_EXPORTS
 #define YPBX_API __declspec(dllexport)
 #else
-#ifndef LIBYPBX_STATIC
+#ifdef LIBYPBX_NO_STATIC
 #define YPBX_API __declspec(dllimport)
 #endif
 #endif

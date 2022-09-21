@@ -28,7 +28,7 @@
 #ifdef LIBYSCRIPT_EXPORTS
 #define YSCRIPT_API __declspec(dllexport)
 #else
-#ifndef LIBYSCRIPT_STATIC
+#ifdef LIBYSCRIPT_NO_STATIC
 #define YSCRIPT_API __declspec(dllimport)
 #endif
 #endif

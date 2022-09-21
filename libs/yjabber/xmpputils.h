@@ -29,7 +29,7 @@
 #ifdef LIBYJABBER_EXPORTS
 #define YJABBER_API __declspec(dllexport)
 #else
-#ifndef LIBYJABBER_STATIC
+#ifdef LIBYJABBER_NO_STATIC
 #define YJABBER_API __declspec(dllimport)
 #endif
 #endif

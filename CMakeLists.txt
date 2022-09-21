@@ -276,8 +276,9 @@ TARGET_LINK_LIBRARIES( yateengine
 	PRIVATE spdlog::spdlog_header_only
 )
 
-SET_PROPERTY(TARGET yateengine PROPERTY FOLDER "libs")
-			 
+SET_PROPERTY(TARGET yateengine PROPERTY FOLDER "libs-yate")
+
+ 
 ####### ====================================================================
 ## 应用
 
@@ -314,8 +315,12 @@ INSTALL (TARGETS yateengine  EXPORT ${PackageName}Targets DESTINATION lib)
 if( YATE_MASTER_PROJECT )
 
 
-# Library
-# Note: may not work on windows
+	ADD_SUBDIRECTORY(libs)
+		
+	ADD_SUBDIRECTORY(modules)
+
+	# Library
+	# Note: may not work on windows
 	SET ( dest ${LIB_INSTALL_DIR}/cmake/${PackageName} )
 
 	INCLUDE ( CMakePackageConfigHelpers )
@@ -392,94 +397,5 @@ INSTALL(DIRECTORY conf.d
 		)
 	
 
-
-
-##==========================================================
-	
-ADD_LIBRARY(msgsniff SHARED
-    modules/msgsniff.cpp
-)
-
-SET_PROPERTY(TARGET msgsniff PROPERTY FOLDER "modules")
-
-## 链接Yate库
-TARGET_LINK_LIBRARIES( msgsniff yateengine )
-
-if(NOT ANDROID)
-	## 设置插件的后缀为.yate 
-	SET_TARGET_PROPERTIES(msgsniff PROPERTIES SUFFIX ".yate")
-endif()
-
-SET_TARGET_PROPERTIES(msgsniff PROPERTIES PREFIX "")
-	 	 
-# 安装
-# Note: may not work on windows
-INSTALL (TARGETS msgsniff LIBRARY DESTINATION modules )
-
-##==========================================================
-
-ADD_LIBRARY(ysockschan SHARED
-    modules/ysockschan.cpp
-)
-
-SET_PROPERTY(TARGET ysockschan PROPERTY FOLDER "modules")
-
-## 链接Yate库
-TARGET_LINK_LIBRARIES( ysockschan yateengine )
-
-if(NOT ANDROID)
-	## 设置插件的后缀为.yate 
-	SET_TARGET_PROPERTIES(ysockschan PROPERTIES SUFFIX ".yate")
-endif()
-
-SET_TARGET_PROPERTIES(ysockschan PROPERTIES PREFIX "")
-	 	 
-# 安装
-# Note: may not work on windows
-INSTALL (TARGETS ysockschan LIBRARY DESTINATION modules )
-	
-##==========================================================
-
-ADD_LIBRARY(ystunchan SHARED
-    modules/ystunchan.cpp
-)
-
-SET_PROPERTY(TARGET ystunchan PROPERTY FOLDER "modules")
-
-## 链接Yate库
-TARGET_LINK_LIBRARIES( ystunchan yateengine )
-
-if(NOT ANDROID)
-	## 设置插件的后缀为.yate 
-	SET_TARGET_PROPERTIES(ystunchan PROPERTIES SUFFIX ".yate")
-endif()
-
-SET_TARGET_PROPERTIES(ystunchan PROPERTIES PREFIX "")
-	 	 
-# 安装
-# Note: may not work on windows
-INSTALL (TARGETS ystunchan LIBRARY DESTINATION modules )
-
-##==========================================================
-
-ADD_LIBRARY(rmanager SHARED
-    modules/rmanager.cpp
-)
-
-SET_PROPERTY(TARGET rmanager PROPERTY FOLDER "modules")
-
-## 链接Yate库
-TARGET_LINK_LIBRARIES( rmanager yateengine )
-
-if(NOT ANDROID)
-	## 设置插件的后缀为.yate 
-	SET_TARGET_PROPERTIES(rmanager PROPERTIES SUFFIX ".yate")
-endif()
-
-SET_TARGET_PROPERTIES(rmanager PROPERTIES PREFIX "")
-	 	 
-# 安装
-# Note: may not work on windows
-INSTALL (TARGETS rmanager LIBRARY DESTINATION modules )
 
 
