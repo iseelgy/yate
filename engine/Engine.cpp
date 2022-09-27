@@ -44,7 +44,7 @@ __declspec(dllimport) BOOL WINAPI SHGetSpecialFolderPathA(HWND,LPSTR,INT,BOOL);
 #endif
 
 #else // _WINDOWS
-
+#include <unistd.h>
 #include "yatepaths.h"
 #include <dirent.h>
 #include <dlfcn.h>
@@ -69,7 +69,6 @@ static int s_childsig = 0;
 #include "MacOSXUtils.h"
 #endif
 
-#include <unistd.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>

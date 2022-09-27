@@ -22,13 +22,18 @@
 
 #include <yatengine.h>
 
-#include <unistd.h>
+//#include <unistd.h>
 #include <sys/types.h>
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
+
+#ifndef _WIN32
+#include <unistd.h>
+#endif
+
 
 #ifdef NDEBUG
 #undef HAVE_MALLINFO

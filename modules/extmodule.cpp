@@ -1075,8 +1075,8 @@ bool ExtModReceiver::create(const char *script, const char *args)
 #else
     String tmp(script);
     int pid;
-    HANDLE ext2yate[2];
-    HANDLE yate2ext[2];
+    Y_HANDLE ext2yate[2];
+    Y_HANDLE yate2ext[2];
     int x;
     adjustPath(tmp);
     script = tmp.c_str();

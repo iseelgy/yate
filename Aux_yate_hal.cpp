@@ -144,6 +144,8 @@ int Aux_cmd_line::format(const char * cmd)
 void logStartup()
 {
 
+	S_WARN("AAA" << fmt::format( "kkkkk" ) );
+
 	//TelEngine::logger::get().set_level(spdlog::level::trace);
 
 	// Debug()
@@ -174,20 +176,6 @@ void logShowDemo()
 
 void yateLog(const char * file, const char * function, int line, const char * category, int level, const char * fmt ...)
 {
-	if (level > TE::debugLevel()) {
-		return;
-	}
-
-#ifdef WIN32 
-
-
-#else
-
-
-#endif
-
-	// TelEngine::Debug(TelEngine::DebugFail, "%s, %s, %d", file, function, line);
-
 
 }
 
@@ -322,7 +310,7 @@ namespace TelEngine {
 	}
 
 	template <typename... Args>
-	void logger::log(const source_loc& loc, level_enum lvl, const char* fmt, const Args &... args)
+	void logger::log(const source_loc& loc, int lvl, const char* fmt, const Args &... args)
 	{
 		if (_loger) {
 			spdlog::source_loc sloc(loc.filename, loc.line, loc.funcname);
@@ -331,7 +319,7 @@ namespace TelEngine {
 	}
 
 	template <typename... Args>
-	void logger::printf(const source_loc& loc, level_enum lvl, const char* fmt, const Args &... args)
+	void logger::printf(const source_loc& loc, int lvl, const char* fmt, const Args &... args)
 	{
 		if (_loger) {
 			spdlog::source_loc sloc(loc.filename, loc.line, loc.funcname);
@@ -339,7 +327,7 @@ namespace TelEngine {
 		}
 	}
 
-	void logger::set_level(level_enum lvl) {
+	void logger::set_level(int lvl) {
 		_log_level = lvl;
 		if (_loger) {
 			_loger->set_level((spdlog::level::level_enum)lvl);
@@ -347,19 +335,15 @@ namespace TelEngine {
 
 	}
 
-	void logger::set_level(int lvl) {
-		_log_level = (level_enum)lvl;
-		if (_loger) {
-			_loger->set_level((spdlog::level::level_enum)lvl);
-		}
 
-	}
-
-
-	void logger::set_flush_on(level_enum lvl) {
+	void logger::set_flush_on(int lvl) {
 		if (_loger) {
 			_loger->flush_on((spdlog::level::level_enum)lvl);
 		}
+	}
+
+	void logger::shutdown() {
+		spdlog::shutdown(); 
 	}
 
 
