@@ -73,54 +73,54 @@ typedef long HRESULT;
 //=====================================================================================================================
 //=====================================================================================================================
 //=====================================================================================================================
-//  JNI 回调命令
+//
 
 #define CB_YATE_CMD									1
-#define CB_VTOKON_CMD								10		// 
-#define CB_ANDOID_SYS_INFO							20		// 
-#define CB_VOIP_AUDIO								30		// 
-#define CB_IDCARD_HANDLE							40		// 
+#define CB_VTOKON_CMD								10
+#define CB_ANDOID_SYS_INFO							20
+#define CB_VOIP_AUDIO								30
+#define CB_IDCARD_HANDLE							40
 
-#define ZMQ_SKF										60		// 
-#define ZMQ_SKF_CALLBACK							70		// 
-#define ZMQ_SKF_NOTIFY								80		// 
-#define ZMQ_SKF_VTOKEN								90		// Skf 
+#define ZMQ_SKF										60
+#define ZMQ_SKF_CALLBACK							70
+#define ZMQ_SKF_NOTIFY								80
+#define ZMQ_SKF_VTOKEN								90
 #define ZMQ_WORKSHOP								99
 
 
 #define ZMQ_GOAL									100
-#define CB_LOG_FILE_WRITE							0x80000000  // 
+#define CB_LOG_FILE_WRITE							0x80000000
 
 
 #ifdef CB_YATE_CMD
-	const static int ARG1_YATE_ENGINE_START = 1;   // 
-	const static int ARG1_YATE_SKF_DEVICE_INSTALL = 10;   //
-	const static int ARG1_YATE_SKF_DEVICE_REMOVE = 20;   //
+	const static int ARG1_YATE_ENGINE_START = 1;
+	const static int ARG1_YATE_SKF_DEVICE_INSTALL = 10;
+	const static int ARG1_YATE_SKF_DEVICE_REMOVE = 20;
 #endif
 
 
-#define ZMQ_SKF										60		// Skf 
-#define ZMQ_SKF_CALLBACK							70		// Skf服务回调客户端
-#define ZMQ_SKF_NOTIFY								80		// Skf服务通知
-#define ZMQ_SKF_VTOKEN								90		// Skf 
+#define ZMQ_SKF										60
+#define ZMQ_SKF_CALLBACK							70
+#define ZMQ_SKF_NOTIFY								80
+#define ZMQ_SKF_VTOKEN								90
 #define ZMQ_WORKSHOP								99
 
 
 #ifdef ZMQ_WORKSHOP
 
-	#define SKF_CLEINT_TYPE_UNKNOW					0	//   
-	#define SKF_CLEINT_TYPE_SKF						1	// CSP    
-	#define SKF_CLEINT_TYPE_TOOL					2   // 管理工具
-	#define SKF_CLEINT_TYPE_DEBUG					3   // 调试工具
+	#define SKF_CLEINT_TYPE_UNKNOW					0
+	#define SKF_CLEINT_TYPE_SKF						1
+	#define SKF_CLEINT_TYPE_TOOL					2
+	#define SKF_CLEINT_TYPE_DEBUG					3
 
-	const static int ARG1_ZMQ_REGISTER = 10;	// 注册
-	const static int ARG1_ZMQ_UNREGISTER = 20;	// 注消
+	const static int ARG1_ZMQ_REGISTER = 10;
+	const static int ARG1_ZMQ_UNREGISTER = 20;
 
 #endif
 
 
-#define CMD_OP_TEST					1		
-#define CMD_OP_REMOVE_CLIENT		100  // 移除客户端
+#define CMD_OP_TEST					1
+#define CMD_OP_REMOVE_CLIENT		100
 #define CMD_OP_CLIENT_TIMER			101
 #define CMD_OP_CALLBACK_ERROR		200
 #define CMD_OP_DEVICE_CHANGE		300
@@ -128,23 +128,23 @@ typedef long HRESULT;
 #define CMD_OP_CHECK_DEVICE			400
 
 
-const static int ARG1_SKF_NOTIFY_STOP = 10;	// 服务关闭
-const static int ARG1_SKF_NOTIFY_DEVICE_CHANGE = 20;	// 设备变化
+const static int ARG1_SKF_NOTIFY_STOP = 10;
+const static int ARG1_SKF_NOTIFY_DEVICE_CHANGE = 20;
 
-const static int ARG1_SKF_NOTIFY_DELETE_APP = 30;	// 删除应用
+const static int ARG1_SKF_NOTIFY_DELETE_APP = 30;
 
-const static int ARG1_SKF_NOTIFY_CREATE_CONT = 40;	// 生成容器
-const static int ARG1_SKF_NOTIFY_DELETE_CONT = 50;	// 删除容器
+const static int ARG1_SKF_NOTIFY_CREATE_CONT = 40;
+const static int ARG1_SKF_NOTIFY_DELETE_CONT = 50;
 
-const static int ARG1_SKF_NOTIFY_CREATE_KEYPARE = 60;	// 生成密钥对
-const static int ARG1_SKF_NOTIFY_IMPORT_CERT = 70;	// 导入证书
+const static int ARG1_SKF_NOTIFY_CREATE_KEYPARE = 60;
+const static int ARG1_SKF_NOTIFY_IMPORT_CERT = 70;
 
 
 //=====================================================================================================================
 //=====================================================================================================================
 //=====================================================================================================================
-// ΢
-// 微盾 命令范围
+//
+
 #ifdef CB_VTOKON_CMD
 
 	const static int ARG1_VTOKEN_HAS_DETECT = 6000;   
@@ -187,8 +187,8 @@ const static int ARG1_SKF_NOTIFY_IMPORT_CERT = 70;	// 导入证书
 //=====================================================================================================================
 #ifdef CB_ANDOID_SYS_INFO
 
-	const static int ARG1_ASYS_INFO_GET_SIM			= 10;	// 
-	const static int ARG1_ASYS_INFO_GET_DEVICEID	= 11;	
+	const static int ARG1_ASYS_INFO_GET_SIM			= 10;
+	const static int ARG1_ASYS_INFO_GET_DEVICEID	= 11;
 	const static int ARG1_ASYS_APP_REGISTER			= 20;
 
 #endif
@@ -199,13 +199,13 @@ const static int ARG1_SKF_NOTIFY_IMPORT_CERT = 70;	// 导入证书
 // 
 #ifdef CB_VOIP_AUDIO
 
-	const static int ARG1_AUDIO_OBJECT_NEW 			= 5000;   //
-	const static int ARG1_AUDIO_OBJECT_DELETE 		= 5001;   //
-	const static int ARG1_AUDIO_OBJECT_SET 			= 5002;   //
-	const static int ARG1_AUDIO_OBJECT_START 		= 5003;   //
-	const static int ARG1_AUDIO_OBJECT_STOP 		= 5004;   //
-	const static int ARG1_AUDIO_OBJECT_READ 		= 5005;   //
-	const static int ARG1_AUDIO_OBJECT_WRITE 		= 5006;   //
+	const static int ARG1_AUDIO_OBJECT_NEW 			= 5000;
+	const static int ARG1_AUDIO_OBJECT_DELETE 		= 5001;
+	const static int ARG1_AUDIO_OBJECT_SET 			= 5002;
+	const static int ARG1_AUDIO_OBJECT_START 		= 5003;
+	const static int ARG1_AUDIO_OBJECT_STOP 		= 5004;
+	const static int ARG1_AUDIO_OBJECT_READ 		= 5005;
+	const static int ARG1_AUDIO_OBJECT_WRITE 		= 5006;
 
 #endif
 
@@ -218,7 +218,7 @@ const static int ARG1_SKF_NOTIFY_IMPORT_CERT = 70;	// 导入证书
 
 #ifdef CB_IDCARD_HANDLE
 
-	const static int ARG1_IDCARD_QUERY_RESULT		= 1000;   // 
+	const static int ARG1_IDCARD_QUERY_RESULT		= 1000;
 
 
 
@@ -243,21 +243,21 @@ const static int ARG1_SKF_NOTIFY_IMPORT_CERT = 70;	// 导入证书
 //=====================================================================================================================
 //=====================================================================================================================
 // JNI 
-#define ID_ZDTOKEN_GET_INFO 							1	// 
-#define ID_ZDTOKEN_SET_INFO 							2	// 
-#define ID_DEVLOPMENT_TEST								3	// 
+#define ID_ZDTOKEN_GET_INFO 							1
+#define ID_ZDTOKEN_SET_INFO 							2
+#define ID_DEVLOPMENT_TEST								3
 
 
-#define CMD_YATE_MESSAGE								10000	// 
-#define CMD_VTOKEN_HANDLE								10020	// 
-#define CMD_SUNELAN										10030	// 
-#define CMD_VOIP										10040	// 
+#define CMD_YATE_MESSAGE								10000
+#define CMD_VTOKEN_HANDLE								10020
+#define CMD_SUNELAN										10030
+#define CMD_VOIP										10040
 
-const static int ARG1_ID_INFO_VERSION 					= 10;  	// 
-const static int ARG1_ID_INFO_IDCARD_SERVER				= 20;	// 
-const static int ARG1_ID_INFO_PSAM_SERVER				= 30;	// 
+const static int ARG1_ID_INFO_VERSION 					= 10;
+const static int ARG1_ID_INFO_IDCARD_SERVER				= 20;
+const static int ARG1_ID_INFO_PSAM_SERVER				= 30;
 const static int ARG1_ID_INFO_CARD_ID					= 40;
-const static int ARG1_ID_INFO_DEVICE_INFO				= 41;	// 
+const static int ARG1_ID_INFO_DEVICE_INFO				= 41;
 const static int ARG1_ID_INFO_CARD_PUBKEY				= 50;
 const static int ARG1_ID_INFO_CARD_SIGN					= 51;
 const static int ARG1_ID_INFO_DEVICE_ID					= 60;
@@ -265,9 +265,9 @@ const static int ARG1_ID_INFO_DEVICE_ID					= 60;
 
 #ifdef CMD_YATE_MESSAGE
 
-	const static int ARG1_YATE_MESSAGE_LOG_BROADCAST	= 1;   // 
-	const static int ARG1_YATE_MESSAGE_SIM_STATE_CHANGE = 100;   // 
-	const static int ARG1_YATE_MESSAGE_LOCATION_CHANGE =  200;   // 
+	const static int ARG1_YATE_MESSAGE_LOG_BROADCAST	= 1;
+	const static int ARG1_YATE_MESSAGE_SIM_STATE_CHANGE = 100;
+	const static int ARG1_YATE_MESSAGE_LOCATION_CHANGE =  200;
 
 #endif
 
@@ -343,7 +343,7 @@ const static int ARG1_ID_INFO_DEVICE_ID					= 60;
 //=====================================================================================================================
 //=====================================================================================================================
 //=====================================================================================================================
-// ΢
+// 
 #ifdef ZMQ_SKF
 
 	const static int ZMQ_SKF_ARG1_0000 = 0;
@@ -446,13 +446,11 @@ const static int ARG1_ID_INFO_DEVICE_ID					= 60;
 //=====================================================================================================================
 //=====================================================================================================================
 //=====================================================================================================================
-//  int IDcard( int cmd, String&result, String& info, String& server, String& idcard )
-//  IDcard 
 
-const static int IDCARD_CMD_DN_QUERY_BASE	= 1;	// 
-const static int IDCARD_CMD_DN_QUERY_ALL	= 2;  // ͨ
-const static int IDCARD_CMD_DN_QUERY_PSAM	= 3;  // ͨ
-const static int IDCARD_CMD_REPORT			= 1002;  // 
+const static int IDCARD_CMD_DN_QUERY_BASE	= 1;
+const static int IDCARD_CMD_DN_QUERY_ALL	= 2;
+const static int IDCARD_CMD_DN_QUERY_PSAM	= 3;
+const static int IDCARD_CMD_REPORT			= 1002;
 
 #endif
 
