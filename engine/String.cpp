@@ -642,7 +642,7 @@ String& String::assign(const char* value, int len)
 	}
 	if (value != m_string || len != (int)m_length) {
 	    char* data = (char*) ::malloc(len+1);
-		if (len == 4 && strcmp( value, "Yate") == 0) {
+		if (len == 49 /*&& strcmp( value, "Yate") == 0*/) {
 			int k = len;
 		}
 	    if (data) {

@@ -3493,9 +3493,12 @@ protected:
      */
 	static void capturing(bool capture);
 
+public:
+	// for memory destroy
+	static ObjList s_cls_events;
+
 private:
     int m_level;
-    static ObjList s_cls_events;
     static bool s_cls_capturing;
 };
 

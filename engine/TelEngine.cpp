@@ -1536,7 +1536,8 @@ void globalDestroyTelEngine()
 	TelEngine::s_counters.clear();
 	TelEngine::s_countersMutex.~Mutex();
 
-	
+	TelEngine::CapturedEvent::s_cls_events.clear();
+
 }
 
 /* vi: set ts=8 sw=4 sts=4 noet: */

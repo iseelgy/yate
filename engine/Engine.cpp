@@ -3335,6 +3335,8 @@ void globalDestroyEngine()
 	s_cfgpath.clear();
 	s_usrpath.clear();
 	s_affinity.clear();
+
+	s_startMsg.clear();
 	s_startMsg.clear();
 
 	r_static.clear();
