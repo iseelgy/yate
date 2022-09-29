@@ -58,10 +58,10 @@ public:
     // Return true if handled
     virtual bool handleUserNotify(const String& account, bool ok, const char* reason = 0);
     // Widgets
-    static const String s_pagesWidget;   // Wizard pages UI widget
-    static const String s_actionNext;    // The name of the 'next' action
-    static const String s_actionPrev;    // The name of the 'previous' action
-    static const String s_actionCancel;  // The name of the 'cancel async operation' action
+    static String s_pagesWidget;   // Wizard pages UI widget
+    static String s_actionNext;    // The name of the 'next' action
+    static String s_actionPrev;    // The name of the 'previous' action
+    static String s_actionCancel;  // The name of the 'cancel async operation' action
 protected:
     virtual void onNext()
 	{}
@@ -691,87 +691,87 @@ private:
 using namespace TelEngine;
 
 // Windows
-static const String s_wndMain = "mainwindow";           // mainwindow
-static const String s_wndAccount = "account";           // Account edit/add
-static const String s_wndAddrbook = "addrbook";         // Contact edit/add
-static const String s_wndChatContact = "chatcontact";   // Chat contact edit/add
-static const String s_wndMucInvite = "mucinvite";       // MUC invite
-static const String s_wndAcountList = "accountlist";    // Accounts list
-static const String s_wndFileTransfer = "fileprogress"; // File transfer
-static const String s_wndNotification = "notification"; // Notifications
+static String s_wndMain = "mainwindow";           // mainwindow
+static String s_wndAccount = "account";           // Account edit/add
+static String s_wndAddrbook = "addrbook";         // Contact edit/add
+static String s_wndChatContact = "chatcontact";   // Chat contact edit/add
+static String s_wndMucInvite = "mucinvite";       // MUC invite
+static String s_wndAcountList = "accountlist";    // Accounts list
+static String s_wndFileTransfer = "fileprogress"; // File transfer
+static String s_wndNotification = "notification"; // Notifications
 // Some UI widgets
-static const String s_mainwindowTabs = "mainwindowTabs";
-static const String s_channelList = "channels";
-static const String s_accountList = "accounts";         // Global accounts list
-static const String s_contactList = "contacts";
-static const String s_logList = "log";
-static const String s_calltoList = "callto";
-static const String s_account = "account";               // Account selector
-static const String s_chatAccount = "chataccount";       // List of chat accounts
-static const String s_chatContactList = "chat_contacts"; // List of chat contacts
-static const String s_mucAccounts = "mucaccount";        // List of accounts supporting MUC
-static const String s_mucSavedRooms = "mucsavedrooms";   // List of saved MUC rooms
-static const String s_mucMembers = "muc_members";        // List of MUC room members
-static const String s_accProtocol = "acc_protocol";         // List of protocols in account add/edit
-static const String s_accWizProtocol = "accwiz_protocol";   // List of protocols in account wizard
-static const String s_accProviders = "acc_providers";       // List of providers in account add/edit
-static const String s_accWizProviders = "accwiz_providers"; // List of providers in account wizard
-static const String s_inviteContacts = "invite_contacts";   // List of contacts in muc invite
-static const String s_fileProgressList = "fileprogresslist";  // List of file transfers
-static const String s_pageEmpty = "page_empty_list";          // An empty stacked widget page
-static const String s_pageList = "page_list";                 // A page for list in a stacked widget
-static const String s_fileProgressCont = "file_progress_container"; // File progress window stacked widget
+static String s_mainwindowTabs = "mainwindowTabs";
+static String s_channelList = "channels";
+static String s_accountList = "accounts";         // Global accounts list
+static String s_contactList = "contacts";
+static String s_logList = "log";
+static String s_calltoList = "callto";
+static String s_account = "account";               // Account selector
+static String s_chatAccount = "chataccount";       // List of chat accounts
+static String s_chatContactList = "chat_contacts"; // List of chat contacts
+static String s_mucAccounts = "mucaccount";        // List of accounts supporting MUC
+static String s_mucSavedRooms = "mucsavedrooms";   // List of saved MUC rooms
+static String s_mucMembers = "muc_members";        // List of MUC room members
+static String s_accProtocol = "acc_protocol";         // List of protocols in account add/edit
+static String s_accWizProtocol = "accwiz_protocol";   // List of protocols in account wizard
+static String s_accProviders = "acc_providers";       // List of providers in account add/edit
+static String s_accWizProviders = "accwiz_providers"; // List of providers in account wizard
+static String s_inviteContacts = "invite_contacts";   // List of contacts in muc invite
+static String s_fileProgressList = "fileprogresslist";  // List of file transfers
+static String s_pageEmpty = "page_empty_list";          // An empty stacked widget page
+static String s_pageList = "page_list";                 // A page for list in a stacked widget
+static String s_fileProgressCont = "file_progress_container"; // File progress window stacked widget
 // Actions
-static const String s_actionShowCallsList = "showCallsList";
-static const String s_actionShowNotification = "showNotification";
-static const String s_actionShowInfo = "showNotificationInfo";
-static const String s_actionPendingChat = "showPendingChat";
-static const String s_actionCall = "call";
-static const String s_actionAnswer = "answer";
-static const String s_actionHangup = "hangup";
-static const String s_actionTransfer = "transfer";
-static const String s_actionConf = "conference";
-static const String s_actionHold = "hold";
-static const String s_actionLogin = "acc_login";
-static const String s_actionLogout = "acc_logout";
-static const String s_chat = "chatcontact_chat";
-static const String s_chatCall = "chatcontact_call";
-static const String s_chatNew = "chatcontact_new";
-static const String s_chatRoomNew = "chatroom_new";
-static const String s_chatShowLog = "chatcontact_showlog";
-static const String s_chatEdit = "chatcontact_edit";
-static const String s_chatDel = "chatcontact_del";
-static const String s_chatInfo = "chatcontact_info";
-static const String s_chatSub = "chatcontact_subscribe";
-static const String s_chatUnsubd = "chatcontact_unsubscribed";
-static const String s_chatUnsub = "chatcontact_unsubscribe";
-static const String s_chatShowOffline = "chatcontact_showoffline";
-static const String s_chatFlatList = "chatcontact_flatlist";
-static const String s_chatSend = "send_chat";
-static const String s_fileSend = "send_file";
-static const String s_fileShare = "share_file";
-static const String s_fileShared = "shared_file";
-static const String s_fileShareList = "share_file_list";
-static const String s_fileSharedDirsList = "shared_dir_list";
-static const String s_fileSharedDirsContent = "shared_dir_content";
-static const String s_fileShareChooseDirPrefix = "share_file_choosedir:";
-static const String s_fileLocalFs = "local_fs";
-static const String s_mucJoin = "room_join";
-static const String s_mucChgSubject = "room_changesubject";
-static const String s_mucChgNick = "room_changenick";
-static const String s_mucSave = "room_save";
-static const String s_mucInvite = "room_invite_contacts";
-static const String s_mucPrivChat = "room_member_chat";
-static const String s_mucKick = "room_member_kick";
-static const String s_mucBan = "room_member_ban";
-static const String s_mucRoomShowLog = "room_showlog";
-static const String s_mucMemberShowLog = "room_member_showlog";
-static const String s_storeContact = "storecontact";
-static const String s_mucInviteAdd = "invite_add";
-static const String s_menuSubscription = "menuSubscription";
-static const String s_fileShareNew = "file_share_new";
-static const String s_fileShareDel = "file_share_del";
-static const String s_fileShareRename = "file_share_rename";
+static String s_actionShowCallsList = "showCallsList";
+static String s_actionShowNotification = "showNotification";
+static String s_actionShowInfo = "showNotificationInfo";
+static String s_actionPendingChat = "showPendingChat";
+static String s_actionCall = "call";
+static String s_actionAnswer = "answer";
+static String s_actionHangup = "hangup";
+static String s_actionTransfer = "transfer";
+static String s_actionConf = "conference";
+static String s_actionHold = "hold";
+static String s_actionLogin = "acc_login";
+static String s_actionLogout = "acc_logout";
+static String s_chat = "chatcontact_chat";
+static String s_chatCall = "chatcontact_call";
+static String s_chatNew = "chatcontact_new";
+static String s_chatRoomNew = "chatroom_new";
+static String s_chatShowLog = "chatcontact_showlog";
+static String s_chatEdit = "chatcontact_edit";
+static String s_chatDel = "chatcontact_del";
+static String s_chatInfo = "chatcontact_info";
+static String s_chatSub = "chatcontact_subscribe";
+static String s_chatUnsubd = "chatcontact_unsubscribed";
+static String s_chatUnsub = "chatcontact_unsubscribe";
+static String s_chatShowOffline = "chatcontact_showoffline";
+static String s_chatFlatList = "chatcontact_flatlist";
+static String s_chatSend = "send_chat";
+static String s_fileSend = "send_file";
+static String s_fileShare = "share_file";
+static String s_fileShared = "shared_file";
+static String s_fileShareList = "share_file_list";
+static String s_fileSharedDirsList = "shared_dir_list";
+static String s_fileSharedDirsContent = "shared_dir_content";
+static String s_fileShareChooseDirPrefix = "share_file_choosedir:";
+static String s_fileLocalFs = "local_fs";
+static String s_mucJoin = "room_join";
+static String s_mucChgSubject = "room_changesubject";
+static String s_mucChgNick = "room_changenick";
+static String s_mucSave = "room_save";
+static String s_mucInvite = "room_invite_contacts";
+static String s_mucPrivChat = "room_member_chat";
+static String s_mucKick = "room_member_kick";
+static String s_mucBan = "room_member_ban";
+static String s_mucRoomShowLog = "room_showlog";
+static String s_mucMemberShowLog = "room_member_showlog";
+static String s_storeContact = "storecontact";
+static String s_mucInviteAdd = "invite_add";
+static String s_menuSubscription = "menuSubscription";
+static String s_fileShareNew = "file_share_new";
+static String s_fileShareDel = "file_share_del";
+static String s_fileShareRename = "file_share_rename";
 // Not selected string(s)
 static String s_notSelected = "-none-";
 // Maximum number of call log entries
@@ -783,10 +783,10 @@ AccountStatus* AccountStatus::s_current = 0;
 ObjList PendingRequest::s_items;
 Mutex PendingRequest::s_mutex(false,"PendingReq");
 // Client wizard
-const String ClientWizard::s_pagesWidget = "pages";
-const String ClientWizard::s_actionNext = "next";
-const String ClientWizard::s_actionPrev = "prev";
-const String ClientWizard::s_actionCancel = "cancel";
+String ClientWizard::s_pagesWidget = "pages";
+String ClientWizard::s_actionNext = "next";
+String ClientWizard::s_actionPrev = "prev";
+String ClientWizard::s_actionCancel = "cancel";
 // Wizards managed by the default logic
 static AccountWizard* s_accWizard = 0;
 static JoinMucWizard* s_mucWizard = 0;
@@ -814,15 +814,15 @@ const char* ClientLogic::s_provParams[] = {
     0
 };
 // Common account parameters (protocol independent)
-static const String s_accParams[] = {
+static String s_accParams[] = {
     "username", "password", ""
 };
 // Common account boolean parameters (protocol independent)
-static const String s_accBoolParams[] = {
+static String s_accBoolParams[] = {
     "savepassword", ""
 };
 // Account protocol dependent parameters
-static const String s_accProtoParams[] = {
+static String s_accProtoParams[] = {
     "server", "domain", "outbound", "options", "resource", "port", "interval",
     "authname", "authmethods", ""
 };
@@ -885,15 +885,15 @@ static bool s_changingDockedChat = false;
 // Pending chat items managed in the client's thread
 static ObjList s_pendingChat;
 // Google MUC domain
-static const String s_googleMucDomain = "groupchat.google.com";
+static String s_googleMucDomain = "groupchat.google.com";
 // Miscellaneous
-static const String s_jabber = "jabber";
-static const String s_sip = "sip";
-static const String s_h323 = "h323";
-static const String s_gmailDomain = "gmail.com";
-static const String s_googleDomain = "google.com";
-static const String s_fileOpenSendPrefix = "send_fileopen:";
-static const String s_fileOpenRecvPrefix = "recv_fileopen:";
+static String s_jabber = "jabber";
+static String s_sip = "sip";
+static String s_h323 = "h323";
+static String s_gmailDomain = "gmail.com";
+static String s_googleDomain = "google.com";
+static String s_fileOpenSendPrefix = "send_fileopen:";
+static String s_fileOpenRecvPrefix = "recv_fileopen:";
 static String s_lastFileDir;             // Last directory used to send/recv file
 static String s_lastFileShareDir;        // Last directory used to share files
 static String s_lastFileFilter;          // Last filter used to pick a file to send
@@ -12521,6 +12521,135 @@ void DurationUpdate::destroyed()
 {
     setLogic();
     RefObject::destroyed();
+}
+
+void globalDestroyClientLogic()
+{
+
+	s_wndMain.clear();           // mainwindow
+	s_wndAccount.clear();           // Account edit/add
+	s_wndAddrbook.clear();         // Contact edit/add
+	s_wndChatContact.clear();   // Chat contact edit/add
+	s_wndMucInvite.clear();       // MUC invite
+	s_wndAcountList.clear();    // Accounts list
+	//s_wndFileTransfe; // File transfer
+	s_wndNotification.clear(); // Notifications
+	// Some UI widgets
+	s_mainwindowTabs.clear();
+	s_channelList.clear();
+	s_accountList.clear();         // Global accounts list
+	s_contactList.clear();
+	s_calltoList.clear();
+	s_account.clear();               // Account selector
+	s_chatAccount.clear();       // List of chat accounts
+	s_chatContactList.clear(); // List of chat contacts
+	s_mucAccounts.clear();        // List of accounts supporting MUC
+	s_mucSavedRooms.clear();   // List of saved MUC rooms
+	s_mucMembers.clear();        // List of MUC room members
+	s_accProtocol.clear();         // List of protocols in account add/edit
+	s_accWizProtocol.clear();   // List of protocols in account wizard
+	s_accProviders.clear();       // List of providers in account add/edit
+	s_accWizProviders.clear(); // List of providers in account wizard
+	s_inviteContacts.clear();   // List of contacts in muc invite
+	s_fileProgressList.clear();  // List of file transfers
+	s_pageEmpty.clear();          // An empty stacked widget page
+	s_pageList.clear();                 // A page for list in a stacked widget
+	s_fileProgressCont.clear(); // File progress window stacked widget
+	// Actions
+	s_actionShowCallsList.clear();
+	s_actionShowNotification.clear();
+	s_actionShowInfo.clear();
+	s_actionPendingChat.clear();
+	s_actionCall.clear();
+	s_actionAnswer.clear();
+	s_actionHangup.clear();
+	s_actionTransfer.clear();
+	s_actionConf.clear();
+	s_actionHold.clear();
+	s_actionLogin.clear();
+	s_actionLogout.clear();
+	s_chat.clear();
+	s_chatCall.clear();
+	s_chatNew.clear();
+	s_chatRoomNew.clear();
+	s_chatShowLog.clear();
+	s_chatEdit.clear();
+	s_chatDel.clear();
+	s_chatInfo.clear();
+	s_chatSub.clear();
+	s_chatUnsubd.clear();
+	s_chatUnsub.clear();
+	s_chatShowOffline.clear();
+	s_chatFlatList.clear();
+	s_chatSend.clear();
+	s_fileSend.clear();
+	s_fileShare.clear();
+	s_fileShared.clear();
+	s_fileShareList.clear();
+	s_fileSharedDirsList.clear();
+	s_fileSharedDirsContent.clear();
+	s_fileShareChooseDirPrefix.clear();
+	s_fileLocalFs.clear();
+	s_mucJoin.clear();
+	s_mucChgSubject.clear();
+	s_mucChgNick.clear();
+	s_mucSave.clear();
+	s_mucInvite.clear();
+	s_mucPrivChat.clear();
+	s_mucKick.clear();
+	s_mucBan.clear();
+	s_mucRoomShowLog.clear();
+	s_mucMemberShowLog.clear();
+	s_storeContact.clear();
+	s_mucInviteAdd.clear();
+	s_menuSubscription.clear();
+	s_fileShareNew.clear();
+	s_fileShareDel.clear();
+	s_fileShareRename.clear();
+
+	s_wndFileTransfer.clear();
+
+	// Not selected string(s)
+	s_notSelected.clear();
+	// Client wizard
+	ClientWizard::s_pagesWidget.clear();
+	ClientWizard::s_actionNext.clear();
+	ClientWizard::s_actionPrev.clear();
+	ClientWizard::s_actionCancel.clear();
+	// Wizards managed by the default logic
+	// Saved rooms
+	s_mucRooms.clear();
+	// Actions from notification area
+	// Google MUC domain
+	s_googleMucDomain.clear();
+	// Miscellaneous
+	s_jabber.clear();
+	s_sip.clear();
+	s_h323.clear();
+	s_gmailDomain.clear();
+	s_googleDomain.clear();
+	s_fileOpenSendPrefix.clear();
+	s_fileOpenRecvPrefix.clear();
+	s_lastFileDir.clear();             // Last directory used to send/recv file
+	s_lastFileShareDir.clear();        // Last directory used to share files
+	s_lastFileFilter.clear();          // Last filter used to pick a file to send
+	s_dirUp.clear();
+
+	int i;
+
+	for (i = 0; i < sizeof(s_accParams) / sizeof(String); i++) {
+		s_accParams[i].clear();
+	}
+
+	for (i = 0; i < sizeof(s_accBoolParams) / sizeof(String); i++) {
+		s_accBoolParams[i].clear();
+	}
+
+	for (i = 0; i < sizeof(s_accProtoParams) / sizeof(String); i++) {
+		s_accProtoParams[i].clear();
+	}
+
+
 }
 
 /* vi: set ts=8 sw=4 sts=4 noet: */

@@ -23,10 +23,10 @@
 using namespace TelEngine;
 
 
-const String XmlElement::s_ns = "xmlns";
-const String XmlElement::s_nsPrefix = "xmlns:";
-static const String s_type("type");
-static const String s_name("name");
+String XmlElement::s_ns = "xmlns";
+String XmlElement::s_nsPrefix = "xmlns:";
+static String s_type("type");
+static String s_name("name");
 
 
 // Return a replacement char for the given string
@@ -2266,5 +2266,14 @@ void XmlDoctype::toString(String& dump, const String& indent) const
 {
     dump << indent << "<!DOCTYPE " << m_doctype << ">";
 }
+
+void globalDestroyXML()
+{
+	XmlElement::s_ns.clear();
+	XmlElement::s_nsPrefix.clear();
+	s_type.clear();
+	s_name.clear();
+}
+
 
 /* vi: set ts=8 sw=4 sts=4 noet: */

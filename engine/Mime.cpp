@@ -437,8 +437,8 @@ const DataBlock& MimeBody::getBody() const
     return m_body;
 }
 
-static const Regexp s_appStringFull("^\\(dtmf\\|json\\|yaml\\|x-yaml\\)$");
-static const Regexp s_appStringPlusEnd("+\\(xml\\|json\\)$");
+static Regexp s_appStringFull("^\\(dtmf\\|json\\|yaml\\|x-yaml\\)$");
+static Regexp s_appStringPlusEnd("+\\(xml\\|json\\)$");
 
 // Method to build a MIME body from a type and data buffer
 MimeBody* MimeBody::build(const char* buf, int len, const MimeHeaderLine& type)
@@ -1125,6 +1125,12 @@ void MimeLinesBody::buildBody() const
 MimeBody* MimeLinesBody::clone() const
 {
     return new MimeLinesBody(*this);
+}
+
+void globalDestroyMine()
+{
+	s_appStringFull.clear();
+	s_appStringPlusEnd.clear();
 }
 
 /* vi: set ts=8 sw=4 sts=4 noet: */

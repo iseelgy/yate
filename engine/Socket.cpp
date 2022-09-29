@@ -220,8 +220,8 @@ static inline bool resolveIPv6(struct sockaddr* addr, const char* name)
 #endif // AF_INET6
 
 
-const String s_ipv4NullAddr = "0.0.0.0";
-const String s_ipv6NullAddr = "::";
+String s_ipv4NullAddr = "0.0.0.0";
+String s_ipv6NullAddr = "::";
 
 const TokenDict SocketAddr::s_cls_familyName[] = {
     {"Unknown", Unknown},
@@ -2259,5 +2259,12 @@ void Socket::timerTick(const Time& when)
 SctpSocket::~SctpSocket()
 {
 }
+
+void globalDestroySocket()
+{
+	s_ipv4NullAddr.clear();
+	s_ipv6NullAddr.clear();
+}
+
 
 /* vi: set ts=8 sw=4 sts=4 noet: */

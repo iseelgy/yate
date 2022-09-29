@@ -65,8 +65,8 @@ static Mutex s_callidMutex(false,"CallID");
 //  of call endpoints at the same time
 static Mutex s_mutex(true,"CallEndpoint");
 static Mutex s_lastMutex(false,"CallEndpoint::last");
-static const String s_audioType = "audio";
-static const String s_copyParams = "copyparams";
+static String s_audioType = "audio";
+static String s_copyParams = "copyparams";
 
 // Check if a Lock taken on the common mutex succeeded, wait up to 55s more in congestion
 static bool checkRetry(Lock& lock)
@@ -1940,6 +1940,12 @@ void CallAccount::setRegisterParams(NamedList& params)
 	params.replaceParams(tmp);
 	params.setParam(n->name(),tmp);
     }
+}
+
+void globalDestroyChannel()
+{
+	s_audioType.clear();
+	s_copyParams.clear();
 }
 
 /* vi: set ts=8 sw=4 sts=4 noet: */
