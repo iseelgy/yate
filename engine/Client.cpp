@@ -17,16 +17,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-
 #include "yatecbase.h"
 #include <stdio.h>
 #include <stdarg.h>
-
-
-#ifdef _DEBUG_MSVC_NEW_
-#include "3rlibs/DebugNew.h"
-#define new DEBUG_NEW
-#endif
 
 
 #ifndef OUT_BUFFER_SIZE
@@ -6276,15 +6269,12 @@ void NamedInt::clearValue(ObjList& list, int val)
 void globalDestroyClient()
 {
 
-	// List of window params prefix handled in setParams()
-	//static const String s_wndParamPrefix[] = { "show:","active:","focus:","check:","select:","display:","" };
-	// Error messages returned by channels
 	s_userBusy.clear();
 	s_rejectReason.clear();
 	s_hangupReason.clear();
 	s_cancelReason.clear();
-
 	s_incomingUrlParam.clear(); 
+	s_trayIcons.clear(); 
 
 	Client::s_settings.clear();                // Client settings
 	Client::s_settings.clearSection();
@@ -6310,7 +6300,6 @@ void globalDestroyClient()
 	Client::s_notSelected.clear();
 
 	Client::s_guidRegexp.clear();
-	//ObjList Client::s_logics;
 	Client::s_skinPath.clear();                       // Skin path
 	Client::s_soundPath.clear();                      // Sounds path
 	Client::s_ringInName.clear();   // Ring name for incoming channels
@@ -6319,103 +6308,8 @@ void globalDestroyClient()
 	Client::s_debugWidget.clear();     // Default widget displaying the debug text
 	// The list of client's toggles
 
-	/*
-	Client::s_toggles[OptCount] = {
-		"multilines", "autoanswer", "ringincoming", "ringoutgoing",
-		"activatelastoutcall", "activatelastincall", "activatecallonselect",
-		"display_keypad", "openincomingurl", "addaccountonstartup",
-		"dockedchat", "destroychat", "notifychatstate", "showemptychat",
-		"sendemptychat"
-	};
-	*/
 	ClientDriver::s_confName.clear(); // The name of the client's conference room
 	ClientSound::s_calltoPrefix.clear(); // Client sound target prefix
-	s_trayIcons.clear();                // Tray icon stacks. This list is managed in the client's thread
-													 // Each item is a NamedPointer whose name is the window name
-													 // and with ObjList data containing item defs
-
-	/*
-	// Client relays
-	static const MsgRelay s_relays[] = {
-		{"call.cdr",           Client::CallCdr,           90},
-		{"ui.action",          Client::UiAction,          150},
-		{"user.login",         Client::UserLogin,         50},
-		{"user.notify",        Client::UserNotify,        50},
-		{"resource.notify",    Client::ResourceNotify,    50},
-		{"resource.subscribe", Client::ResourceSubscribe, 50},
-		{"clientchan.update",  Client::ClientChanUpdate,  50},
-		{"user.roster",        Client::UserRoster,        50},
-		{"contact.info",       Client::ContactInfo,       50},
-		{0,0,0},
-	};
-
-	// Channel slave type
-	const TokenDict ClientChannel::s_slaveTypes[] = {
-		{"conference",      ClientChannel::SlaveConference},
-		{"transfer",        ClientChannel::SlaveTransfer},
-		{0,0}
-	};
-
-	// Channel notifications
-	const TokenDict ClientChannel::s_notification[] = {
-		{"startup",         ClientChannel::Startup},
-		{"destroyed",       ClientChannel::Destroyed},
-		{"active",          ClientChannel::Active},
-		{"onhold",          ClientChannel::OnHold},
-		{"noticed",         ClientChannel::Noticed},
-		{"addresschanged",  ClientChannel::AddrChanged},
-		{"routed",          ClientChannel::Routed},
-		{"accepted",        ClientChannel::Accepted},
-		{"rejected",        ClientChannel::Rejected},
-		{"progressing",     ClientChannel::Progressing},
-		{"ringing",         ClientChannel::Ringing},
-		{"answered",        ClientChannel::Answered},
-		{"transfer",        ClientChannel::Transfer},
-		{"conference",      ClientChannel::Conference},
-		{"audioset",        ClientChannel::AudioSet},
-		{0,0}
-	};
-
-	// Resource status names
-	const TokenDict ClientResource::s_statusName[] = {
-		{"offline",   ClientResource::Offline},
-		{"connecting",ClientResource::Connecting},
-		{"online",    ClientResource::Online},
-		{"busy",      ClientResource::Busy},
-		{"dnd",       ClientResource::Dnd},
-		{"away",      ClientResource::Away},
-		{"xa",        ClientResource::Xa},
-		{0,0}
-	};
-
-	// resource.notify capability names
-	const TokenDict ClientResource::s_resNotifyCaps[] = {
-		{"audio", ClientResource::CapAudio},
-		{"filetransfer", ClientResource::CapFileTransfer},
-		{"fileinfoshare", ClientResource::CapFileInfo},
-		{"resultsetmngt", ClientResource::CapRsm},
-		{0,0}
-	};
-
-	// MucRoomMember affiliations
-	const TokenDict MucRoomMember::s_affName[] = {
-		{"owner",   MucRoomMember::Owner},
-		{"admin",   MucRoomMember::Admin},
-		{"member",  MucRoomMember::Member},
-		{"outcast", MucRoomMember::Outcast},
-		{"none",    MucRoomMember::AffNone},
-		{0,0}
-	};
-
-	// MucRoomMember roles
-	const TokenDict MucRoomMember::s_roleName[] = {
-		{"moderator",   MucRoomMember::Moderator},
-		{"participant", MucRoomMember::Participant},
-		{"visitor",     MucRoomMember::Visitor},
-		{"none",        MucRoomMember::RoleNone},
-		{0,0}
-	};
-	*/
 
 	ClientContact::s_chatPrefix.clear();     // Client contact chat window prefix
 	ClientContact::s_dockedChatWnd.clear();            // Docked chat window name
@@ -6432,7 +6326,13 @@ void globalDestroyClient()
 	for (i = 0; i < Client::OptCount; i++) {
 		Client::s_toggles[i].clear();
 	}
-	
+
+
+	s_debugMutex.~Mutex();
+	s_proxyMutex.~Mutex();
+	s_postponeMutex.~Mutex();
+
+	ClientSound::s_soundsMutex.~Mutex();
 
 }
 

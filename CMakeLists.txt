@@ -259,6 +259,8 @@ SET( YATE_SRC
 	engine/YSHA256.cpp
 	
 	Aux_yate_hal.cpp
+	
+	Aux_yate_log.cpp
 )
 
 if( _DEBUG_MSVC_NEW_ )
@@ -266,7 +268,7 @@ if( _DEBUG_MSVC_NEW_ )
 		3rlibs/DebugNew.h
 		3rlibs/DebugNew.cpp
 	)
-
+	## ADD_DEFINITIONS(-D_DISABLE_YATE_SDP_LOG_)
 	## ADD_DEFINITIONS(-DXDEBUG)
 	ADD_DEFINITIONS(-D_DEBUG_MSVC_NEW_)
 	
@@ -294,7 +296,7 @@ SET_PROPERTY(TARGET yateengine PROPERTY FOLDER "libs-yate")
 ####### ====================================================================
 ## 应用
 
-if( NOT ANDROID )
+if( NOT ANDROID AND NOT _DEBUG_MSVC_NEW_)
 
 	ADD_EXECUTABLE(yate
 		main.cpp

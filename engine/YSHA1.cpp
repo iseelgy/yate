@@ -28,11 +28,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _DEBUG_MSVC_NEW_
-#include "3rlibs/DebugNew.h"
-#define new DEBUG_NEW
-#endif
-
 
 #if (defined(WORDS_BIGENDIAN) || defined(BIGENDIAN))
 #define be32_to_cpu(x) (x) /* Nothing */

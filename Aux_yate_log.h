@@ -44,11 +44,19 @@
 #include <memory>
 
 
-#include "yfmt/format.h"
-#include "yfmt/xchar.h"
-#include "yfmt/printf.h"
-#include "yfmt/chrono.h"
+//#include "yfmt/format.h"
+//#include "yfmt/xchar.h"
+//#include "yfmt/printf.h"
+//#include "yfmt/chrono.h"
 
+
+#ifdef LIBYATE_EXPORTS
+#define YATE_API __declspec(dllexport)
+#else
+#ifndef LIBYATE_STATIC
+#define YATE_API __declspec(dllimport)
+#endif
+#endif
 
 
 namespace spdlog {
@@ -167,7 +175,7 @@ namespace TelEngine {
 		void operator=(const logger&) = delete;
 
 	private:
-		int _log_level = yate_log_level_trace;
+		int _log_level;
 	};
 
 }

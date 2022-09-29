@@ -26,11 +26,6 @@
 #include <stdio.h>
 #include <time.h>
 
-#ifdef _DEBUG_MSVC_NEW_
-#include "3rlibs/DebugNew.h"
-#define new DEBUG_NEW
-#endif
-
 
 #ifdef _WINDOWS
 
@@ -1537,6 +1532,13 @@ void globalDestroyTelEngine()
 	TelEngine::s_countersMutex.~Mutex();
 
 	TelEngine::CapturedEvent::s_cls_events.clear();
+
+	TelEngine::out_mux.~Mutex();
+	TelEngine::ind_mux.~Mutex();
+
+	TelEngine::s_randomMutex.~Mutex();
+
+	TelEngine::s_countersMutex.~Mutex();
 
 }
 

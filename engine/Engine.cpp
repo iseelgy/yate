@@ -21,11 +21,6 @@
 #include "yateversn.h"
 #include "yatewin32.h"
 
-#ifdef _DEBUG_MSVC_NEW_
-#include "3rlibs/DebugNew.h"
-#define new DEBUG_NEW
-#endif
-
 #ifdef _WINDOWS
 
 #include <process.h>
@@ -120,7 +115,9 @@ public:
     inline EngineSharedPrivate()
 	: vars(new SharedVars),
 	varsListMutex(false,"SharedVarsList")
-	{}
+	{
+	
+	}
     inline ~EngineSharedPrivate()
 	{ TelEngine::destruct(vars); }
 
@@ -1579,6 +1576,9 @@ void globalDestroyXML();
 void globalDestroySocket();
 void globalDestroyBase64();
 void globalDestroyTelEngine();
+void globalDestroyDataFormate();
+void globalDestroyString();
+void globalDestroyThread();
 
 Engine::~Engine()
 {
@@ -1613,7 +1613,9 @@ Engine::~Engine()
 	globalDestroySocket();
 	globalDestroyBase64();
 	globalDestroyTelEngine();
-
+	globalDestroyDataFormate();
+	globalDestroyString();
+	globalDestroyThread();
 	//
 	//=====================
 
@@ -3341,6 +3343,13 @@ void globalDestroyEngine()
 
 	r_static.clear();
 	s_userdir.clear();
+
+	s_vars.~EngineSharedPrivate();
+
+	s_congMutex.~Mutex();
+	s_eventsMutex.~Mutex();
+
+	s_hooksMutex.~Mutex();
 
 }
 

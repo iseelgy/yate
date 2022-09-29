@@ -17,6 +17,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+
 #ifdef FDSIZE_HACK
 #include <features.h>
 #if (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 2)
@@ -73,10 +74,6 @@
 #define MAX_SOCKLEN 1024
 #define MAX_RESWAIT 5000000
 
-#ifdef _DEBUG_MSVC_NEW_
-#include "3rlibs/DebugNew.h"
-#define new DEBUG_NEW
-#endif
 
 
 using namespace TelEngine;
@@ -2270,6 +2267,7 @@ void globalDestroySocket()
 {
 	s_ipv4NullAddr.clear();
 	s_ipv6NullAddr.clear();
+	s_mutex.~Mutex();
 }
 
 

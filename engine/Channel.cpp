@@ -17,15 +17,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+
 #include "yatephone.h"
 
 #include <string.h>
 #include <stdlib.h>
-
-#ifdef _DEBUG_MSVC_NEW_
-#include "3rlibs/DebugNew.h"
-#define new DEBUG_NEW
-#endif
 
 using namespace TelEngine;
 
@@ -1959,6 +1955,12 @@ void globalDestroyChannel()
 
 	// Mutex used to protect channel data
 	Channel::s_chanDataMutex.~Mutex();
+
+	s_callidMutex.~Mutex();
+	// this is to protect against two threads trying to (dis)connect a pair
+	//  of call endpoints at the same time
+	s_mutex.~Mutex();
+	s_lastMutex.~Mutex();
 
 
 }

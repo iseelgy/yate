@@ -23,12 +23,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifdef _DEBUG_MSVC_NEW_
-#include "3rlibs/DebugNew.h"
-#define new DEBUG_NEW
-#endif
-
-
 namespace TelEngine {
 
 static const FormatInfo s_formats[] = {
@@ -1806,5 +1800,22 @@ DataTranslator* ChainedFactory::create(const DataFormat& sFormat, const DataForm
 	trans->getFirstTranslator()->destruct();
     return trans2;
 }
+
+
+void globalDestroyDataFormate()
+{
+
+	DataTranslator::s_mutex.~Mutex();
+	DataTranslator::s_factories.clear();
+
+	s_compose.clear();;
+
+	s_dataMutex.~Mutex();
+	s_consSrcMutex.~Mutex();
+
+	DataTranslator::s_mutex.~Mutex();
+
+}
+
 
 /* vi: set ts=8 sw=4 sts=4 noet: */

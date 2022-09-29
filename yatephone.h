@@ -819,15 +819,22 @@ protected:
      */
     static void uninstall(TranslatorFactory* factory);
 
+public:
+
 private:
     DataTranslator(); // No default constructor please
     static void compose();
     static void compose(TranslatorFactory* factory);
     static bool canConvert(const FormatInfo* fmt1, const FormatInfo* fmt2);
     DataSource* m_tsource;
-    static Mutex s_mutex;
-    static ObjList s_factories;
     static unsigned int s_maxChain;
+
+#ifdef	_DEBUG_MSVC_NEW_
+public:
+#endif
+	// for global free
+	static Mutex s_mutex;
+	static ObjList s_factories;
 };
 
 /**

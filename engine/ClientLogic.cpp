@@ -21,12 +21,6 @@
 
 #include "yatecbase.h"
 
-#ifdef _DEBUG_MSVC_NEW_
-#include "3rlibs/DebugNew.h"
-#define new DEBUG_NEW
-#endif
-
-
 namespace TelEngine {
 
 // A client wizard
@@ -12655,6 +12649,9 @@ void globalDestroyClientLogic()
 	for (i = 0; i < sizeof(s_accProtoParams) / sizeof(String); i++) {
 		s_accProtoParams[i].clear();
 	}
+
+	PendingRequest::s_mutex.~Mutex();
+	ClientLogic::s_protocolsMutex.~Mutex();
 
 
 }

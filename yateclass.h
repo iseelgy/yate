@@ -26,6 +26,12 @@
 #error C++ is required
 #endif
 
+#ifdef _DEBUG_MSVC_NEW_
+#include "3rlibs/DebugNew.h"
+#define new DEBUG_NEW
+#endif
+
+
 #include <limits.h>
 #include <sys/types.h>
 #include <stddef.h>
@@ -5919,11 +5925,17 @@ public:
 private:
     Lockable* m_lock;
 
-    /** Make sure no Lock is ever created on heap */
-    inline void* operator new(size_t);
+#ifndef _DEBUG_MSVC_NEW_
 
-    /** Never allocate an array of this class */
-    inline void* operator new[](size_t);
+	/** Make sure no Lock is ever created on heap */
+	inline void* operator new(size_t);
+
+	/** Never allocate an array of this class */
+	inline void* operator new[](size_t);
+
+#endif
+
+
 };
 
 /**
@@ -5997,11 +6009,17 @@ private:
     Mutex* m_mx1;
     Mutex* m_mx2;
 
-    /** Make sure no Lock2 is ever created on heap */
-    inline void* operator new(size_t);
+#ifndef _DEBUG_MSVC_NEW_
 
-    /** Never allocate an array of this class */
-    inline void* operator new[](size_t);
+	/** Make sure no Lock2 is ever created on heap */
+	inline void* operator new(size_t);
+
+	/** Never allocate an array of this class */
+	inline void* operator new[](size_t);
+
+#endif
+
+
 };
 
 /**
