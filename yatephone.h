@@ -2219,10 +2219,13 @@ protected:
     inline NamedList& parameters()
 	{ return m_parameters; }
 
+public:
+	// for clean memory
+	static Mutex s_chanDataMutex;
+
 private:
     void init();
     Channel(); // no default constructor please
-    static Mutex s_chanDataMutex;
     // Just in case we are going to (re)move the channel data mutex!
 	static Mutex* chanDataMutex();
 	//{ return &s_chanDataMutex; }

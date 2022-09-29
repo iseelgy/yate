@@ -22,6 +22,13 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+
+#ifdef _DEBUG_MSVC_NEW_
+#include "3rlibs/DebugNew.h"
+#define new DEBUG_NEW
+#endif
+
+
 #ifndef OUT_BUFFER_SIZE
 #define OUT_BUFFER_SIZE 8192
 #endif

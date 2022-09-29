@@ -21,6 +21,12 @@
 
 #include "yatecbase.h"
 
+#ifdef _DEBUG_MSVC_NEW_
+#include "3rlibs/DebugNew.h"
+#define new DEBUG_NEW
+#endif
+
+
 namespace TelEngine {
 
 // A client wizard
@@ -12634,6 +12640,7 @@ void globalDestroyClientLogic()
 	s_lastFileShareDir.clear();        // Last directory used to share files
 	s_lastFileFilter.clear();          // Last filter used to pick a file to send
 	s_dirUp.clear();
+	s_logList.clear();
 
 	int i;
 

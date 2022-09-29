@@ -19,6 +19,11 @@
 
 #include "yateclass.h"
 
+#ifdef _DEBUG_MSVC_NEW_
+#include "3rlibs/DebugNew.h"
+#define new DEBUG_NEW
+#endif
+
 using namespace TelEngine;
 
 ListIterator::ListIterator(ObjList& list, int offset)

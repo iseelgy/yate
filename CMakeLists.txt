@@ -261,6 +261,17 @@ SET( YATE_SRC
 	Aux_yate_hal.cpp
 )
 
+if( _DEBUG_MSVC_NEW_ )
+	set( YATE_DEBUG_SRC 
+		3rlibs/DebugNew.h
+		3rlibs/DebugNew.cpp
+	)
+
+	## ADD_DEFINITIONS(-DXDEBUG)
+	ADD_DEFINITIONS(-D_DEBUG_MSVC_NEW_)
+	
+endif()
+
 ## 源文件
 ADD_LIBRARY(yateengine  
 
@@ -268,6 +279,7 @@ ADD_LIBRARY(yateengine
 
 	${YATE_SRC}
 	${YATE_HEADER}
+	${YATE_DEBUG_SRC}
 		
 )
 
@@ -310,8 +322,6 @@ INSTALL (TARGETS yateengine DESTINATION .)
 
 INSTALL (TARGETS yateengine  EXPORT ${PackageName}Targets DESTINATION lib)
 
-## find_dependency(spdlog::spdlog)
-
 if( YATE_MASTER_PROJECT )
 
 
@@ -351,9 +361,7 @@ if( YATE_MASTER_PROJECT )
 	)
 	
 	ADD_DEPENDENCIES(yateengine  fmt::fmt-header-only)
-	#add_dependencies(yateengine  spdlog::spdlog_header_only)
 	
-
 endif()
 
 INSTALL(FILES ${YATE_HEADER}

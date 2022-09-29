@@ -21,6 +21,12 @@
 
 #include "yateclass.h"
 
+#ifdef _DEBUG_MSVC_NEW_
+#include "3rlibs/DebugNew.h"
+#define new DEBUG_NEW
+#endif
+
+
 using namespace TelEngine;
 
 // Padding char
@@ -286,5 +292,12 @@ bool Base64::decode(DataBlock& dest, bool liberal)
     Debug("Base64",DebugInfo,"Got garbage bits at end, probably truncated");
     return false;
 }
+
+void globalDestroyBase64()
+{
+	s_eoln.clear();
+	s_ignore.clear();
+}
+
 
 /* vi: set ts=8 sw=4 sts=4 noet: */

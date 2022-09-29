@@ -22,6 +22,11 @@
 #include <string.h>
 #include <stdlib.h>
 
+#ifdef _DEBUG_MSVC_NEW_
+#include "3rlibs/DebugNew.h"
+#define new DEBUG_NEW
+#endif
+
 using namespace TelEngine;
 
 // Find if a string appears to be an E164 phone number
@@ -380,7 +385,7 @@ const String& CallEndpoint::audioType()
 }
 
 
-static const String s_disconnected("chan.disconnected");
+static String s_disconnected("chan.disconnected");
 
 // Mutex used to lock disconnect parameters during access
 static Mutex s_paramMutex(true,"ChannelParams");
@@ -1946,6 +1951,16 @@ void globalDestroyChannel()
 {
 	s_audioType.clear();
 	s_copyParams.clear();
+
+	s_disconnected.clear();
+
+	// Mutex used to lock disconnect parameters during access
+	s_paramMutex.~Mutex();
+
+	// Mutex used to protect channel data
+	Channel::s_chanDataMutex.~Mutex();
+
+
 }
 
 /* vi: set ts=8 sw=4 sts=4 noet: */

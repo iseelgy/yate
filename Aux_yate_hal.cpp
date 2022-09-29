@@ -24,6 +24,13 @@
 
 #endif
 
+
+#ifdef _DEBUG_MSVC_NEW_
+#include "3rlibs/DebugNew.h"
+#define new DEBUG_NEW
+#endif
+
+
 bool b64_decode(const char * in, TelEngine::DataBlock& dest)
 {
 	TelEngine::Base64 b64Decode((U8 *)in, strlen(in));

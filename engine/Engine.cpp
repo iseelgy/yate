@@ -21,6 +21,11 @@
 #include "yateversn.h"
 #include "yatewin32.h"
 
+#ifdef _DEBUG_MSVC_NEW_
+#include "3rlibs/DebugNew.h"
+#define new DEBUG_NEW
+#endif
+
 #ifdef _WINDOWS
 
 #include <process.h>
@@ -1572,6 +1577,8 @@ void globalDestroyMine();
 void globalDestroyURI();
 void globalDestroyXML();
 void globalDestroySocket();
+void globalDestroyBase64();
+void globalDestroyTelEngine();
 
 Engine::~Engine()
 {
@@ -1604,6 +1611,8 @@ Engine::~Engine()
 	globalDestroyURI();
 	globalDestroyXML();
 	globalDestroySocket();
+	globalDestroyBase64();
+	globalDestroyTelEngine();
 
 	//
 	//=====================
@@ -3329,6 +3338,7 @@ void globalDestroyEngine()
 	s_startMsg.clear();
 
 	r_static.clear();
+	s_userdir.clear();
 
 }
 

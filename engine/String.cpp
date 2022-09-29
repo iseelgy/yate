@@ -26,6 +26,12 @@
 #include <stdio.h>
 #include <regex.h>
 
+#ifdef _DEBUG_MSVC_NEW_
+#include "3rlibs/DebugNew.h"
+#define new DEBUG_NEW
+#endif
+
+
 #if (defined(WORDS_BIGENDIAN) || defined(BIGENDIAN))
 #define ENDIANNESS_NATIVE (UChar::BE)
 #define ENDIANNESS_OPPOSITE (UChar::LE)
@@ -636,6 +642,9 @@ String& String::assign(const char* value, int len)
 	}
 	if (value != m_string || len != (int)m_length) {
 	    char* data = (char*) ::malloc(len+1);
+		if (len == 4 && strcmp( value, "Yate") == 0) {
+			int k = len;
+		}
 	    if (data) {
 		::memcpy(data,value,len);
 		data[len] = 0;

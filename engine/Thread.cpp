@@ -70,6 +70,12 @@ static int pthread_attr_setinheritsched(pthread_attr_t *,int) { return 0; }
 #define THREAD_IDLE_MIN  1
 #define THREAD_IDLE_MAX 20
 
+#ifdef _DEBUG_MSVC_NEW_
+#include "3rlibs/DebugNew.h"
+#define new DEBUG_NEW
+#endif
+
+
 namespace TelEngine {
 
 class ThreadPrivate : public GenObject {

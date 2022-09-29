@@ -26,6 +26,11 @@
 #include <stdio.h>
 #include <time.h>
 
+#ifdef _DEBUG_MSVC_NEW_
+#include "3rlibs/DebugNew.h"
+#define new DEBUG_NEW
+#endif
+
 
 #ifdef _WINDOWS
 
@@ -1524,5 +1529,14 @@ double SysUsage::runTime(Type type)
 }
 
 };
+
+void globalDestroyTelEngine()
+{
+
+	TelEngine::s_counters.clear();
+	TelEngine::s_countersMutex.~Mutex();
+
+	
+}
 
 /* vi: set ts=8 sw=4 sts=4 noet: */

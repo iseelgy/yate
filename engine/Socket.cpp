@@ -73,6 +73,12 @@
 #define MAX_SOCKLEN 1024
 #define MAX_RESWAIT 5000000
 
+#ifdef _DEBUG_MSVC_NEW_
+#include "3rlibs/DebugNew.h"
+#define new DEBUG_NEW
+#endif
+
+
 using namespace TelEngine;
 
 static Mutex s_mutex(false,"SocketAddr");
