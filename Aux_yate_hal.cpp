@@ -3,6 +3,9 @@
 #include <string>
 
 //#include <fmt/core.h>
+
+#ifndef _DISABLE_YATE_SDP_LOG_
+
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 #include <spdlog/async.h>
@@ -18,6 +21,8 @@
 //#include <spdlog/sinks/msvc_sink.h>
 //#include <spdlog/sinks/stdout_sinks.h>
 //#include <spdlog/sinks/stdout_color_sinks.h>
+
+#endif
 
 bool b64_decode(const char * in, TelEngine::DataBlock& dest)
 {
@@ -144,7 +149,7 @@ int Aux_cmd_line::format(const char * cmd)
 void logStartup()
 {
 
-	S_WARN("AAA" << fmt::format( "kkkkk" ) );
+	//S_WARN("AAA" << fmt::format( "kkkkk" ) );
 
 	//TelEngine::logger::get().set_level(spdlog::level::trace);
 
@@ -178,6 +183,9 @@ void yateLog(const char * file, const char * function, int line, const char * ca
 {
 
 }
+
+#ifndef _DISABLE_YATE_SDP_LOG_
+
 
 namespace spdlog {
 
@@ -348,3 +356,6 @@ namespace TelEngine {
 
 
 }
+
+#endif
+

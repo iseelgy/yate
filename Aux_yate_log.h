@@ -5,6 +5,28 @@
 #pragma warning ( disable : 4251 )
 #endif 
 
+#ifdef _DISABLE_YATE_SDP_LOG_
+
+#define S_TRACE(message) do { \
+}while(0)
+
+#define S_DEBUG(message) do { \
+}while(0)
+
+#define S_INFO(message) do { \
+}while(0)
+
+#define S_WARN(message) do { \
+}while(0)
+
+#define S_ERROR(message) do { \
+}while(0)
+
+#define S_FATAL(message) do { \
+}while(0)
+
+#else
+
 #include <string>
 #include <iostream>
 #include <time.h>
@@ -27,26 +49,6 @@
 #include "yfmt/printf.h"
 #include "yfmt/chrono.h"
 
-
-#ifndef DISABLE_YATE_STREAM_LOG
-
-#ifdef _WIN32
-
-	#ifdef LIBYATE_EXPORTS
-		#define YATE_API __declspec(dllexport)
-	#else
-		#ifndef LIBYATE_STATIC
-		#define YATE_API __declspec(dllimport)
-		#endif
-	#endif
-
-
-#else
-
-	#define YATE_API
-
-
-#endif  // _WIN32
 
 
 namespace spdlog {
@@ -248,8 +250,6 @@ const char * get_yate_module_name();
 #define y_fatal() TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  yate_log_level_fatal, get_yate_module_name())
 
 
-
-
-#endif // #ifndef DISABLE_YATE_STREAM_LOG
+#endif // #ifndef _DISABLE_YATE_SDP_LOG_
 
 #endif  // _AUX_YATE_LOG_H_
