@@ -1634,12 +1634,12 @@ public:
     /**
      * Default namespace attribute name
      */
-    static const String s_ns;
+    static String s_ns;
 
     /**
      * Namespace attribute name perfix
      */
-    static const String s_nsPrefix;
+    static String s_nsPrefix;
 
 private:
     // Set prefixed data (tag and prefix)
