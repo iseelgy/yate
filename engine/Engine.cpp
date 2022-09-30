@@ -3331,6 +3331,8 @@ void Engine::help(bool client, bool errout)
 void globalDestroyEngine()
 {
 
+	s_cfgfile.clear();
+
 	s_cfg.clear();
 	s_cfg.clearSection();
 
