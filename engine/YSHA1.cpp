@@ -23,6 +23,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#ifdef _DEBUG_MSVC_NEW_
+#include "3rlibs/DebugNew.h"
+#define new DEBUG_NEW
+#endif
+
 #include "yateclass.h"
 
 #include <stdlib.h>

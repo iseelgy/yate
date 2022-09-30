@@ -26,12 +26,6 @@
 #error C++ is required
 #endif
 
-#ifdef _DEBUG_MSVC_NEW_
-#include "3rlibs/DebugNew.h"
-#define new DEBUG_NEW
-#endif
-
-
 #include <limits.h>
 #include <sys/types.h>
 #include <stddef.h>

@@ -1,8 +1,10 @@
+#ifdef _DEBUG_MSVC_NEW_
+#include "3rlibs/DebugNew.h"
+#define new DEBUG_NEW
+#endif
+
+
 #include <string>
-
-//#include <fmt/core.h>
-
-
 #include "Aux_yate_hal.h"
 
 bool b64_decode(const char * in, TelEngine::DataBlock& dest)
