@@ -1,4 +1,4 @@
-#include "Aux_yate_log.h"
+#include "Aux_yate_hal.h"
 
 #ifndef _DISABLE_YATE_SDP_LOG_
 
@@ -18,7 +18,6 @@
 //#include <spdlog/sinks/stdout_sinks.h>
 //#include <spdlog/sinks/stdout_color_sinks.h>
 
-#endif
 
 
 
@@ -148,9 +147,9 @@ namespace TelEngine {
 	logger::logger() :
 		_log_level(yate_log_level_trace)
 	{
-		//auto abc_sink = std::make_shared<abc_sink_mt>();
-		//_loger = std::make_shared< spdlog::logger>( "yate", abc_sink);
-		//_loger->set_pattern("[%L %D %T.%e %P %t] %s(%#) %v");
+		auto abc_sink = std::make_shared<abc_sink_mt>();
+		_loger = std::make_shared< spdlog::logger>( "yate", abc_sink);
+		_loger->set_pattern("[%L %D %T.%e %P %t] %s(%#) %v");
 	}
 
 	template <typename... Args>
@@ -192,3 +191,6 @@ namespace TelEngine {
 
 
 }
+
+
+#endif // #ifndef _DISABLE_YATE_SDP_LOG_
