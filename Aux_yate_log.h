@@ -50,14 +50,19 @@
 #include "yfmt/chrono.h"
 
 
-#ifdef LIBYATE_EXPORTS
-#define YATE_API __declspec(dllexport)
-#else
-#ifndef LIBYATE_STATIC
-#define YATE_API __declspec(dllimport)
-#endif
+#ifdef _WIN32
+	#ifdef LIBYATE_EXPORTS
+	#define YATE_API __declspec(dllexport)
+	#else
+	#ifndef LIBYATE_STATIC
+	#define YATE_API __declspec(dllimport)
+	#endif
+	#endif
 #endif
 
+#ifndef YATE_API
+#define YATE_API
+#endif
 
 namespace spdlog {
 	class logger;

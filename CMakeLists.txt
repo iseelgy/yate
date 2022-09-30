@@ -328,7 +328,6 @@ if( YATE_MASTER_PROJECT )
 
 
 	ADD_SUBDIRECTORY(libs)
-		
 	ADD_SUBDIRECTORY(modules)
 
 	# Library

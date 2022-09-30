@@ -69,29 +69,4 @@ protected:
 };
 
 
-namespace TelEngine {
-
-	
-	_DEFINE_SHARED_PTR(File)
-
-	_DEFINE_SHARED_PTR(Stream)
-
-	_DEFINE_SHARED_PTR(String)
-
-	_DEFINE_SHARED_PTR(Socket)
-
-	_DEFINE_SHARED_PTR(NamedList)		
-
-	_DEFINE_SHARED_PTR(Semaphore)
-		
-	_DEFINE_SHARED_PTR(Mutex)
-
-	_DEFINE_SHARED_PTR(DataBlock)
-
-
-
-} // END of namespace TelEngine
-
-
-
 #endif
