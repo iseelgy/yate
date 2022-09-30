@@ -44,10 +44,10 @@
 #include <memory>
 
 
-//#include "yfmt/format.h"
-//#include "yfmt/xchar.h"
-//#include "yfmt/printf.h"
-//#include "yfmt/chrono.h"
+#include "yfmt/format.h"
+#include "yfmt/xchar.h"
+#include "yfmt/printf.h"
+#include "yfmt/chrono.h"
 
 
 #ifdef LIBYATE_EXPORTS

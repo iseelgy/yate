@@ -829,9 +829,7 @@ private:
     DataSource* m_tsource;
     static unsigned int s_maxChain;
 
-#ifdef	_DEBUG_MSVC_NEW_
 public:
-#endif
 	// for global free
 	static Mutex s_mutex;
 	static ObjList s_factories;

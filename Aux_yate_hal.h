@@ -25,11 +25,11 @@
 
 
 #include "Aux_type.h"
+#include "Aux_yate_log.h"
 
 #include <yatecbase.h>
 #include <yatephone.h>
 
-#include "Aux_yate_log.h"
 
 
 #define ShowLevel TelEngine::DebugNote
