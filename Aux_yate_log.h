@@ -129,8 +129,8 @@ namespace TelEngine {
 		}
 
 	private:
-		std::ostringstream _stream;
 		source_loc loc;
+		std::ostringstream _stream;
 		int lvl = yate_log_level_info;
 		std::string prefix;
 	};
@@ -170,7 +170,7 @@ namespace TelEngine {
 		}
 
 
-		std::shared_ptr<::spdlog::logger> _loger;
+		std::shared_ptr<::spdlog::logger> loger_;
 
 	private:
 		logger(); // = default;
