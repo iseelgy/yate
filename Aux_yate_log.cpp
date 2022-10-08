@@ -153,7 +153,7 @@ namespace TelEngine {
 	{
 		auto abc_sink = std::make_shared<abc_sink_mt>();
 		loger_ = std::make_shared< spdlog::logger>( "yate", abc_sink);
-		loger_->set_pattern("[%L %D %T.%e %P %t] %s(%#) %v");
+		loger_->set_pattern("[%L %D %T.%e %P#%t] %s(%#) %v");
 	}
 
 	template <typename... Args>
