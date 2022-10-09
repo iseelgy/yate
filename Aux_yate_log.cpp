@@ -168,9 +168,9 @@ namespace TelEngine {
 	template <typename... Args>
 	void logger::printf(const source_loc& loc, int lvl, const char* fmt, const Args &... args)
 	{
-		if (_loger) {
+		if (loger_) {
 			spdlog::source_loc sloc(loc.filename, loc.line, loc.funcname);
-			_loger->log(sloc, (spdlog::level::level_enum)lvl, fmt::sprintf(fmt, args...).c_str());
+			loger_->log(sloc, (spdlog::level::level_enum)lvl, fmt::sprintf(fmt, args...).c_str());
 		}
 	}
 
