@@ -44,6 +44,7 @@ bool YATE_API b64_decode(const char * in, TelEngine::DataBlock& dest);
 bool YATE_API b64_decode(void * in, int size, TelEngine::DataBlock& dest);
 
 void YATE_API logStartup();
+void YATE_API logShutdown();
 
 class YATE_API Aux_cmd_line
 {

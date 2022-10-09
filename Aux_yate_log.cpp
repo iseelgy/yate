@@ -18,6 +18,10 @@
 //#include <spdlog/sinks/stdout_sinks.h>
 //#include <spdlog/sinks/stdout_color_sinks.h>
 
+#ifdef _DEBUG_MSVC_NEW_
+#include "3rlibs/DebugNew.h"
+#define new DEBUG_NEW
+#endif
 
 
 
@@ -148,46 +152,52 @@ namespace TelEngine {
 		_log_level(yate_log_level_trace)
 	{
 		auto abc_sink = std::make_shared<abc_sink_mt>();
-		_loger = std::make_shared< spdlog::logger>( "yate", abc_sink);
-		_loger->set_pattern("[%L %D %T.%e %P %t] %s(%#) %v");
+		loger_ = std::make_shared< spdlog::logger>( "yate", abc_sink);
+		loger_->set_pattern("[%L %D %T.%e %P#%t] %s(%#) %v");
 	}
 
 	template <typename... Args>
 	void logger::log(const source_loc& loc, int lvl, const char* fmt, const Args &... args)
 	{
-		if (_loger) {
+		if (loger_) {
 			spdlog::source_loc sloc(loc.filename, loc.line, loc.funcname);
-			_loger->log(sloc, (spdlog::level::level_enum)lvl, fmt, args...);
+			loger_->log(sloc, (spdlog::level::level_enum)lvl, fmt, args...);
 		}
 	}
 
 	template <typename... Args>
 	void logger::printf(const source_loc& loc, int lvl, const char* fmt, const Args &... args)
 	{
-		if (_loger) {
+		if (loger_) {
 			spdlog::source_loc sloc(loc.filename, loc.line, loc.funcname);
-			_loger->log(sloc, (spdlog::level::level_enum)lvl, fmt::sprintf(fmt, args...).c_str());
+			loger_->log(sloc, (spdlog::level::level_enum)lvl, fmt::sprintf(fmt, args...).c_str());
 		}
 	}
 
 	void logger::set_level(int lvl) {
 		_log_level = lvl;
-		if (_loger) {
-			_loger->set_level((spdlog::level::level_enum)lvl);
+		if (loger_) {
+			loger_->set_level((spdlog::level::level_enum)lvl);
 		}
 
 	}
 
 
 	void logger::set_flush_on(int lvl) {
-		if (_loger) {
-			_loger->flush_on((spdlog::level::level_enum)lvl);
+		if (loger_) {
+			loger_->flush_on((spdlog::level::level_enum)lvl);
 		}
 	}
 
 	void logger::shutdown() {
-		spdlog::shutdown();
+		//spdlog::shutdown();
+		if (loger_) {
+			loger_->~logger();
+		}
+		loger_ = nullptr;
 	}
+
+
 
 
 }
