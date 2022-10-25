@@ -209,8 +209,20 @@ ThreadPrivate* ThreadPrivate::create(Thread* t,const char* name,Thread::Priority
 	    default:
 		break;
 	}
-	int err = 0; 
-	/*::pthread_attr_setinheritsched(&attr,PTHREAD_EXPLICIT_SCHED);*/
+
+#ifdef __ANDROID__
+	// android-28 Ö§³Ö
+#if __ANDROID_API__ < 28
+	int err = 0; /*::pthread_attr_setinheritsched(&attr,PTHREAD_EXPLICIT_SCHED);*/
+#else
+	int err = ::pthread_attr_setinheritsched(&attr,PTHREAD_EXPLICIT_SCHED);
+#endif
+
+#else
+	int err = ::pthread_attr_setinheritsched(&attr,PTHREAD_EXPLICIT_SCHED);
+#endif
+
+
 	if (!err)
 	    err = ::pthread_attr_setschedpolicy(&attr,policy);
 	if (!err)
@@ -262,7 +274,15 @@ ThreadPrivate* ThreadPrivate::create(Thread* t,const char* name,Thread::Priority
 #ifdef PTHREAD_INHERIT_SCHED
 	if ((0 == i) && (EPERM == e) && (prio > Thread::Normal)) {
 	    Debug(DebugWarn,"Failed to create thread with priority %d, trying with inherited",prio);
-	    //::pthread_attr_setinheritsched(&attr,PTHREAD_INHERIT_SCHED);
+#ifdef __ANDROID__
+
+#if __ANDROID_API__ >= 28
+		::pthread_attr_setinheritsched(&attr,PTHREAD_INHERIT_SCHED);
+#endif
+
+#else
+	    ::pthread_attr_setinheritsched(&attr,PTHREAD_INHERIT_SCHED);
+#endif
 	    e = EAGAIN;
 	}
 #endif
