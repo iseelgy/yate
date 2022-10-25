@@ -209,7 +209,8 @@ ThreadPrivate* ThreadPrivate::create(Thread* t,const char* name,Thread::Priority
 	    default:
 		break;
 	}
-	int err = ::pthread_attr_setinheritsched(&attr,PTHREAD_EXPLICIT_SCHED);
+	int err = 0; 
+	/*::pthread_attr_setinheritsched(&attr,PTHREAD_EXPLICIT_SCHED);*/
 	if (!err)
 	    err = ::pthread_attr_setschedpolicy(&attr,policy);
 	if (!err)
@@ -261,7 +262,7 @@ ThreadPrivate* ThreadPrivate::create(Thread* t,const char* name,Thread::Priority
 #ifdef PTHREAD_INHERIT_SCHED
 	if ((0 == i) && (EPERM == e) && (prio > Thread::Normal)) {
 	    Debug(DebugWarn,"Failed to create thread with priority %d, trying with inherited",prio);
-	    ::pthread_attr_setinheritsched(&attr,PTHREAD_INHERIT_SCHED);
+	    //::pthread_attr_setinheritsched(&attr,PTHREAD_INHERIT_SCHED);
 	    e = EAGAIN;
 	}
 #endif

@@ -13,7 +13,7 @@ set save_path=%PATH%
 
 set PATH=%MY_ANDROID_CMAKE%;
 
-set platform_type=android-28
+set platform_type=android-26
 
 set src_dir=.
 
