@@ -65,9 +65,75 @@ public:
 
 protected:
 
-
-
 };
+
+/*
+* withDebugEnabler() 需要在各自组件内部定义
+* 
+*/
+TelEngine::DebugEnabler * withDebugEnabler();
+
+#define y_trace(a) TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  yate_log_level_trace, a)
+#define y_debug(a) TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  yate_log_level_debug, a)
+#define y_info(a)  TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  yate_log_level_info, a)
+#define y_warn(a)  TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  yate_log_level_warn, a)
+#define y_error(a) TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  yate_log_level_error, a)
+#define y_fatal(a) TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  yate_log_level_fatal, a)
+
+#define Y_TRACE(message) do { \
+	TelEngine::DebugEnabler * d = withDebugEnabler(); \
+	if( d ){		\
+		if( d->debugLevel() > TelEngine::DebugAll){ \
+			y_trace(d->debugName()) << message; \
+		} \
+	}	\
+}while(0)
+
+#define Y_DEBUG(message) do { \
+	TelEngine::DebugEnabler * d = withDebugEnabler(); \
+	if( d ){		\
+		if( d->debugLevel() >= TelEngine::DebugAll){ \
+			y_debug(d->debugName()) << message; \
+		} \
+	}	\
+}while(0)
+
+#define Y_INFO(message) do { \
+	TelEngine::DebugEnabler * d = withDebugEnabler(); \
+	if( d ){		\
+		if( d->debugLevel() >= TelEngine::DebugInfo){ \
+			y_info(d->debugName()) << message; \
+		} \
+	}	\
+}while(0)
+
+#define Y_WARN(message) do { \
+	TelEngine::DebugEnabler * d = withDebugEnabler(); \
+	if( d ){		\
+		if( d->debugLevel() >= TelEngine::DebugWarn){ \
+			y_warn(d->debugName()) << message; \
+		} \
+	}	\
+}while(0)
+
+#define Y_ERROR(message) do { \
+	TelEngine::DebugEnabler * d = withDebugEnabler(); \
+	if( d ){		\
+		if( d->debugLevel() >= TelEngine::DebugCrit){ \
+			y_error(d->debugName()) << message; \
+		} \
+	}	\
+}while(0)
+
+#define Y_FATAL(message) do { \
+	TelEngine::DebugEnabler * d = withDebugEnabler(); \
+	if( d ){		\
+		if( d->debugLevel() >= TelEngine::DebugFail){ \
+			y_fatal(d->debugName()) << message; \
+		} \
+	}	\
+}while(0)
+
 
 
 #endif

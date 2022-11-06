@@ -253,15 +253,6 @@ namespace TelEngine {
 #define h_error(a) TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  yate_log_level_error, a)
 #define h_fatal(a) TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  yate_log_level_fatal, a)
 
-const char * get_yate_module_name();
-
-#define y_trace() TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  yate_log_level_trace, get_yate_module_name())
-#define y_debug() TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  yate_log_level_debug, get_yate_module_name())
-#define y_info()  TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  yate_log_level_info, get_yate_module_name())
-#define y_warn()  TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  yate_log_level_warn, get_yate_module_name())
-#define y_error() TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  yate_log_level_error, get_yate_module_name())
-#define y_fatal() TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  yate_log_level_fatal, get_yate_module_name())
-
 
 #endif // #ifndef _DISABLE_YATE_SDP_LOG_
 
