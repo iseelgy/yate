@@ -4019,8 +4019,9 @@ protected:
 
 private:
     int m_level;
-    static ObjList s_events;
     static bool s_capturing;
+public:
+	static ObjList s_events;
 };
 
 /**

@@ -35,6 +35,7 @@
 #endif
 
 #ifdef _DEBUG_MSVC_NEW_
+#include "Aux_yate_log.h"
 #include "3rlibs/DebugNew.h"
 #define new DEBUG_NEW
 #endif

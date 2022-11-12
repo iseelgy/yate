@@ -1539,7 +1539,7 @@ void globalDestroyTelEngine()
 	TelEngine::s_counters.clear();
 	TelEngine::s_countersMutex.~Mutex();
 
-	//TelEngine::CapturedEvent::s_cls_events.clear();
+	TelEngine::CapturedEvent::s_events.clear();
 
 	TelEngine::out_mux.~Mutex();
 	TelEngine::ind_mux.~Mutex();

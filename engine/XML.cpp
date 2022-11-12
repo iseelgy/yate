@@ -29,8 +29,8 @@
 using namespace TelEngine;
 
 
-const String XmlElement::s_ns = "xmlns";
-const String XmlElement::s_nsPrefix = "xmlns:";
+String XmlElement::s_ns = "xmlns";
+String XmlElement::s_nsPrefix = "xmlns:";
 static String s_type("type");
 static String s_name("name");
 
@@ -4141,8 +4141,8 @@ XPath& XPath::copy(const XPath& other, bool constr)
 
 void globalDestroyXML()
 {
-	//XmlElement::s_ns.clear();
-	//XmlElement::s_nsPrefix.clear();
+	XmlElement::s_ns.clear();
+	XmlElement::s_nsPrefix.clear();
 	s_type.clear();
 	s_name.clear();
 }

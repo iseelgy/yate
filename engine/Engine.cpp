@@ -1574,7 +1574,6 @@ void globalDestroyURI();
 void globalDestroyXML();
 
 
-
 Engine::~Engine()
 {
 #ifdef DEBUG
@@ -1587,6 +1586,16 @@ Engine::~Engine()
     s_events.clear();
 
 
+	// ========================
+	//
+	s_cfgsuffix.clear();
+	s_modpath.clear();
+	s_modsuffix.clear();
+	s_node.clear();
+	s_shrpath.clear();
+
+	s_params.clear();
+	s_params.clearParams();
 
 	globalDestroyEngine();
 	globalDestroyClientLogic();
@@ -1601,7 +1610,10 @@ Engine::~Engine()
 	globalDestroyDataFormate();
 	globalDestroyString();
 	globalDestroyThread();
+
 	//
+	// ========================
+	
     s_mode = Stopped;
     s_self = 0;
 }
@@ -2218,6 +2230,8 @@ void Engine::tryPluginFile(const String& name, const String& path, bool defload)
 	s_cfg.getBoolValue(YSTRING("nounload"),name));
 }
 
+static Regexp loadPluginDir_r("^\\([/\\]\\|[[:alpha:]]:[/\\]\\).");
+
 bool Engine::loadPluginDir(const String& relPath)
 {
 #ifdef DEBUG
@@ -2225,8 +2239,7 @@ bool Engine::loadPluginDir(const String& relPath)
 #endif
     bool defload = s_cfg.getBoolValue("general","modload",true);
     String path = s_modpath;
-    static const Regexp r("^\\([/\\]\\|[[:alpha:]]:[/\\]\\).");
-    if (r.matches(relPath))
+    if (loadPluginDir_r.matches(relPath))
 	path = relPath;
     else if (relPath) {
 	if (!path.endsWith(PATH_SEP))
@@ -3234,10 +3247,11 @@ void globalDestroyEngine()
 	s_affinity.clear();
 
 	s_startMsg.clear();
-	s_startMsg.clear();
 
 	//r_static.clear();
 	s_userdir.clear();
+
+	loadPluginDir_r.clear();
 
 	s_vars.~EngineSharedPrivate();
 
