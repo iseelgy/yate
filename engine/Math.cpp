@@ -17,13 +17,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#include "yatemath.h"
+#include <stdio.h>
+
 #ifdef _DEBUG_MSVC_NEW_
 #include "3rlibs/DebugNew.h"
 #define new DEBUG_NEW
 #endif
 
-#include "yatemath.h"
-#include <stdio.h>
 
 using namespace TelEngine;
 
@@ -62,10 +63,14 @@ static inline void unpackMsb8(uint8_t*& d, uint8_t val)
 }
 
 // Copy string, advance dest and src, return src
-static inline const char* copyInc(char*& dest, const char* src, unsigned int n)
+static inline const char* copyInc(char*& dest, const char* src, unsigned int n,
+    bool strLen = false)
 {
     if (n) {
-	::strncpy(dest,src,n);
+	if (strLen)
+	    ::strcpy(dest,src);
+	else
+	    ::strncpy(dest,src,n);
 	dest += n;
     }
     return src + n;
@@ -105,11 +110,11 @@ String& RefStorage::dumpSplit(String& buf, const String& str, unsigned int lineL
     const char* src = str.c_str();
     src = copyInc(dest,src,firstLineLen);
     for (; nFullLines; nFullLines--) {
-	copyInc(dest,linePrefix,linePrefLen);
+	copyInc(dest,linePrefix,linePrefLen,true);
 	src = copyInc(dest,src,lineLen);
     }
     if (lastLineLen) {
-	copyInc(dest,linePrefix,linePrefLen);
+	copyInc(dest,linePrefix,linePrefLen,true);
 	src = copyInc(dest,src,lastLineLen);
     }
     copyInc(dest,suffix,suffixLen);
@@ -255,7 +260,7 @@ bool BitVector::pack(ByteVector& dest) const
 	return false;
     }
     YBITVECTOR_VALID("pack()",0,length());
-    dest.y_bzero(0,n);
+    dest.bzero(0,n);
     const uint8_t* src = data();
     // Full bytes
     for (const uint8_t* last = end(src,full * 8); src != last; ++d) {

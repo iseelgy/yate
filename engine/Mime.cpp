@@ -17,13 +17,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#include <stdlib.h>
+#include "yatemime.h"
+
 #ifdef _DEBUG_MSVC_NEW_
 #include "3rlibs/DebugNew.h"
 #define new DEBUG_NEW
 #endif
 
-#include <stdlib.h>
-#include "yatemime.h"
 
 using namespace TelEngine;
 
@@ -442,8 +443,8 @@ const DataBlock& MimeBody::getBody() const
     return m_body;
 }
 
-static Regexp s_appStringFull("^\\(dtmf\\|json\\|yaml\\|x-yaml\\)$");
-static Regexp s_appStringPlusEnd("+\\(xml\\|json\\)$");
+static const Regexp s_appStringFull("^\\(dtmf\\|json\\|yaml\\|x-yaml\\)$");
+static const Regexp s_appStringPlusEnd("+\\(xml\\|json\\)$");
 
 // Method to build a MIME body from a type and data buffer
 MimeBody* MimeBody::build(const char* buf, int len, const MimeHeaderLine& type)
@@ -1134,8 +1135,7 @@ MimeBody* MimeLinesBody::clone() const
 
 void globalDestroyMine()
 {
-	s_appStringFull.clear();
-	s_appStringPlusEnd.clear();
+
 }
 
 /* vi: set ts=8 sw=4 sts=4 noet: */

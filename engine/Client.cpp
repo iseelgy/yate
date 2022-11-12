@@ -17,14 +17,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifdef _DEBUG_MSVC_NEW_
-#include "3rlibs/DebugNew.h"
-#define new DEBUG_NEW
-#endif
 
 #include "yatecbase.h"
 #include <stdio.h>
 #include <stdarg.h>
+
+#ifdef _DEBUG_MSVC_NEW_
+#include "3rlibs/DebugNew.h"
+#define new DEBUG_NEW
+#endif
 
 
 #ifndef OUT_BUFFER_SIZE
@@ -6278,8 +6279,8 @@ void globalDestroyClient()
 	s_rejectReason.clear();
 	s_hangupReason.clear();
 	s_cancelReason.clear();
-	s_incomingUrlParam.clear(); 
-	s_trayIcons.clear(); 
+	s_incomingUrlParam.clear();
+	s_trayIcons.clear();
 
 	Client::s_settings.clear();                // Client settings
 	Client::s_settings.clearSection();
@@ -6339,7 +6340,7 @@ void globalDestroyClient()
 
 	ClientSound::s_soundsMutex.~Mutex();
 
-}
 
+}
 
 /* vi: set ts=8 sw=4 sts=4 noet: */

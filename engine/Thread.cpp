@@ -17,12 +17,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifdef _DEBUG_MSVC_NEW_
-#include "3rlibs/DebugNew.h"
-#define new DEBUG_NEW
-#endif
-
-
 #include "yateclass.h"
 
 #include <string.h>
@@ -76,6 +70,10 @@ static int pthread_attr_setinheritsched(pthread_attr_t *,int) { return 0; }
 #define THREAD_IDLE_MIN  1
 #define THREAD_IDLE_MAX 20
 
+#ifdef _DEBUG_MSVC_NEW_
+#include "3rlibs/DebugNew.h"
+#define new DEBUG_NEW
+#endif
 
 
 namespace TelEngine {
@@ -209,20 +207,7 @@ ThreadPrivate* ThreadPrivate::create(Thread* t,const char* name,Thread::Priority
 	    default:
 		break;
 	}
-
-#ifdef __ANDROID__
-	// android-28 Ö§³Ö
-#if __ANDROID_API__ < 28
-	int err = 0; /*::pthread_attr_setinheritsched(&attr,PTHREAD_EXPLICIT_SCHED);*/
-#else
 	int err = ::pthread_attr_setinheritsched(&attr,PTHREAD_EXPLICIT_SCHED);
-#endif
-
-#else
-	int err = ::pthread_attr_setinheritsched(&attr,PTHREAD_EXPLICIT_SCHED);
-#endif
-
-
 	if (!err)
 	    err = ::pthread_attr_setschedpolicy(&attr,policy);
 	if (!err)
@@ -267,22 +252,14 @@ ThreadPrivate* ThreadPrivate::create(Thread* t,const char* name,Thread::Priority
 		    break;
 	    }
 	    if (pr != THREAD_PRIORITY_NORMAL)
-		::SetThreadPriority(reinterpret_cast<Y_HANDLE>(t),pr);
+		::SetThreadPriority(reinterpret_cast<HANDLE>(t),pr);
 	}
 #else /* _WINDOWS */
 	e = ::pthread_create(&p->thread,&attr,startFunc,p);
 #ifdef PTHREAD_INHERIT_SCHED
 	if ((0 == i) && (EPERM == e) && (prio > Thread::Normal)) {
 	    Debug(DebugWarn,"Failed to create thread with priority %d, trying with inherited",prio);
-#ifdef __ANDROID__
-
-#if __ANDROID_API__ >= 28
-		::pthread_attr_setinheritsched(&attr,PTHREAD_INHERIT_SCHED);
-#endif
-
-#else
 	    ::pthread_attr_setinheritsched(&attr,PTHREAD_INHERIT_SCHED);
-#endif
 	    e = EAGAIN;
 	}
 #endif
@@ -420,11 +397,7 @@ void ThreadPrivate::run()
 	threadInfo.szName = m_name;
 	threadInfo.dwThreadID = (DWORD)-1;
 	threadInfo.dwFlags = 0;
-	__try { 
-	
-		RaiseException(0x406D1388, 0, sizeof(threadInfo)/sizeof(DWORD), (ULONG_PTR*)&threadInfo); 
-	
-	}
+	__try { RaiseException(0x406D1388, 0, sizeof(threadInfo)/sizeof(DWORD), (DWORD*)&threadInfo); }
 	__except (EXCEPTION_CONTINUE_EXECUTION) { }
     }
 #endif
@@ -463,7 +436,7 @@ bool ThreadPrivate::cancel(bool hard)
 #ifdef _WINDOWS
 	    Debug(DebugCrit,"ThreadPrivate '%s' terminating win32 thread %lu [%p]",
 		m_name,thread,this);
-	    ret = ::TerminateThread(reinterpret_cast<Y_HANDLE>(thread),0) != 0;
+	    ret = ::TerminateThread(reinterpret_cast<HANDLE>(thread),0) != 0;
 #else
 #ifdef PTHREAD_CANCEL_ASYNCHRONOUS
 	    Debug(critical ? DebugInfo : DebugWarn,"ThreadPrivate '%s' terminating pthread %p [%p]",
@@ -534,7 +507,7 @@ int ThreadPrivate::setAffinity(ThreadPrivate* t, const DataBlock& cpuMask)
 	      cpuMask.length() * 8, sizeof(DWORD_PTR) * 8);
     for (unsigned int i = 0; i < sizeof(mask) && i < cpuMask.length(); i++)
 	mask |= (cpuMask.at(i) << (i << 3));
-    if (!(mask = ::SetThreadAffinityMask(t ?reinterpret_cast<Y_HANDLE>(t->thread) : ::GetCurrentThread(),mask)))
+    if (!(mask = ::SetThreadAffinityMask(t ?reinterpret_cast<HANDLE>(t->thread) : ::GetCurrentThread(),mask)))
 	return ::GetLastError();
     if (t)
 	t->m_affinityMask = mask;
@@ -585,7 +558,7 @@ int ThreadPrivate::getAffinity(ThreadPrivate* t, DataBlock& outMask)
 
 #ifdef _WINDOWS
 
-	Y_HANDLE thr = t ? reinterpret_cast<Y_HANDLE>(t->thread) : ::GetCurrentThread();
+    HANDLE thr = t ? reinterpret_cast<HANDLE>(t->thread) : ::GetCurrentThread();
     DWORD_PTR setMask = 0;
     if (t) {
 	setMask = t->m_affinityMask;
@@ -1214,8 +1187,8 @@ bool Thread::errorString(String& buffer, int code)
 void globalDestroyThread()
 {
 	s_tmutex.~Mutex();
-}
 
+}
 
 
 /* vi: set ts=8 sw=4 sts=4 noet: */

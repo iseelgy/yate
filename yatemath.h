@@ -760,13 +760,13 @@ public:
      * @param offs The offset
      * @param len The number of elements to retrieve (must not be 0)
      */
-    inline void y_bzero(unsigned int offs, unsigned int len)
+    inline void bzero(unsigned int offs, unsigned int len)
 	{ RefStorage::fill(data(offs,len),size(len)); }
 
     /**
      * Fill the buffer with 0
      */
-    inline void y_bzero()
+    inline void bzero()
 	{ RefStorage::fill(data(),size()); }
 
     /**

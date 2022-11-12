@@ -819,8 +819,6 @@ protected:
      */
     static void uninstall(TranslatorFactory* factory);
 
-public:
-
 private:
     DataTranslator(); // No default constructor please
     static void compose();
@@ -828,9 +826,7 @@ private:
     static bool canConvert(const FormatInfo* fmt1, const FormatInfo* fmt2);
     DataSource* m_tsource;
     static unsigned int s_maxChain;
-
 public:
-	// for global free
 	static Mutex s_mutex;
 	static ObjList s_factories;
 };
@@ -1395,15 +1391,15 @@ public:
      * Retrieve the global update notification delay
      * @return Update delay value in seconds
      */
-	static unsigned int updateDelay();
-	//{ return s_delay; }
+    inline static unsigned int updateDelay()
+	{ return s_delay; }
 
     /**
      * Set the global update notification delay
      * @param delay New update delay value in seconds, 0 to disable
      */
-	static void updateDelay(unsigned int delay);
-	//{ s_delay = delay; }
+    inline static void updateDelay(unsigned int delay)
+	{ s_delay = delay; }
 
     /**
      * Check if a debug filter is installed
@@ -1476,8 +1472,8 @@ protected:
      * @param name Name of the Relay to search for
      * @return ID of the Relay, zero if not found
      */
-	static int relayId(const char* name);
-	//{ return lookup(name,s_messages); }
+    static inline int relayId(const char* name)
+	{ return lookup(name,s_messages); }
 
     /**
      * Constructor
@@ -1514,26 +1510,29 @@ protected:
      * Install a standard message relay
      * @param id RelayID of the new relay to create
      * @param priority Priority of the handler, 0 = top
+     * @param filter Optional filter for relay. It will be consumed
      * @return True if installed or already was one installed
      */
-    bool installRelay(int id, unsigned priority = 100);
+    bool installRelay(int id, unsigned priority = 100, NamedString* filter = 0);
 
     /**
      * Install a standard message relay
      * @param name Name of the relay to create, must match a RelayID
      * @param priority Priority of the handler, 0 = top
+     * @param filter Optional filter for relay. It will be consumed
      * @return True if installed or already was one installed
      */
-    bool installRelay(const char* name, unsigned priority = 100);
+    bool installRelay(const char* name, unsigned priority = 100, NamedString* filter = 0);
 
     /**
      * Install a custom message relay
      * @param id RelayID of the new relay to create
      * @param name Name of the custom relay to create
      * @param priority Priority of the handler, 0 = top
+     * @param filter Optional filter for relay. It will be consumed
      * @return True if installed or already was one installed
      */
-    bool installRelay(int id, const char* name, unsigned priority = 100);
+    bool installRelay(int id, const char* name, unsigned priority = 100, NamedString* filter = 0);
 
     /**
      * Install a custom message relay
@@ -2224,16 +2223,14 @@ protected:
     inline NamedList& parameters()
 	{ return m_parameters; }
 
-public:
-	// for clean memory
-	static Mutex s_chanDataMutex;
-
 private:
     void init();
     Channel(); // no default constructor please
     // Just in case we are going to (re)move the channel data mutex!
-	static Mutex* chanDataMutex();
-	//{ return &s_chanDataMutex; }
+    static inline Mutex* chanDataMutex()
+	{ return &s_chanDataMutex; }
+public:
+	static Mutex s_chanDataMutex;
 };
 
 /**

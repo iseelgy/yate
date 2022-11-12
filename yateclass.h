@@ -29,6 +29,7 @@
 #include <limits.h>
 #include <sys/types.h>
 #include <stddef.h>
+#include <unistd.h>
 #include <errno.h>
 #include <stdarg.h>
 
@@ -53,12 +54,10 @@
 #include <windows.h>
 #include <io.h>
 #include <direct.h>
-#include <stdint.h>
 
 /**
  * Windows definitions for commonly used types
  */
-
 typedef signed __int8 int8_t;
 typedef unsigned __int8 u_int8_t;
 typedef unsigned __int8 uint8_t;
@@ -76,6 +75,8 @@ typedef int pid_t;
 typedef int socklen_t;
 typedef unsigned long in_addr_t;
 
+#if 0
+
 #ifndef strcasecmp
 #define strcasecmp _stricmp
 #endif
@@ -84,9 +85,14 @@ typedef unsigned long in_addr_t;
 #define strncasecmp _strnicmp
 #endif
 
-/*
+#ifndef _vsnprintf
 #define vsnprintf _vsnprintf
+#endif
+
+#ifndef _snprintf
 #define snprintf _snprintf
+#endif
+
 #define strdup _strdup
 #define strtoll _strtoi64
 #define strtoull _strtoui64
@@ -116,9 +122,7 @@ typedef unsigned long in_addr_t;
 #define S_IXUSR 0
 #define S_IRWXU (_S_IREAD|_S_IWRITE)
 
-修改后在yatewin32.h中实现
-
-*/
+#endif
 
 #ifdef LIBYATE_EXPORTS
 #define YATE_API __declspec(dllexport)
@@ -130,10 +134,6 @@ typedef unsigned long in_addr_t;
 
 #define FMT64 "%I64d"
 #define FMT64U "%I64u"
-
-#ifndef Y_HANDLE
-typedef HANDLE Y_HANDLE;
-#endif
 
 #else /* _WINDOWS */
 
@@ -149,7 +149,6 @@ typedef HANDLE Y_HANDLE;
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <unistd.h>
 
 /**
  * Non-Windows definitions for commonly used types
@@ -157,8 +156,8 @@ typedef HANDLE Y_HANDLE;
 #ifndef SOCKET
 typedef int SOCKET;
 #endif
-#ifndef Y_HANDLE
-typedef int Y_HANDLE;
+#ifndef HANDLE
+typedef int HANDLE;
 #endif
 
 #ifndef O_BINARY
@@ -698,7 +697,6 @@ do { if (!!(pGenObj) && (pGenObj)->traceId()) TraceDebug((pGenObj)->traceId(),##
  * Outputs a debug string with trace ID and emits an alarm if a callback is installed
  * @param traceId The trace ID associated with this message
  * @param component Component that emits the alarm
- * @param info Extra alarm information
  * @param level The level of the alarm
  * @param format A printf() style format string
  */
@@ -1040,7 +1038,7 @@ YATE_API inline uint32_t hashInt32(uint32_t val)
 
 /**
  * Compute a hash for a pointer
- * @param val Pointer to hash
+ * @param ptr Pointer to hash
  * @return Hash value
  */
 YATE_API inline uint32_t hashPtr(const void* ptr)
@@ -1117,13 +1115,15 @@ public:
      * Get the global state of object counting
      * @return True if object counting is enabled
      */
-	static bool getObjCounting();
+    static inline bool getObjCounting()
+	{ return s_counting; }
 
     /**
      * Set the global state of object counting
      * @param enable True to enable object counting, false to disable
      */
-	static void setObjCounting(bool enable);
+    static inline void setObjCounting(bool enable)
+	{ s_counting = enable; }
 
     /**
      * Get the counter of this object
@@ -2292,7 +2292,6 @@ public:
     inline int lenUtf8(uint32_t maxChar = 0x10ffff, bool overlong = false) const
 	{ return lenUtf8(m_string,maxChar,overlong); }
 
-	
     /**
      * Fix an UTF-8 encoded string by replacing invalid sequences
      * @param replace String to replace invalid sequences, use U+FFFD if null
@@ -2302,7 +2301,7 @@ public:
      */
     int fixUtf8(const char* replace = 0, uint32_t maxChar = 0x10ffff, bool overlong = false);
 
-     /**
+    /**
      * Encode flags from dictionary values
      * @param tokens The dictionary containing the flags
      * @return Encoded flags
@@ -2333,6 +2332,7 @@ public:
      * @return Decoded flags
      */
      const String& decodeFlags(uint64_t flags, const TokenDict64* tokens, bool unknownflag = true);
+
     /**
      * Check if a string starts with UTF-8 Byte Order Mark
      * @param str String to check for BOM
@@ -2830,6 +2830,15 @@ public:
 	{ return append(&list,separator,force); }
 
     /**
+     * Append buffer filled with character to current string
+     * @param value Character to insert. NUL character will be ignored
+     * @param len Number of characters to append
+     * @return Reference to the String
+     */
+    inline String& append(char value, unsigned int len = 1)
+	{ return insert(length(),value,len); }
+
+    /**
      * Explicit double append
      * @param value Value to append
      * @param decimals Number of decimals
@@ -2847,16 +2856,12 @@ public:
 
     /**
      * Insert a character into current string
-     * @param pos Position to insert. The character will be appended if position is greater than curent length
+     * @param pos Position to insert. Negative or greater than curent length: append
      * @param value Character to insert. NUL character will be ignored
+     * @param len Number of characters to insert
      * @return Reference to the String
      */
-    inline String& insert(unsigned int pos, char value) {
-	    if (!value)
-		return *this;
-	    char s[] = {value};
-	    return insert(pos,s,1);
-	}
+    String& insert(unsigned int pos, char value, unsigned int len = 1);
 
     /**
      * Build a String in a printf style.
@@ -3113,13 +3118,48 @@ public:
 	{ return sqlEscape(c_str(),extraEsc); }
 
     /**
+     * Append an escaped string suitable for use in URIs
+     * @param buf Destination buffer
+     * @param str String to convert to escaped format
+     * @param extraEsc Character to escape other than the default ones
+     * @param noEsc Optional pointer to string of characters that shouldn't be escaped
+     * @return Destination buffer reference
+     */
+    static String& uriEscapeTo(String& buf, const char* str, char extraEsc = 0,
+	const char* noEsc = 0);
+
+    /**
+     * Append an escaped string suitable for use in URIs
+     * @param buf Destination buffer
+     * @param str String to convert to escaped format
+     * @param extraEsc Pointer to string of characters to escape other than the defaults
+     * @param noEsc Optional pointer to string of characters that shouldn't be escaped
+     * @return Destination buffer reference
+     */
+    static String& uriEscapeTo(String& buf, const char* str, const char* extraEsc,
+	const char* noEsc = 0);
+
+    /**
+     * Append an escaped string suitable for use in URIs
+     * @param buf Destination buffer
+     * @param extraEsc Character to escape other than the default ones
+     * @param noEsc Optional pointer to string of characters that shouldn't be escaped
+     * @return Destination buffer reference
+     */
+    inline String& uriEscapeTo(String& buf, char extraEsc = 0, const char* noEsc = 0) const
+	{ return uriEscapeTo(buf,c_str(),extraEsc,noEsc); }
+
+    /**
      * Create an escaped string suitable for use in URIs
      * @param str String to convert to escaped format
      * @param extraEsc Character to escape other than the default ones
      * @param noEsc Optional pointer to string of characters that shouldn't be escaped
      * @return The string with special characters escaped
      */
-    static String uriEscape(const char* str, char extraEsc = 0, const char* noEsc = 0);
+    static inline String uriEscape(const char* str, char extraEsc = 0, const char* noEsc = 0) {
+	    String tmp;
+	    return uriEscapeTo(tmp,str,extraEsc,noEsc);
+	}
 
     /**
      * Create an escaped string suitable for use in URIs
@@ -3128,7 +3168,10 @@ public:
      * @param noEsc Optional pointer to string of characters that shouldn't be escaped
      * @return The string with special characters escaped
      */
-    static String uriEscape(const char* str, const char* extraEsc, const char* noEsc = 0);
+    static inline String uriEscape(const char* str, const char* extraEsc, const char* noEsc = 0) {
+	    String tmp;
+	    return uriEscapeTo(tmp,str,extraEsc,noEsc);
+	}
 
     /**
      * Create an escaped string suitable for use in URI
@@ -3140,20 +3183,56 @@ public:
 	{ return uriEscape(c_str(),extraEsc,noEsc); }
 
     /**
+     * Decode and append an URI escaped string back to its raw form
+     * It is safe to call this method with 'str' set to buf.c_str()
+     * @param buf Destination buffer
+     * @param str String to convert to unescaped format
+     * @param setPartial Copy partial (succeeded) string on failure
+     * @param errptr Pointer to an integer to receive the place of 1st error
+     * @return Destination buffer reference
+     */
+    static String& uriUnescapeTo(String& buf, const char* str, bool setPartial = false,
+	int* errptr = 0);
+
+    /**
+     * Decode an URI escaped string back to its raw form
+     * @param buf Destination buffer
+     * @param setPartial Copy partial (succeeded) string on failure
+     * @param errptr Pointer to an integer to receive the place of 1st error
+     * @return Destination buffer reference
+     */
+    inline String& uriUnescapeTo(String& buf, bool setPartial = false, int* errptr = 0) const
+	{ return uriUnescapeTo(buf,c_str(),setPartial,errptr); }
+
+    /**
+     * In place decode an URI escaped string back to its raw form
+     * @param setPartial Copy partial (succeeded) string on failure
+     * @param errptr Pointer to an integer to receive the place of 1st error
+     * @return String reference
+     */
+    inline String& uriUnescapeStr(bool setPartial = false, int* errptr = 0)
+	{ return uriUnescapeTo(*this,c_str(),setPartial,errptr); }
+
+    /**
      * Decode an URI escaped string back to its raw form
      * @param str String to convert to unescaped format
      * @param errptr Pointer to an integer to receive the place of 1st error
+     * @param setPartial Copy partial (succeeded) string on failure
      * @return The string with special characters unescaped
      */
-    static String uriUnescape(const char* str, int* errptr = 0);
+    static inline String uriUnescape(const char* str, int* errptr = 0, bool setPartial = true) {
+	    String tmp;
+	    return uriUnescapeTo(tmp,str,setPartial,errptr);
+	}
 
     /**
      * Decode an URI escaped string back to its raw form
      * @param errptr Pointer to an integer to receive the place of 1st error
+     * @param setPartial Copy partial (succeeded) string on failure
      * @return The string with special characters unescaped
      */
-    inline String uriUnescape(int* errptr = 0) const
-	{ return uriUnescape(c_str(),errptr); }
+    inline String uriUnescape(int* errptr = 0, bool setPartial = true) const
+	{ return uriUnescape(c_str(),errptr,setPartial); }
 
     /**
      * Atom string support helper
@@ -3170,12 +3249,452 @@ protected:
      virtual void changed();
 
 private:
+    String& changeStringData(char* data, unsigned int len);
     void clearMatches();
     char* m_string;
     unsigned int m_length;
     // I hope every C++ compiler now knows about mutable...
     mutable unsigned int m_hash;
     StringMatchPrivate* m_matches;
+};
+
+/**
+ * Template for generic object vector
+ * The vector can be resized (up/down)
+ * Objects MUST implement a default contructor and an assignment operator
+ * When name based find or set are used objects should implement toString()
+ * This template should be used for simple objects
+ * @short Template for generic object vector
+ */
+template <class Obj> class GenericVector : public GenObject
+{
+public:
+    /**
+     * Constructor
+     * @param overAlloc How many items to overallocate
+     * @param name Optional vector name
+     */
+    inline GenericVector(unsigned int overAlloc = 0, const char* name = 0)
+	: m_data(0), m_length(0), m_size(0), m_overAlloc(overAlloc), m_name(name)
+	{}
+
+    /**
+     * Constructor
+     * @param items Pointer to initial values
+     * @param count Initial length
+     * @param overAlloc How many items to overallocate
+     * @param name Optional vector name
+     */
+    inline GenericVector(const Obj* items, unsigned int count, unsigned int overAlloc = 0,
+	const char* name = 0)
+	: m_data(0), m_length(0), m_size(0), m_overAlloc(overAlloc), m_name(name)
+	{ assign(count,items); }
+
+    /**
+     * Constructor
+     * @param items List to copy
+     * @param overAlloc How items to overallocate
+     * @param name Optional vector name
+     */
+    inline GenericVector(const ObjList& items, unsigned int overAlloc = 0,
+	const char* name = 0)
+	: m_data(0), m_length(0), m_size(0), m_overAlloc(overAlloc), m_name(name)
+	{ assign(items); }
+
+    /**
+     * Copy constructor
+     * @param other Vector to copy
+     */
+    inline GenericVector(const GenericVector& other)
+	: m_data(0), m_length(0), m_size(0), m_overAlloc(other.overAlloc()),
+	m_name(other.name())
+	{ assign(other.length(),other.data()); }
+
+    /**
+     * Destructor
+     */
+    virtual ~GenericVector()
+	{ clear(); }
+
+    /**
+     * Retrieve vector length
+     * @return Vector length
+     */
+    inline unsigned int length() const
+	{ return m_length; }
+
+    /**
+     * Retrieve vector size (total allocated items, including over alloc)
+     * @return Vector size
+     */
+    inline unsigned int size() const
+	{ return m_size; }
+
+    /**
+     * Retrieve the over alloc value
+     * @return Over alloc value
+     */
+    inline unsigned int overAlloc() const
+	{ return m_overAlloc; }
+
+    /**
+     * Set over alloc length
+     * @param count Value of over alloc length
+     */
+    inline void overAlloc(unsigned int count)
+	{ m_overAlloc = count; }
+
+    /**
+     * Retrieve vector name
+     * @return Vector name
+     */
+    inline const String& name() const
+	{ return m_name; }
+
+    /**
+     * Retrieve a pointer to data
+     * @param offs Index to start
+     * @param count Optional number of elements to retrieve
+     * @return Obj pointer, NULL if data not set or given index and count are past vector length
+     */
+    inline Obj* data(unsigned int offs = 0, unsigned int count = 0)
+	{ return dataAvail(offs,count); }
+
+    /**
+     * Retrieve a pointer to data
+     * @param offs Index to start
+     * @param count Optional number of elements to retrieve
+     * @return Obj pointer, NULL if data not set or given index and count are past vector length
+     */
+    inline const Obj* data(unsigned int offs = 0, unsigned int count = 0) const
+	{ return dataAvail(offs,count); }
+
+    /**
+     * Retrieve a pointer to first item in vector
+     * @return Obj pointer, NULL if not found
+     */
+    inline Obj* first()
+	{ return m_data; }
+
+    /**
+     * Retrieve a pointer to first item in vector
+     * @return Obj pointer, NULL if not found
+     */
+    inline const Obj* first() const
+	{ return m_data; }
+
+    /**
+     * Retrieve a pointer to last item in vector
+     * @return Obj pointer, NULL if not found
+     */
+    inline Obj* last()
+	{ return length() ? m_data + length() - 1 : 0; }
+
+    /**
+     * Retrieve a pointer to last item in vector
+     * @return Obj pointer, NULL if not found
+     */
+    inline const Obj* last() const
+	{ return length() ? m_data + length() - 1 : 0; }
+
+    /**
+     * Retrieve index of object by name
+     * Obj MUST implement toString()
+     * @param name Object name
+     * @param offs Optional index to start
+     * @param found Optional pointer to be filled with found object pointer
+     * @return Index of object, -1 if not found
+     */
+    inline int indexOf(const String& name, unsigned int offs = 0, Obj** found = 0) const {
+	    const Obj* d = data(offs);
+	    for (; offs < length(); ++offs, ++d)
+		if (name == d->toString()) {
+		    if (found)
+			*found = (Obj*)d;
+		    return offs;
+		}
+	    return -1;
+	}
+
+    /**
+     * Find an object by name
+     * Obj MUST implement toString()
+     * @param name Object name
+     * @param offs Optional index to start
+     * @return Obj pointer, NULL if not found
+     */
+    inline Obj* find(const String& name, unsigned int offs = 0) const {
+	    Obj* d = 0;
+	    indexOf(name,offs,&d);
+	    return d;
+	}
+
+    /**
+     * Clear data
+     */
+    inline void clear() {
+	    if (!m_data)
+		return;
+	    delete[] m_data;
+	    m_data = 0;
+	    m_length = m_size = 0;
+	}
+
+    /**
+     * Assign new data or just allocate new space
+     * @param len New vector length. No changes will be applied if 0
+     * @param items Pointer to items to set. Pointer may be inside held buffer
+     * @param count Number of items to copy, 0 to use 'len', At most 'len' items will be copied
+     * @return True on success, false on memory allocation failure
+     */
+    inline bool assign(unsigned int len, const Obj* items = 0, unsigned int count = 0) {
+	    if (!len)
+		return true;
+	    unsigned int sz = len + m_overAlloc;
+	    Obj* tmp = new Obj[sz];
+	    if (!tmp) {
+		Debug("YateVector",DebugFail,"Failed to allocate %u item(s) bytes=%u",
+		    sz,(unsigned int)(sz * sizeof(Obj)));
+		return false;
+	    }
+	    if (items)
+		copy(tmp,items,!count ? len : (count <= len ? count : len));
+	    if (m_data)
+		delete[] m_data;
+	    m_data = tmp;
+	    m_length = len;
+	    m_size = sz;
+	    return true;
+	}
+
+    /**
+     * Resize the vector
+     * 'len' between length() and size(): just increase length
+     * 'len' between (size() - overAlloc()) and size(): just decrease length,
+     *   assign empty Obj to remaining items
+     * @param len New vector length. No changes will be applied if len is 0 
+     *  or equal to current vector length
+     * @return True on success, false on memory allocation failure
+     */
+    inline bool resize(unsigned int len) {
+	    if (!len || len == length())
+		return true;
+	    if (len > size())
+		return assign(len,m_data,length());
+	    if (length() > len) {
+		if ((size() - len) > m_overAlloc)
+		    return assign(len,m_data,length());
+		fill(len,length() - len);
+	    }
+	    m_length = len;
+	    return true;
+	}
+
+    /**
+     * Remove last item(s)
+     * @param count Number of items to remove
+     * @return True on success, false on memory allocation failure
+     */
+    inline bool removeLast(unsigned int count = 1) {
+	    if (!count)
+		return true;
+	    if (count < length())
+		return resize(length() - count);
+	    clear();
+	    return true;
+	}
+
+    /**
+     * Fill vector with data
+     * @param offs Start offset
+     * @param count Number of items to fill, negative to fill until vector end
+     * @param value Optional value to fill. Fill with default Obj if not given
+     * @return Number of filled items. 0 on empty count or failure
+     */
+    inline unsigned int fill(unsigned int offs = 0, int count = -1, const Obj* value = 0) {
+	    if (!count)
+		return 0;
+	    unsigned int n = numItems(offs,count < 0 ? length() : (unsigned int)count);
+	    if (!n)
+		return 0;
+	    if (value)
+		fillArray(*value,m_data + offs,n);
+	    else {
+		Obj item;
+		fillArray(item,m_data + offs,n);
+	    }
+	    return n;
+	}
+
+    /**
+     * Fill vector with data
+     * @param value Value to fill
+     * @param offs Start offset
+     * @param count Number of items to fill, negative to fill until vector end
+     * @return Number of filled items. 0 on empty count or failure
+     */
+    inline unsigned int fill(const Obj& value, unsigned int offs = 0, int count = -1)
+	{ return fill(offs,count,&value); }
+
+    /**
+     * Fill vector with data
+     * @param items Items to fill
+     * @param count Number of items to fill
+     * @param offs Optional start offset
+     * @return Number of filled items, 0 on empty items or failure
+     */
+    inline unsigned int fill(const Obj* items, unsigned int count, unsigned int offs = 0) {
+	    if (!(items && count))
+		return 0;
+	    unsigned int n = numItems(offs,count);
+	    if (n)
+		copy(m_data + offs,items,n);
+	    return n;
+	}
+
+    /**
+     * Append an item to vector
+     * @param item Item to append
+     * @return Given item pointer, NULL on failure
+     */
+    inline Obj* append(const Obj& item) {
+	    if (!resize(length() + 1))
+		return 0;
+	    m_data[length() - 1] = item;
+	    return (Obj*)&item;
+	}
+
+    /**
+     * Append an array of items to vector
+     * @param items Pointer to items to append
+     * @param count The number of items to append
+     * @return Number of added items
+     */
+    inline unsigned int append(const Obj* items, unsigned int count) {
+	    if (!(items && count && resize(length() + count)))
+		return 0;
+	    copy(m_data + length() - count,items,count);
+	    return count;
+	}
+
+    /**
+     * Append a list of items
+     * @param list Items to append
+     * @return Number of added items
+     */
+    inline unsigned int append(const ObjList& list) {
+	    unsigned int n = list.count();
+	    if (!(n && resize(length() + n)))
+		return 0;
+	    copy(m_data + length() - n,list);
+	    return n;
+	}
+
+    /**
+     * Append a list of items
+     * @param list Items to append
+     * @return Number of added items, 0 on empty list or failure
+     */
+    inline unsigned int assign(const ObjList& list) {
+	    unsigned int n = list.count();
+	    if (!(n && resize(n)))
+		return 0;
+	    copy(m_data,list);
+	    return n;
+	}
+
+    /**
+     * Append or set an item to vector
+     * @param item Item to append or set
+     * @return Given item pointer, NULL on failure
+     */
+    inline Obj* set(const Obj& item) {
+	    int idx = indexOf(item);
+	    if (idx < 0)
+		return append(item);
+	    m_data[idx] = item;
+	    return (Obj*)&item;
+	}
+
+    /**
+     * Assignment (from other vector) operator
+     * @param other Vector to assign
+     */
+    inline GenericVector& operator=(const GenericVector& other) {
+	    assign(other.length(),other.data());
+	    return *this;
+	}
+
+    /**
+     * Assignment (from Obj vector) operator
+     * @param item Item to assign
+     */
+    inline GenericVector& operator=(const Obj& item) {
+	    assign(1,&item);
+	    return *this;
+	}
+
+    /**
+     * Addition (append) operator
+     * @param item Item to append
+     */
+    inline GenericVector& operator+=(const Obj& item) {
+	    append(item);
+	    return *this;
+	}
+
+    /**
+     * Addition (append) operator
+     * @param other Vector to append
+     */
+    inline GenericVector& operator+=(const GenericVector& other) {
+	    if (&other != this)
+		append(other.data(),other.length());
+	    else {
+		unsigned int n = length();
+		resize(2 * n);
+		fill(data(),n,n);
+	    }
+	    return *this;
+	}
+
+    /**
+     * Retrieve vector name
+     * @return Vector name
+     */
+    virtual const String& toString() const
+	{ return name(); }
+
+protected:
+    // Retrive data available from offset
+    inline Obj* dataAvail(unsigned int offs, unsigned int count) const {
+	    if (offs >= length() || !m_data)
+		return 0;
+	    return (count <= (length() - offs)) ? (m_data + offs) : 0;
+	}
+    // Calculate the number of items available from offset
+    inline unsigned int numItems(unsigned int offs, unsigned int count) const {
+	    if (offs >= length())
+		return 0;
+	    offs = length() - offs;
+	    return (count <= offs) ? count : offs;
+	}
+    static inline void fillArray(const Obj& value, Obj* dest, unsigned int n)
+	{ while (n) { *dest++ = value; --n; } }
+    static inline void copy(Obj* dest, const ObjList& src) {
+	    for (const ObjList* o = src.skipNull(); o; o = o->skipNext())
+		*dest++ = *static_cast<Obj*>(o->get());
+	}
+    static inline void copy(Obj* dest, const Obj* src, unsigned int n)
+	{ while (n) { *dest++ = *src++; --n; } }
+
+    Obj* m_data;
+    unsigned int m_length;
+    unsigned int m_size;
+    unsigned int m_overAlloc;
+
+private:
+    String m_name;
 };
 
 /**
@@ -3465,41 +3984,43 @@ public:
      * Get the capturing state of the output and debug messages
      * @return True if output and debug messages are being captured
      */
-	static bool capturing();
+    inline static bool capturing()
+	{ return s_capturing; }
 
     /**
      * Get the list of captured events
      * @return List of events captured from output and debugging
      */
-	static const ObjList& events();
+    inline static const ObjList& events()
+	{ return s_events; }
 
     /**
      * Add an event to the captured events list
      * @param level Debugging level associated with the event
      * @param text Text description of the event, must not be empty
      */
-	static void append(int level, const char* text);
+    inline static void append(int level, const char* text)
+	{ if (text && *text) s_events.append(new CapturedEvent(level,text)); }
 
 protected:
     /**
      * Get a writable list of captured events
      * @return List of events captured from output and debugging
      */
-	static ObjList& eventsRw();
+    inline static ObjList& eventsRw()
+	{ return s_events; }
 
     /**
      * Enable or disable capturing of output and debug messages
      * @param capture True to capture internally the debugging messages
      */
-	static void capturing(bool capture);
-
-public:
-	// for memory destroy
-	static ObjList s_cls_events;
+    inline static void capturing(bool capture)
+	{ s_capturing = capture; }
 
 private:
     int m_level;
-    static bool s_cls_capturing;
+    static ObjList s_events;
+    static bool s_capturing;
 };
 
 /**
@@ -3662,6 +4183,12 @@ public:
      * @return Post-decrement value of the counter
      */
     int dec();
+
+    /**
+     * Add a specific value to the counter
+     * @param val Value to add
+     */
+    int add(int val);
 
     /**
      * Get the current value of the counter
@@ -5139,9 +5666,10 @@ public:
      * Clears all instances of a named string in the parameter list.
      * @param name Name of the string to remove
      * @param childSep If set clears all child parameters in format name+childSep+anything
+     * @param value Optional pointer to string used to match parameter's value (may be a regexp)
      * @return Reference to this NamedList
      */
-    NamedList& clearParam(const String& name, char childSep = 0);
+    NamedList& clearParam(const String& name, char childSep = 0, const String* value = 0);
 
     /**
      * Remove a specific parameter
@@ -5544,6 +6072,7 @@ protected:
 class MutexPrivate;
 class SemaphorePrivate;
 class ThreadPrivate;
+class RWLockPrivate;
 
 /**
  * An abstract base class for implementing lockable objects
@@ -5919,17 +6448,11 @@ public:
 private:
     Lockable* m_lock;
 
-#ifndef _DEBUG_MSVC_NEW_
+    /** Make sure no Lock is ever created on heap */
+    inline void* operator new(size_t);
 
-	/** Make sure no Lock is ever created on heap */
-	inline void* operator new(size_t);
-
-	/** Never allocate an array of this class */
-	inline void* operator new[](size_t);
-
-#endif
-
-
+    /** Never allocate an array of this class */
+    inline void* operator new[](size_t);
 };
 
 /**
@@ -6003,18 +6526,227 @@ private:
     Mutex* m_mx1;
     Mutex* m_mx2;
 
-#ifndef _DEBUG_MSVC_NEW_
+    /** Make sure no Lock2 is ever created on heap */
+    inline void* operator new(size_t);
 
-	/** Make sure no Lock2 is ever created on heap */
-	inline void* operator new(size_t);
-
-	/** Never allocate an array of this class */
-	inline void* operator new[](size_t);
-
-#endif
-
-
+    /** Never allocate an array of this class */
+    inline void* operator new[](size_t);
 };
+
+/**
+ * A read/write lock
+ * @short Read/write lock support
+ */
+class YATE_API RWLock : public Lockable
+{
+    friend class RWLockPrivate;
+public:
+    /**
+     * Build a read/write lock
+     * @param name Name of this lock
+     */
+    RWLock(const char* name = 0);
+
+    /**
+     * Copy constructor, creates a RWLock semaphore
+     * @param original Reference of the semaphore to share
+     */
+    RWLock(const RWLock& original);
+
+    /**
+     * Destructor
+     */
+    ~RWLock();
+
+    /**
+     * Unlock either the read or write lock held by the calling thread
+     * @return True if anything was unlocked
+     */
+    bool unlock();
+
+    /**
+     * Lock the read lock.
+     * @param maxWait Time to wait for locking to succeed, -1 to wait forever, 0 return immediately
+     * @return True if locking succeed
+     */
+    bool readLock(long maxWait = -1);
+
+    /**
+     * Lock the write lock.
+     * @param maxWait Time to wait for locking to succeed, -1 to wait forever, 0 return immediately
+     * @return True if locking succeed
+     */
+    bool writeLock(long maxWait = -1);
+
+    /**
+     * Lock the write lock. This behaves like a mutex
+     * @param maxWait Time to wait for locking to succeed, -1 to wait forever, 0 return immediately
+     * @return True if locking succeed
+     */
+    virtual bool lock(long maxWait = -1)
+	{ return writeLock(maxWait); }
+
+    /**
+     * Check if the object is currently locked - as it's asynchronous it
+     *  guarantees nothing if other thread changes the status
+     * @return True if the object was locked when the function was called
+     */
+    virtual bool locked() const;
+
+    /**
+     * Debugging method for disabling RW locks usage
+     * and replacing it with a non-recursive mutex
+     * @param disable True to disable RW locks usage
+     */
+    static void disableRWLock(bool disable);
+
+private:
+    RWLockPrivate* privDataCopy() const;
+    RWLockPrivate* m_private;
+};
+
+/**
+ * Ephemeral read lock on a read-write lock (stack allocated lock that is locked on
+ * creation and unlocked in destructor
+ */
+class RLock
+{
+public:
+    /**
+     * Create the lock, try to lock the object
+     * @param lck Reference to the object to lock
+     * @param maxWait Time in microseconds to wait, -1 wait forever
+     */
+    inline RLock(RWLock& lck, long maxWait = -1)
+ 	{ m_lock = lck.readLock(maxWait) ? &lck : 0; }
+
+    /**
+     * Create the lock, try to lock the object
+     * @param lck Pointer to the object to lock
+     * @param maxwait Time in microseconds to wait, -1 wait forever
+     */
+    inline RLock(RWLock* lck, long maxwait = -1)
+	{ m_lock = (lck && lck->readLock(maxwait)) ? lck : 0; }
+
+    /**
+     * Destroy the lock, unlock the mutex if it was locked
+     */
+    ~RLock()
+	{ if (m_lock) m_lock->unlock(); }
+
+    /**
+     * Return a pointer to the lockable object this lock holds
+     * @return A pointer to a Lockable or NULL if locking failed
+     */
+    inline RWLock* locked() const
+	{ return m_lock; }
+
+    /**
+     * Unlock the object if it was locked and drop the reference to it
+     */
+    inline void drop()
+	{ if (m_lock) m_lock->unlock(); m_lock = 0; }
+
+    /**
+     * Attempt to acquire a new lock on another object
+     * @param lck Pointer to the object to lock
+     * @param maxwait Time in microseconds to wait, -1 wait forever
+     * @return True if locking succeeded or same object was locked
+     */
+    inline bool acquire(RWLock* lck, long maxwait = -1)
+	{ return (lck && (lck == m_lock)) ||
+	    (drop(),(lck && (m_lock = lck->readLock(maxwait) ? lck : 0))); }
+
+    /**
+     * Attempt to acquire a new lock on another object
+     * @param lck Reference to the object to lock
+     * @param maxwait Time in microseconds to wait, -1 wait forever
+     * @return True if locking succeeded or same object was locked
+     */
+    inline bool acquire(RWLock& lck, long maxwait = -1)
+	{ return acquire(&lck,maxwait); }
+
+private:
+    RWLock* m_lock;
+
+    /** Make sure no Lock is ever created on heap */
+    inline void* operator new(size_t);
+
+    /** Never allocate an array of this class */
+    inline void* operator new[](size_t);
+};
+
+/**
+ * Ephemeral read lock on a read-write lock (stack allocated lock that is locked on
+ * creation and unlocked in destructor
+ */
+class WLock
+{
+public:
+    /**
+     * Create the lock, try to lock the object
+     * @param lck Reference to the object to lock
+     * @param maxWait Time in microseconds to wait, -1 wait forever
+     */
+    inline WLock(RWLock& lck, long maxWait = -1)
+ 	{ m_lock = lck.writeLock(maxWait) ? &lck : 0; }
+
+    /**
+     * Create the lock, try to lock the object
+     * @param lck Pointer to the object to lock
+     * @param maxWait Time in microseconds to wait, -1 wait forever
+     */
+    inline WLock(RWLock* lck, long maxWait = -1)
+	{ m_lock = (lck && lck->writeLock(maxWait)) ? lck : 0; }
+
+    /**
+     * Destroy the lock, unlock the mutex if it was locked
+     */
+    ~WLock()
+	{ if (m_lock) m_lock->unlock(); }
+
+    /**
+     * Return a pointer to the lockable object this lock holds
+     * @return A pointer to a Lockable or NULL if locking failed
+     */
+    inline RWLock* locked() const
+	{ return m_lock; }
+
+    /**
+     * Unlock the object if it was locked and drop the reference to it
+     */
+    inline void drop()
+	{ if (m_lock) m_lock->unlock(); m_lock = 0; }
+
+    /**
+     * Attempt to acquire a new lock on another object
+     * @param lck Pointer to the object to lock
+     * @param maxWait Time in microseconds to wait, -1 wait forever
+     * @return True if locking succeeded or same object was locked
+     */
+    inline bool acquire(RWLock* lck, long maxWait = -1)
+	{ return (lck && (lck == m_lock)) ||
+	    (drop(),(lck && (m_lock = lck->writeLock(maxWait) ? lck : 0))); }
+
+    /**
+     * Attempt to acquire a new lock on another object
+     * @param lck Reference to the object to lock
+     * @param maxWait Time in microseconds to wait, -1 wait forever
+     * @return True if locking succeeded or same object was locked
+     */
+    inline bool acquire(RWLock& lck, long maxWait = -1)
+	{ return acquire(&lck,maxWait); }
+
+private:
+    RWLock* m_lock;
+
+    /** Make sure no Lock is ever created on heap */
+    inline void* operator new(size_t);
+
+    /** Never allocate an array of this class */
+    inline void* operator new[](size_t);
+};
+
 
 /**
  * This class holds the action to execute a certain task, usually in a
@@ -6047,6 +6779,7 @@ class YATE_API Thread : public Runnable
     friend class ThreadPrivate;
     friend class MutexPrivate;
     friend class SemaphorePrivate;
+    friend class RWLockPrivate;
     YNOCOPY(Thread); // no automatic copies please
 public:
     /**
@@ -6603,12 +7336,36 @@ public:
 
     /**
      * Get the host and port of this address
-     * @return Address String (host:port)
+     * @param full Retrieve the full address, interface included
+     * @return Address String (host:port or host%iface:port)
      */
-    inline const String& addr() const {
-	    if (!m_addr)
-		updateAddr();
-	    return m_addr;
+    inline const String& addr(bool full = false) const {
+	    const String& s = full ? m_addrFull : m_addr;
+	    if (!s)
+		updateAddr(full);
+	    return s;
+	}
+
+    /**
+     * Get the interface to use for this address
+     * @return Interface to use for this address
+     */
+    inline const String& iface() const
+	{ return m_iface; }
+
+    /**
+     * Set the interface to use for this address
+     * @param name Interface to use for this address
+     * @param uriUnescape Set it to true to URI unescape the value
+     * @return True on success, false otherwise
+     */
+    inline bool iface(const char* name, bool uriUnescape = false) {
+	    m_iface = name;
+	    if (!m_iface || !uriUnescape)
+		return true;
+	    int e = -1;
+	    m_iface.uriUnescapeStr(false,&e);
+	    return e < 0;
 	}
 
     /**
@@ -6712,8 +7469,8 @@ public:
      */
     static inline unsigned int scopeId(struct sockaddr* addr) {
 #ifdef AF_INET6
-	    //if (addr && addr->sa_family == AF_INET6)
-		//return ((struct sockaddr_in6*)addr)->sin6_scope_id;
+	    if (addr && addr->sa_family == AF_INET6)
+		return ((struct sockaddr_in6*)addr)->sin6_scope_id;
 #endif
 	    return 0;
 	}
@@ -6726,10 +7483,10 @@ public:
      */
     static inline bool scopeId(struct sockaddr* addr, unsigned int val) {
 #ifdef AF_INET6
-	    //if (addr && addr->sa_family == AF_INET6) {
-		//((struct sockaddr_in6*)addr)->sin6_scope_id = val;
-		//return true;
-	    //}
+	    if (addr && addr->sa_family == AF_INET6) {
+		((struct sockaddr_in6*)addr)->sin6_scope_id = val;
+		return true;
+	    }
 #endif
 	    return false;
 	}
@@ -6739,9 +7496,11 @@ public:
      * @param buf Destination buffer
      * @param addr Address to append
      * @param family Address family, set it to Unknown to detect
+     * @param iface Optional interface name
      * @return Buffer address
      */
-    static String& appendAddr(String& buf, const String& addr, int family = Unknown);
+    static String& appendAddr(String& buf, const String& addr, int family = Unknown,
+	const String& iface = String::empty());
 
     /**
      * Append an address to a buffer in the form addr:port
@@ -6749,11 +7508,12 @@ public:
      * @param addr Address to append
      * @param port Port to append
      * @param family Address family, set it to Unknown to detect
+     * @param iface Optional interface name
      * @return Buffer address
      */
     static inline String& appendTo(String& buf, const String& addr, int port,
-	int family = Unknown) {
-	    appendAddr(buf,addr,family) << ":" << port;
+	int family = Unknown, const String& iface = String::empty()) {
+	    appendAddr(buf,addr,family,iface) << ":" << port;
 	    return buf;
 	}
 
@@ -6762,12 +7522,13 @@ public:
      * @param addr Address to append
      * @param port Port to append
      * @param family Address family, set it to Unknown to detect
+     * @param iface Optional interface name
      * @return A String with concatenated address and port
      */
-    static inline String appendTo(const String& addr, int port, int family = Unknown) {
+    static inline String appendTo(const String& addr, int port, int family = Unknown,
+	const String& iface = String::empty()) {
 	    String buf;
-	    appendTo(buf,addr,port,family);
-	    return buf;
+	    return appendTo(buf,addr,port,family,iface);
 	}
 
     /**
@@ -6791,7 +7552,7 @@ public:
     /**
      * Split an address into ip/port.
      * Handled formats: addr, addr:port, [addr], [addr]:port
-     * It is safe call this method with the same destination and source string
+     * It is safe to call this method with the same destination and source string
      * @param buf Source buffer
      * @param addr Destination buffer for address
      * @param port Destination port
@@ -6806,7 +7567,8 @@ public:
      * @param family Address family to retrieve
      * @return Address family name
      */
-	static const char* lookupFamily(int family);
+    static inline const char* lookupFamily(int family)
+	{ return lookup(family,s_familyName); }
 
     /**
      * Retrieve IPv4 null address
@@ -6826,6 +7588,22 @@ public:
      */
     static const TokenDict* dictFamilyName();
 
+    /**
+     * Retrieve the string for interface name extra URI escape in address
+     * @return Interface name extra URI escape in address
+     */
+    static inline const char* ifaceNameExtraEscape()
+	{ return s_ifaceNameExtraEscape; }
+
+    /**
+     * Escape an interface name
+     * @param buf Destination buffer
+     * @param name Interface name
+     * @return Destination buffer reference
+     */
+    static inline String& escapeIface(String& buf, const char* name)
+	{ return String::uriEscapeTo(buf,name,ifaceNameExtraEscape()); }
+
 protected:
     /**
      * Convert the host address to a String stored in m_host
@@ -6834,16 +7612,21 @@ protected:
 
     /**
      * Store host:port in m_addr
+     * Store host%iface:port in m_addrFull
+     * @param full Build the full addr
      */
-    virtual void updateAddr() const;
+    virtual void updateAddr(bool full = false) const;
 
     struct sockaddr* m_address;
     socklen_t m_length;
     String m_host;
+    String m_iface;
     mutable String m_addr;
+    mutable String m_addrFull;
 
 private:
-    static const TokenDict s_cls_familyName[];
+    static const TokenDict s_familyName[];
+    static const char* s_ifaceNameExtraEscape;
 };
 
 /**
@@ -7174,7 +7957,7 @@ public:
      * Constructor from an existing handle
      * @param handle Operating system handle to an open file
      */
-    explicit File(Y_HANDLE handle);
+    explicit File(HANDLE handle);
 
     /**
      * Destructor, closes the file
@@ -7207,19 +7990,19 @@ public:
      * Attach an existing handle to the file, closes any existing first
      * @param handle Operating system handle to an open file
      */
-    void attach(Y_HANDLE handle);
+    void attach(HANDLE handle);
 
     /**
      * Detaches the object from the file handle
      * @return The handle previously owned by this object
      */
-	Y_HANDLE detach();
+    HANDLE detach();
 
     /**
      * Get the operating system handle to the file
      * @return File handle
      */
-    inline Y_HANDLE handle() const
+    inline HANDLE handle() const
 	{ return m_handle; }
 
     /**
@@ -7238,7 +8021,7 @@ public:
      * Get the operating system specific handle value for an invalid file
      * @return Handle value for an invalid file
      */
-    static Y_HANDLE invalidHandle();
+    static HANDLE invalidHandle();
 
     /**
      * Set the blocking or non-blocking operation mode of the file
@@ -7390,7 +8173,7 @@ protected:
      */
     void copyError();
 
-	Y_HANDLE m_handle;
+    HANDLE m_handle;
 };
 
 /**
@@ -7442,6 +8225,17 @@ public:
 	// Expedited forwarding
 	ExpeditedFwd   = 0xb8,
 	VoiceAdmit     = 0xb0,
+    };
+
+    /**
+     * Platform specific available features
+     */
+    enum Features {
+	FProtoIpv6           = 0x0001, // IPv6 protocol (IPPROTO_IPV6) socket option
+	FIpv6Only            = 0x0002, // IPv6 only socket option
+	FBindToIface         = 0x0004, // Bind to specific interface for non IPv6
+	FEfficientSelect     = 0x0008, // Efficient select() is available
+	FExclusiveAddrUse    = 0x0010, // Exclusive access may be indicated in reuse
     };
 
     /**
@@ -7647,11 +8441,34 @@ public:
 
     /**
      * Associates the socket with a local address
+     * Optionally associates the socket with a local interface (device)
+     * @param addr Address to assign to this socket
+     * @param addrlen Length of the address structure
+     * @param iface Interface to bind to, may start with '#' for an interface index
+     * @param ifLen Interface string length, -1 to detect
+     * @return True if operation was successfull, false if an error occured
+     */
+    virtual bool bind(struct sockaddr* addr, socklen_t addrlen,
+	const char* iface, int ifLen = -1);
+
+    /**
+     * Associates the socket with a local address
+     * Optionally associates the socket with a local interface (device) if configured
      * @param addr Address to assign to this socket
      * @return True if operation was successfull, false if an error occured
      */
     inline bool bind(const SocketAddr& addr)
-	{ return bind(addr.address(), addr.length()); }
+	{ return bind(addr.address(),addr.length(),addr.iface(),addr.iface().length()); }
+
+    /**
+     * Associates the socket with a local interface (device)
+     * @param iface Interface to bind to, may start with '#' for an interface index
+     * @param ifLen Interface string length, -1 to detect
+     * @param family Address family
+     * NOTE: IPv6 family is ignored, it should be set in address specific field (scope id)
+     * @return True if operation was successfull, false if an error occured
+     */
+    virtual bool bindIface(const char* iface, int ifLen = -1, int family = SocketAddr::Unknown);
 
     /**
      * Start listening for incoming connections on the socket
@@ -7790,6 +8607,13 @@ public:
     bool getPeerName(SocketAddr& addr);
 
     /**
+     * Retrieve the name of the interface this socket is bound to
+     * @param buf Destination string
+     * @return True if operation was successfull, false if an error occured
+     */
+    virtual bool getBoundIface(String& buf);
+
+    /**
      * Send a message over a connected or unconnected socket
      * @param buffer Buffer for data transfer
      * @param length Length of the buffer
@@ -7922,6 +8746,13 @@ public:
      */
     static bool createPair(Socket& sock1, Socket& sock2, int domain = AF_UNIX);
 
+    /**
+     * Retrieve available features
+     * @return Available features mask
+     */
+    static inline unsigned int features()
+	{ return s_features; }
+
 protected:
 
     /**
@@ -7950,6 +8781,9 @@ protected:
 
     SOCKET m_handle;
     ObjList m_filters;
+
+private:
+    static unsigned int s_features;
 };
 
 /**
@@ -8471,7 +9305,8 @@ public:
      * Get the dictionary of cipher directions
      * @return Pointer to the dictionary of cipher directions
      */
-	static const TokenDict* directions();
+    inline static const TokenDict* directions()
+	{ return s_directions; }
 
     /**
      * Get a direction from the dictionary given the name
@@ -8479,7 +9314,8 @@ public:
      * @param defdir Default direction to return if name is empty or unknown
      * @return Direction associated with the given name
      */
-	static Direction direction(const char* name, Direction defdir = Bidir);
+    inline static Direction direction(const char* name, Direction defdir = Bidir)
+	{ return (Direction)TelEngine::lookup(name,s_directions,defdir); }
 
     /**
      * Destructor
@@ -8597,7 +9433,7 @@ public:
 	{ return decrypt(data.data(),data.length()); }
 
 private:
-    static const TokenDict s_cls_directions[];
+    static const TokenDict s_directions[];
 };
 
 /**

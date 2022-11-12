@@ -17,16 +17,17 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#include "yatengine.h"
+
 #ifdef _DEBUG_MSVC_NEW_
 #include "3rlibs/DebugNew.h"
 #define new DEBUG_NEW
 #endif
 
-#include "yatengine.h"
 
 using namespace TelEngine;
 
-const TokenDict Cipher::s_cls_directions[] =
+const TokenDict Cipher::s_directions[] =
 {
     { "bidir",   Cipher::Bidir   },
     { "encrypt", Cipher::Encrypt },
@@ -75,23 +76,5 @@ bool Cipher::initVector(const void* vect, unsigned int len, Direction dir)
 {
     return false;
 }
-
-
-const TokenDict* Cipher::directions()
-{
-	return s_cls_directions;
-}
-
-/**
- * Get a direction from the dictionary given the name
- * @param name Name of the direction
- * @param defdir Default direction to return if name is empty or unknown
- * @return Direction associated with the given name
- */
-Cipher::Direction Cipher::direction(const char* name, Cipher::Direction defdir)
-{
-	return (Cipher::Direction)TelEngine::lookup(name, s_cls_directions, defdir);
-}
-
 
 /* vi: set ts=8 sw=4 sts=4 noet: */

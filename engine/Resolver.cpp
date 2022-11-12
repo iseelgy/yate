@@ -28,12 +28,6 @@
    NO_DN_SKIPNAME: Define it if __dn_skipname() is not available at link time
 */
 
-#ifdef _DEBUG_MSVC_NEW_
-#include "3rlibs/DebugNew.h"
-#define new DEBUG_NEW
-#endif
-
-
 #include "yateclass.h"
 
 #ifdef _WINDOWS
@@ -43,6 +37,10 @@
 #include <arpa/nameser.h>
 #endif // _WINDOWS
 
+#ifdef _DEBUG_MSVC_NEW_
+#include "3rlibs/DebugNew.h"
+#define new DEBUG_NEW
+#endif
 
 using namespace TelEngine;
 

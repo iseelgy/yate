@@ -17,15 +17,16 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifdef _DEBUG_MSVC_NEW_
-#include "3rlibs/DebugNew.h"
-#define new DEBUG_NEW
-#endif
 
 #include "yatephone.h"
 
 #include <string.h>
 #include <stdlib.h>
+
+#ifdef _DEBUG_MSVC_NEW_
+#include "3rlibs/DebugNew.h"
+#define new DEBUG_NEW
+#endif
 
 using namespace TelEngine;
 
@@ -433,12 +434,6 @@ Mutex& Channel::paramMutex()
 {
     return s_paramMutex;
 }
-
-Mutex* Channel::chanDataMutex()
-{
-	return &s_chanDataMutex;
-}
-
 
 void Channel::init()
 {
@@ -1101,12 +1096,6 @@ const char* Module::messageName(int id)
     return lookup(id,s_messages);
 }
 
-int Module::relayId(const char* name)
-{
-	return lookup(name, s_messages);
-}
-
-
 Module::Module(const char* name, const char* type, bool earlyInit)
     : Plugin(name,earlyInit), Mutex(true,"Module"),
       m_init(false), m_relays(0), m_type(type), m_changed(0)
@@ -1124,31 +1113,37 @@ void* Module::getObject(const String& name) const
     return Plugin::getObject(name);
 }
 
-bool Module::installRelay(int id, const char* name, unsigned priority)
+bool Module::installRelay(int id, const char* name, unsigned priority, NamedString* filter)
 {
-    if (!(id && name && priority))
+    if (!(id && name && priority)) {
+	TelEngine::destruct(filter);
 	return false;
+    }
 
     TempObjectCounter cnt(objectsCounter(),true);
     Lock lock(this);
-    if (m_relays & id)
+    if (m_relays & id) {
+	TelEngine::destruct(filter);
 	return true;
+    }
     m_relays |= id;
 
     MessageRelay* relay = new MessageRelay(name,this,id,priority,Module::name());
+    if (filter)
+	relay->setFilter(filter);
     m_relayList.append(relay)->setDelete(false);
     Engine::install(relay);
     return true;
 }
 
-bool Module::installRelay(int id, unsigned priority)
+bool Module::installRelay(int id, unsigned priority, NamedString* filter)
 {
-    return installRelay(id,messageName(id),priority);
+    return installRelay(id,messageName(id),priority,filter);
 }
 
-bool Module::installRelay(const char* name, unsigned priority)
+bool Module::installRelay(const char* name, unsigned priority, NamedString* filter)
 {
-    return installRelay(lookup(name,s_messages),name,priority);
+    return installRelay(lookup(name,s_messages),name,priority,filter);
 }
 
 bool Module::installRelay(MessageRelay* relay)
@@ -1221,21 +1216,6 @@ void Module::changed()
     if (s_delay && !m_changed)
 	m_changed = Time::now() + s_delay*(u_int64_t)1000000;
 }
-
-unsigned int Module::updateDelay()
-{
-	return s_delay;
-}
-
-/**
- * Set the global update notification delay
- * @param delay New update delay value in seconds, 0 to disable
- */
-void Module::updateDelay(unsigned int delay)
-{
-	s_delay = delay;
-}
-
 
 void Module::msgTimer(Message& msg)
 {
@@ -1966,7 +1946,7 @@ void globalDestroyChannel()
 	s_mutex.~Mutex();
 	s_lastMutex.~Mutex();
 
-
 }
+
 
 /* vi: set ts=8 sw=4 sts=4 noet: */

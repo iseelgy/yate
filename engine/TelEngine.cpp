@@ -17,11 +17,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifdef _DEBUG_MSVC_NEW_
-#include "3rlibs/DebugNew.h"
-#define new DEBUG_NEW
-#endif
-
 #include "yateclass.h"
 #include "yatewin32.h"
 
@@ -30,6 +25,11 @@
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
+
+#ifdef _DEBUG_MSVC_NEW_
+#include "3rlibs/DebugNew.h"
+#define new DEBUG_NEW
+#endif
 
 
 #ifdef _WINDOWS
@@ -192,8 +192,8 @@ static Mutex out_mux(false,"DebugOutput");
 static Mutex ind_mux(false,"DebugIndent");
 static Thread* s_thr = 0;
 
-bool CapturedEvent::s_cls_capturing = false;
-ObjList CapturedEvent::s_cls_events;
+bool CapturedEvent::s_capturing = false;
+ObjList CapturedEvent::s_events;
 
 static bool reentered()
 {
@@ -1268,18 +1268,6 @@ ObjList& GenObject::getObjCounters()
     return s_counters;
 }
 
-bool GenObject::getObjCounting()
-{
-	return s_counting;
-}
-
-void GenObject::setObjCounting(bool enable)
-{
-	s_counting = enable;
-}
-
-
-
 
 #ifndef ATOMIC_OPS
 static MutexPool s_refMutex(REFOBJECT_MUTEX_COUNT,false,"RefObject");
@@ -1454,6 +1442,21 @@ int NamedCounter::dec()
 #endif
 }
 
+int NamedCounter::add(int val)
+{
+#ifdef ATOMIC_OPS
+#ifdef _WINDOWS
+    return InterlockedExchangeAdd((LONG*)&m_count,(LONG)val);
+#else
+    return __sync_add_and_fetch(&m_count,val);
+#endif
+#else
+    Lock lock(m_mutex);
+    m_count += val;
+    return m_count;
+#endif
+}
+
 
 void SysUsage::init()
 {
@@ -1536,7 +1539,7 @@ void globalDestroyTelEngine()
 	TelEngine::s_counters.clear();
 	TelEngine::s_countersMutex.~Mutex();
 
-	TelEngine::CapturedEvent::s_cls_events.clear();
+	//TelEngine::CapturedEvent::s_cls_events.clear();
 
 	TelEngine::out_mux.~Mutex();
 	TelEngine::ind_mux.~Mutex();

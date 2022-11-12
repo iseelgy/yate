@@ -17,15 +17,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#include "yatengine.h"
+#include "yateversn.h"
+#include "yatewin32.h"
+
 #ifdef _DEBUG_MSVC_NEW_
 #include "3rlibs/DebugNew.h"
 #define new DEBUG_NEW
 #endif
 
-
-#include "yatengine.h"
-#include "yateversn.h"
-#include "yatewin32.h"
 
 #ifdef _WINDOWS
 
@@ -40,7 +40,7 @@ typedef void (*sig_func_t)(int);
 #define YSERV_RUN 1
 #define YSERV_INS 2
 #define YSERV_DEL 4
-#define PATH_SEP "/"
+#define PATH_SEP "\\"
 #ifndef CFG_DIR
 #define CFG_DIR "Yate"
 #endif
@@ -50,7 +50,7 @@ __declspec(dllimport) BOOL WINAPI SHGetSpecialFolderPathA(HWND,LPSTR,INT,BOOL);
 #endif
 
 #else // _WINDOWS
-#include <unistd.h>
+
 #include "yatepaths.h"
 #include <dirent.h>
 #include <dlfcn.h>
@@ -75,6 +75,7 @@ static int s_childsig = 0;
 #include "MacOSXUtils.h"
 #endif
 
+#include <unistd.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
@@ -121,9 +122,7 @@ public:
     inline EngineSharedPrivate()
 	: vars(new SharedVars),
 	varsListMutex(false,"SharedVarsList")
-	{
-	
-	}
+	{}
     inline ~EngineSharedPrivate()
 	{ TelEngine::destruct(vars); }
 
@@ -292,7 +291,7 @@ NamedList Engine::s_params("");
 
 Engine::RunMode Engine::s_mode = Engine::Stopped;
 Engine::CallAccept Engine::s_accept = Engine::Accept;
-Engine* Engine::s_cls_self = 0;
+Engine* Engine::s_self = 0;
 bool Engine::s_started = false;
 int Engine::s_haltcode = -1;
 int EnginePrivate::count = 0;
@@ -713,7 +712,7 @@ void completeModule(String& ret, const String& part, ObjList& mods, bool reload,
     DDebug(DebugInfo,"completeModule path='%s' rdir='%s'",path.c_str(),rdir.c_str());
 #ifdef _WINDOWS
     WIN32_FIND_DATA entry;
-	Y_HANDLE hf = ::FindFirstFile(path + PATH_SEP "*",&entry);
+    HANDLE hf = ::FindFirstFile(path + PATH_SEP "*",&entry);
     if (hf == INVALID_HANDLE_VALUE)
 	return;
     do {
@@ -917,12 +916,6 @@ bool EngineCommand::received(Message &msg)
 		ok = true;
 		if (reload) {
 		    if (s->unload(true)) {
-
-			Message * notify = new Message("Yateshop.notify", "ok", true);
-			notify->setParam("Op", "unload module");
-			notify->setParam("module", s->safe());
-			Engine::enqueue(notify);
-
 			Engine::self()->m_libs.remove(s);
 			ok = false;
 		    }
@@ -944,12 +937,6 @@ bool EngineCommand::received(Message &msg)
 	    if (!s)
 		msg.retValue() = "Module not loaded: " + arg + "\r\n";
 	    else if (s->unload(true)) {
-
-		Message * notify = new Message("Yateshop.notify", "ok", true);
-		notify->setParam("Op", "unload module");
-		notify->setParam("module", s->safe());
-		Engine::enqueue(notify);
-
 		Engine::self()->m_libs.remove(s);
 		msg.retValue() = "Unloaded module: " + arg + "\r\n";
 	    }
@@ -1572,19 +1559,21 @@ Engine::Engine()
     initUsrPath(s_usrpath);
 }
 
+void globalDestroyBase64();
 void globalDestroyChannel();
 void globalDestroyClient();
 void globalDestroyClientLogic();
+void globalDestroyDataFormate();
 void globalDestroyEngine();
 void globalDestroyMine();
+void globalDestroySocket();
+void globalDestroyString();
+void globalDestroyTelEngine();
+void globalDestroyThread();
 void globalDestroyURI();
 void globalDestroyXML();
-void globalDestroySocket();
-void globalDestroyBase64();
-void globalDestroyTelEngine();
-void globalDestroyDataFormate();
-void globalDestroyString();
-void globalDestroyThread();
+
+
 
 Engine::~Engine()
 {
@@ -1592,22 +1581,12 @@ Engine::~Engine()
     Debugger debug("Engine::~Engine()"," libs=%u plugins=%u [%p]",
 	m_libs.count(),plugins.count(),this);
 #endif
-    assert(this == s_cls_self);
+    assert(this == s_self);
     m_dispatcher.clear();
     m_libs.clear();
     s_events.clear();
 
-	// ====================
-	// 
 
-	Engine::s_node.clear();
-	Engine::s_shrpath.clear();
-	Engine::s_cfgsuffix.clear();
-	Engine::s_modpath.clear();
-	Engine::s_modsuffix.clear();
-
-	Engine::s_params.clear();
-	Engine::s_params.clearParams();
 
 	globalDestroyEngine();
 	globalDestroyClientLogic();
@@ -1623,10 +1602,8 @@ Engine::~Engine()
 	globalDestroyString();
 	globalDestroyThread();
 	//
-	//=====================
-
     s_mode = Stopped;
-	s_cls_self = 0;
+    s_self = 0;
 }
 
 int Engine::engineInit()
@@ -2114,38 +2091,10 @@ void Engine::internalStatisticsStart()
 
 Engine* Engine::self()
 {
-    if (!s_cls_self)
-		s_cls_self = new Engine;
-    return s_cls_self;
+    if (!s_self)
+	s_self = new Engine;
+    return s_self;
 }
-
-Engine::RunMode Engine::mode()
-{
-	return s_mode;
-}
-
-bool Engine::clientMode()
-{
-	return (s_mode == Client) || (s_mode == ClientProxy);
-}
-
-Engine::CallAccept Engine::accept() {
-	return (s_congestion && (s_accept < Congestion)) ? Congestion : s_accept;
-}
-
-/**
- * Set call accept status
- * @param ca New call accept status as enumerated value
- */
-void Engine::setAccept(CallAccept ca) {
-	s_accept = ca;
-}
-
-const TokenDict* Engine::getCallAcceptStates() {
-	return s_callAccept;
-}
-
-
 
 void Engine::setCongestion(const char* reason)
 {
@@ -2169,12 +2118,6 @@ void Engine::setCongestion(const char* reason)
 		Debug("engine",DebugNote,"Engine extra congestion: %s",reason);
     }
 }
-
-unsigned int Engine::getCongestion()
-{
-	return s_congestion;
-}
-
 
 const char* Engine::pathSeparator()
 {
@@ -2210,7 +2153,7 @@ const Configuration& Engine::config()
 
 bool Engine::Register(const Plugin* plugin, bool reg)
 {
-    DDebug(DebugInfo,"Engine::Register(%p,%d,%s)",plugin,reg, plugin->name().safe());
+    DDebug(DebugInfo,"Engine::Register(%p,%d)",plugin,reg);
     ObjList *p = plugins.find(plugin);
     if (reg) {
 	if (p)
@@ -2227,12 +2170,6 @@ bool Engine::Register(const Plugin* plugin, bool reg)
 	p->remove(false);
     return true;
 }
-
-const String& Engine::nodeName()
-{
-	return s_node;
-}
-
 
 bool Engine::loadPlugin(const char* file, bool local, bool nounload)
 {
@@ -2281,8 +2218,6 @@ void Engine::tryPluginFile(const String& name, const String& path, bool defload)
 	s_cfg.getBoolValue(YSTRING("nounload"),name));
 }
 
-static Regexp r_static("^\\([/\\]\\|[[:alpha:]]:[/\\]\\).");
-
 bool Engine::loadPluginDir(const String& relPath)
 {
 #ifdef DEBUG
@@ -2290,7 +2225,8 @@ bool Engine::loadPluginDir(const String& relPath)
 #endif
     bool defload = s_cfg.getBoolValue("general","modload",true);
     String path = s_modpath;
-    if (r_static.matches(relPath))
+    static const Regexp r("^\\([/\\]\\|[[:alpha:]]:[/\\]\\).");
+    if (r.matches(relPath))
 	path = relPath;
     else if (relPath) {
 	if (!path.endsWith(PATH_SEP))
@@ -2312,7 +2248,7 @@ bool Engine::loadPluginDir(const String& relPath)
 	path = path.substr(0,path.length()-1);
 #ifdef _WINDOWS
     WIN32_FIND_DATA entry;
-	Y_HANDLE hf = ::FindFirstFile(path + PATH_SEP "*",&entry);
+    HANDLE hf = ::FindFirstFile(path + PATH_SEP "*",&entry);
     if (hf == INVALID_HANDLE_VALUE) {
 	Debug(DebugWarn,"Engine::loadPlugins() failed directory '%s'",path.safe());
 	return false;
@@ -2426,18 +2362,6 @@ void Engine::halt(unsigned int code)
 	s_haltcode = code;
 }
 
-bool Engine::started()
-{
-	return s_started;
-}
-
-bool Engine::exiting()
-{
-	return (s_haltcode != -1);
-}
-
-
-
 bool Engine::restart(unsigned int code, bool gracefull)
 {
     if ((s_super_handle < 0) || (s_haltcode != -1))
@@ -2456,7 +2380,7 @@ void Engine::init()
 
 bool Engine::init(const String& name)
 {
-    if (exiting() || !s_cls_self)
+    if (exiting() || !s_self)
 	return false;
     if (name.null() || name == "*" || name == "all") {
 	s_init = true;
@@ -2467,7 +2391,7 @@ bool Engine::init(const String& name)
     msg.addParam("plugin",name);
     if (nodeName())
 	msg.addParam("nodename",nodeName());
-    bool ok = s_cls_self->m_dispatcher.dispatch(msg);
+    bool ok = s_self->m_dispatcher.dispatch(msg);
     Plugin* p = static_cast<Plugin*>(plugins[name]);
     if (p) {
 	TempObjectCounter cnt(p->objectsCounter(),true);
@@ -2479,19 +2403,13 @@ bool Engine::init(const String& name)
 
 bool Engine::install(MessageHandler* handler)
 {
-    return s_cls_self ? s_cls_self->m_dispatcher.install(handler) : false;
+    return s_self ? s_self->m_dispatcher.install(handler) : false;
 }
 
 bool Engine::uninstall(MessageHandler* handler)
 {
-    return s_cls_self ? s_cls_self->m_dispatcher.uninstall(handler) : false;
+    return s_self ? s_self->m_dispatcher.uninstall(handler) : false;
 }
-
-MessageDispatcher* Engine::dispatcher()
-{
-	return s_cls_self ? &(s_cls_self->m_dispatcher) : 0;
-}
-
 
 bool Engine::enqueue(Message* msg, bool skipHooks)
 {
@@ -2509,7 +2427,7 @@ bool Engine::enqueue(Message* msg, bool skipHooks)
 	    return true;
 	}
     }
-    if (s_cls_self && s_cls_self->m_dispatcher.enqueue(msg)) {
+    if (s_self && s_self->m_dispatcher.enqueue(msg)) {
 	Semaphore*s = s_semWorkers;
 	if (s)
 	    s->unlock();
@@ -2520,22 +2438,22 @@ bool Engine::enqueue(Message* msg, bool skipHooks)
 
 bool Engine::dispatch(Message* msg)
 {
-    return (msg && s_cls_self) ? s_cls_self->m_dispatcher.dispatch(*msg) : false;
+    return (msg && s_self) ? s_self->m_dispatcher.dispatch(*msg) : false;
 }
 
 bool Engine::dispatch(Message& msg)
 {
-    return s_cls_self ? s_cls_self->m_dispatcher.dispatch(msg) : false;
+    return s_self ? s_self->m_dispatcher.dispatch(msg) : false;
 }
 
 bool Engine::dispatch(const char* name, bool broadcast)
 {
-    if (!(s_cls_self && name && *name))
+    if (!(s_self && name && *name))
 	return false;
     Message msg(name,0,broadcast);
     if (nodeName())
 	msg.addParam("nodename",nodeName());
-    return s_cls_self->m_dispatcher.dispatch(msg);
+    return s_self->m_dispatcher.dispatch(msg);
 }
 
 bool Engine::installHook(MessageHook* hook)
@@ -2556,22 +2474,10 @@ void Engine::uninstallHook(MessageHook* hook)
     s_hooks.remove(hook);
 }
 
-const String& Engine::trackParam()
-{
-	return s_cls_self ? s_cls_self->m_dispatcher.trackParam() : String::empty();
-}
-
-
 unsigned int Engine::runId()
 {
     return s_runid;
 }
-
-const NamedList& Engine::runParams()
-{
-	return s_params;
-}
-
 
 const ObjList* Engine::events(const String& type)
 {
@@ -2697,6 +2603,7 @@ void Engine::initLibrary(const String& line, String* output)
 			    ENGINE_SET_VAL_BREAK('s',s_lateabrt,true);
 			    ENGINE_INSTR_BREAK('m',setLockableWait());
 			    ENGINE_INSTR_BREAK('d',Lockable::enableSafety());
+			    ENGINE_INSTR_BREAK('r',RWLock::disableRWLock(true));
 			    default:
 				unkArgs.append("-D" + String(*pc)," ");
 			}
@@ -2755,28 +2662,6 @@ int Engine::cleanupLibrary()
     }
     return s_haltcode & 0xff;
 }
-
-const String& Engine::sharedPath()
-{
-	return s_shrpath;
-}
-
-const String& Engine::configSuffix()
-{
-	return s_cfgsuffix;
-}
-
-const String& Engine::modulePath()
-{
-	return s_modpath;
-}
-
-const String& Engine::moduleSuffix()
-{
-	return s_modsuffix;
-}
-
-
 
 static void usage(bool client, FILE* f)
 {
@@ -3057,6 +2942,9 @@ int Engine::main(int argc, const char** argv, const char** env, RunMode mode, En
 				case 'd':
 				    Lockable::enableSafety();
 				    break;
+				case 'r':
+				    RWLock::disableRWLock(true);
+				    break;
 #ifdef RTLD_GLOBAL
 				case 'l':
 				    s_localsymbol = true;
@@ -3333,7 +3221,6 @@ void Engine::help(bool client, bool errout)
     usage(client, errout ? stderr : stdout);
 }
 
-
 void globalDestroyEngine()
 {
 
@@ -3349,7 +3236,7 @@ void globalDestroyEngine()
 	s_startMsg.clear();
 	s_startMsg.clear();
 
-	r_static.clear();
+	//r_static.clear();
 	s_userdir.clear();
 
 	s_vars.~EngineSharedPrivate();
@@ -3360,5 +3247,6 @@ void globalDestroyEngine()
 	s_hooksMutex.~Mutex();
 
 }
+
 
 /* vi: set ts=8 sw=4 sts=4 noet: */

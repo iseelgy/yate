@@ -19,12 +19,13 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#include "yatecbase.h"
+
 #ifdef _DEBUG_MSVC_NEW_
 #include "3rlibs/DebugNew.h"
 #define new DEBUG_NEW
 #endif
 
-#include "yatecbase.h"
 
 namespace TelEngine {
 
@@ -12657,6 +12658,7 @@ void globalDestroyClientLogic()
 
 	PendingRequest::s_mutex.~Mutex();
 	ClientLogic::s_protocolsMutex.~Mutex();
+
 
 
 }

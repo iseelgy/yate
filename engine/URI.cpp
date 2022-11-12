@@ -17,19 +17,25 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#include "yateclass.h"
+
 #ifdef _DEBUG_MSVC_NEW_
 #include "3rlibs/DebugNew.h"
 #define new DEBUG_NEW
 #endif
 
 
-#include "yateclass.h"
-
 using namespace TelEngine;
 
 static String s_jabber("jabber");
 static String s_xmpp("xmpp");
 static String s_tel("tel");
+
+static Regexp r1("^[[:space:]]*\"\\([^\"]\\+\\)\"[[:space:]]*\\(.*\\)$");
+static Regexp r2("^[[:space:]]*\\([^<]*[^<[:space:]]\\)[[:space:]]*<\\([^>]\\+\\)");
+static Regexp r3("<\\([^>]\\+\\)>");
+static Regexp r4("^\\([[:alpha:]][[:alnum:]]\\+:\\)\\?/\\?/\\?\\([^[:space:][:cntrl:]@]\\+@\\)\\?\\([[:alnum:]._+-]\\+\\|[[][[:xdigit:].:]\\+[]]\\)\\(:[0-9]\\+\\)\\?");
+
 
 URI::URI()
     : m_parsed(false)
@@ -90,12 +96,6 @@ void URI::changed()
     String::changed();
 }
 
-static Regexp static_r4("^\\([[:alpha:]][[:alnum:]]\\+:\\)\\?/\\?/\\?\\([^[:space:][:cntrl:]@]\\+@\\)\\?\\([[:alnum:]._+-]\\+\\|[[][[:xdigit:].:]\\+[]]\\)\\(:[0-9]\\+\\)\\?");
-static Regexp static_r1("^[[:space:]]*\"\\([^\"]\\+\\)\"[[:space:]]*\\(.*\\)$");
-static Regexp static_r2("^[[:space:]]*\\([^<]*[^<[:space:]]\\)[[:space:]]*<\\([^>]\\+\\)");
-static Regexp static_r3("<\\([^>]\\+\\)>");
-
-
 void URI::parse() const
 {
     if (m_parsed)
@@ -107,10 +107,10 @@ void URI::parse() const
     // the compiler generates wrong code so use the temporary
     String tmp(*this);
     bool hasDesc = false;
-    if (tmp.matches(static_r1))
+    if (tmp.matches(r1))
 	hasDesc = true;
     else {
-	hasDesc = tmp.matches(static_r2);
+	hasDesc = tmp.matches(r2);
     }
     if (hasDesc) {
 	m_desc = tmp.matchString(1);
@@ -119,7 +119,7 @@ void URI::parse() const
 	DDebug("URI",DebugAll,"new value='%s' [%p]",c_str(),this);
     }
 
-    if (tmp.matches(static_r3)) {
+    if (tmp.matches(r3)) {
 	tmp = tmp.matchString(1);
 	*const_cast<URI*>(this) = tmp;
 	DDebug("URI",DebugAll,"new value='%s' [%p]",c_str(),this);
@@ -131,7 +131,7 @@ void URI::parse() const
     // [proto:][//][user@]hostname[:port][/path][;params][?params][&params]
 
     // hack: use while only so we could break out of it
-    while (tmp.matches(static_r4)) {
+    while (tmp.matches(r4)) {
 	int errptr = -1;
 	m_proto = tmp.matchString(1).toLower();
 	m_proto = m_proto.substr(0,m_proto.length()-1);
@@ -171,11 +171,10 @@ void URI::parse() const
 
 void globalDestroyURI()
 {
-
-	static_r1.clear();
-	static_r4.clear();
-	static_r2.clear();
-	static_r3.clear();
+	r1.clear();
+	r2.clear();
+	r3.clear();
+	r4.clear();
 
 	s_jabber.clear();
 	s_xmpp.clear();

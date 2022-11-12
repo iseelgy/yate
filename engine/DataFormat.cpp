@@ -17,17 +17,17 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifdef _DEBUG_MSVC_NEW_
-#include "3rlibs/DebugNew.h"
-#define new DEBUG_NEW
-#endif
-
-
 #include "yatephone.h"
 #include "yatewin32.h"
 
 #include <string.h>
 #include <stdlib.h>
+
+#ifdef _DEBUG_MSVC_NEW_
+#include "3rlibs/DebugNew.h"
+#define new DEBUG_NEW
+#endif
+
 
 namespace TelEngine {
 
@@ -1298,7 +1298,7 @@ void DataTranslator::compose(TranslatorFactory* factory)
 			XDebug(DebugAll,"Can already convert '%s' to '%s'",c2->src->name,c->dest->name);
 			continue;
 		    }
-		    DDebug(DebugAll,"Building chain (%s)%s%s -> (%s) -> %s%s(%s)",
+		    DDebug(DebugInfo,"Building chain (%s)%s%s -> (%s) -> %s%s(%s)",
 			c2->src->name,
 			f2->intermediate() ? " -> " : "",
 			f2->intermediate() ? f2->intermediate()->name : "",
@@ -1314,7 +1314,7 @@ void DataTranslator::compose(TranslatorFactory* factory)
 			XDebug(DebugAll,"Can already convert '%s' to '%s'",c->src->name,c2->dest->name);
 			continue;
 		    }
-		    DDebug(DebugAll,"Building chain (%s)%s%s -> (%s) -> %s%s(%s)",
+		    DDebug(DebugInfo,"Building chain (%s)%s%s -> (%s) -> %s%s(%s)",
 			c->src->name,
 			factory->intermediate() ? " -> " : "",
 			factory->intermediate() ? factory->intermediate()->name : "",
@@ -1807,7 +1807,6 @@ DataTranslator* ChainedFactory::create(const DataFormat& sFormat, const DataForm
     return trans2;
 }
 
-
 void globalDestroyDataFormate()
 {
 
@@ -1822,6 +1821,5 @@ void globalDestroyDataFormate()
 	DataTranslator::s_mutex.~Mutex();
 
 }
-
 
 /* vi: set ts=8 sw=4 sts=4 noet: */
