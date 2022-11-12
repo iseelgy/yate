@@ -19,7 +19,7 @@
  */
 
 #include "util.h"
-
+#include "yatewin32.h"
 #include <string.h>
 
 namespace TelEngine {

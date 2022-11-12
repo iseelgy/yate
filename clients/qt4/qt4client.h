@@ -757,9 +757,6 @@ public:
      */
     static void dumpMime(String& buf, const QMimeData* m);
 
-
-	void demoWald(Window* wnd, const String& name, NamedList* params = 0);
-
 protected:
     virtual void loadWindows(const char* file = 0);
     virtual bool isUIThread();

@@ -78,7 +78,7 @@ SIPMessage::SIPMessage(SIPParty* ep, const char* buf, int len, unsigned int* bod
       m_answer(false), m_outgoing(false), m_ack(false), m_cseq(-1), m_flags(-1),
       m_dontSend(false)
 {
-    DDebug(DebugAll,"SIPMessage::SIPMessage(%p,%d) [%p]\r\n------\r\n%s------",
+    DDebug(DebugInfo,"SIPMessage::SIPMessage(%p,%d) [%p]\r\n------\r\n%s------",
 	buf,len,this,buf);
     if (m_ep)
 	m_ep->ref();
@@ -651,7 +651,7 @@ const DataBlock& SIPMessage::getBuffer() const
 	if (body)
 	    m_data += body->getBody();
 #ifdef DEBUG
-	if (debugAt(DebugAll)) {
+	if (debugAt(DebugInfo)) {
 	    String buf((char*)m_data.data(),m_data.length());
 	    TraceDebug(msgTraceId,DebugInfo,"SIPMessage::getBuffer() [%p]\r\n------\r\n%s------",
 		this,buf.c_str());

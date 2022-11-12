@@ -21,7 +21,8 @@
 #include <yatesip.h>
 #include <yateversn.h>
 #include "util.h"
-#include "yatewin32.h"
+#include <yatewin32.h>
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>

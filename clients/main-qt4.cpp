@@ -81,20 +81,9 @@ static int mainLoop()
     return 0;
 }
 
-//static 
-
-static void YateLogFunc(int level, const char* v1, const char*v2, const char*v3)
-{
-	String s = v1; s += "\r\n";
-	OutputDebugStringA(s.safe());
-}
-
-
 extern "C" int main(int argc, const char** argv, const char** envp)
 {
     TelEngine::Engine::extraPath("qt4");
-	TelEngine::debugLevel(TelEngine::DebugInfo);
-	TelEngine::Debugger::setRelayHook(YateLogFunc);
     return TelEngine::Engine::main(argc,argv,envp,TelEngine::Engine::Client,&mainLoop);
 }
 /* vi: set ts=8 sw=4 sts=4 noet: */

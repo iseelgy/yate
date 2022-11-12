@@ -30,7 +30,7 @@
 #ifdef LIBYRADIO_EXPORTS
 #define YRADIO_API __declspec(dllexport)
 #else
-#ifdef LIBYRADIO_NO_STATIC
+#ifndef LIBYRADIO_STATIC
 #define YRADIO_API __declspec(dllimport)
 #endif
 #endif

@@ -661,7 +661,6 @@ bool AesCtrCipher::encrypt(void* outData, unsigned int len, const void* inpData)
 	inpData = outData;
     unsigned int num = 0;
     unsigned char eCountBuf[AES_BLOCK_SIZE];
-	/*
     AES_ctr128_encrypt(
 	(const unsigned char*)inpData,
 	(unsigned char*)outData,
@@ -671,8 +670,6 @@ bool AesCtrCipher::encrypt(void* outData, unsigned int len, const void* inpData)
 	eCountBuf,
 	&num);
     return true;
-	*/
-	return false;
 }
 
 bool AesCtrCipher::decrypt(void* outData, unsigned int len, const void* inpData)

@@ -3598,10 +3598,6 @@ bool QtClient::action(Window* wnd, const String& name, NamedList* params)
     String tmp = name;
     if (tmp.startSkip("openurl:",false))
 	return openUrl(tmp);
-	if (tmp.startSkip("pushButton")) {
-		demoWald(wnd, name, params);
-		return true;
-	}
     return Client::action(wnd,name,params);
 }
 
@@ -3824,7 +3820,6 @@ void QtClient::buildFrameUiWidgets(QWidget* parent)
     if (!parent)
 	return;
     QList<QFrame*> frm = qFindChildren<QFrame*>(parent);
-	int tsize = frm.size();
     for (int i = 0; i < frm.size(); i++) {
 	if (!getBoolProperty(frm[i],"_yate_uiwidget"))
 	    continue;
@@ -4302,31 +4297,6 @@ int QtClient::str2align(const String& flags, int initVal)
     }
     TelEngine::destruct(list);
     return initVal;
-}
-
-
-
-
-void QtClient::demoWald(Window* wnd, const String& name, NamedList* params)
-{
-	Debug(DebugLevel::DebugInfo, "Demo Wald");
-
-	if (wnd->toString() == "mainwindow") 
-	{
-	
-
-		// frame_messages
-
-		//NamedList* upd = myBuildNotifArea(rows, "loginfail", account, String::empty(), "Login failure");
-		//upd->addParam("text", "Hi");
-		// Enable/disable account edit
-		//const char* ok = String::boolText(false);
-		//upd->addParam("active:messages_acc_edit", ok);
-		// logic->showNotificationArea(true, wnd, &rows, "Hello");
-
-	}
-	
-
 }
 
 // Retrieve QT selection mode from a string value

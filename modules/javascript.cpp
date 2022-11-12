@@ -41,6 +41,14 @@
 using namespace TelEngine;
 namespace { // anonymous
 
+static inline void pushStackResNull(ObjList& stack, ExpOperation* oper)
+{
+    if (oper)
+	ExpEvaluator::pushOne(stack,oper);
+    else
+	ExpEvaluator::pushOne(stack,JsParser::nullClone());
+}
+
 // Temporary class used to store an object from received parameter or build a new one to be used
 // Safely release created object
 template <class Obj> class ExpOpTmpObj
@@ -61,13 +69,14 @@ private:
     bool m_del;
 };
 
-class JPathTmpParam : public ExpOpTmpObj<JPath>
-{
-public:
-    inline JPathTmpParam(ExpOperation& op)
-	: ExpOpTmpObj(YOBJECT(JPath,&op),op)
-	{}
-};
+#define JS_EXP_OP_TMP_OBJ(T) \
+class T##TmpParam : public ExpOpTmpObj<T> \
+{ public: inline T##TmpParam(ExpOperation& op) : ExpOpTmpObj(YOBJECT(T,&op),op) {} }
+
+JS_EXP_OP_TMP_OBJ(JPath);
+JS_EXP_OP_TMP_OBJ(XPath);
+
+#undef JS_EXP_OP_TMP_OBJ
 
 static inline void dumpTraceToMsg(Message* msg, ObjList* lst)
 {
@@ -173,26 +182,65 @@ private:
     RefPointer<JsMessage> m_message;
 };
 
+class JsGlobal;
+
+class JsGlobalInstance : public RefObject
+{
+public:
+    JsGlobalInstance(JsGlobal* owner, unsigned int index);
+    ~JsGlobalInstance();
+    unsigned int runMain();
+    inline ScriptContext* context()
+	{ return m_context; }
+    const String& toString() const
+	{ return m_name; }
+private:
+    JsGlobal* m_owner;
+    RefPointer<ScriptContext> m_context;
+    String m_name;
+    unsigned int m_instance;
+};
+
 class JsGlobal : public NamedString
 {
 public:
-    JsGlobal(const char* scriptName, const char* fileName, bool relPath = true, bool fromCfg = true);
+    JsGlobal(const char* scriptName, const char* fileName, bool relPath = true,
+	     bool fromCfg = true, unsigned int instances = 1);
     virtual ~JsGlobal();
     bool load();
     bool fileChanged(const char* fileName) const;
+    bool updateInstances(unsigned int instances);
     inline JsParser& parser()
 	{ return m_jsCode; }
-    inline ScriptContext* context()
-	{ return m_context; }
     inline const String& fileName()
 	{ return m_file; }
+    inline unsigned int instances() const
+	{ return m_instanceCount; }
+    inline JsGlobalInstance* getInstance(unsigned int idx) const
+    {
+	String str = name();
+	if (idx)
+	    str << "/" << idx;
+	JsGlobalInstance* inst = static_cast<JsGlobalInstance*>(m_instances[str]);
+	if (inst && inst->ref())
+	    return inst;
+	return 0;
+    }
+    inline JsGlobalInstance* getInstance(const String& name) const
+    {
+	JsGlobalInstance* inst = static_cast<JsGlobalInstance*>(m_instances[name]);
+	if (inst && inst->ref())
+	    return inst;
+	return 0;
+    }
     bool runMain();
     static void markUnused();
     static void freeUnused();
     static void reloadDynamic();
-    static bool initScript(const String& scriptName, const String& fileName, bool relPath = true, bool fromCfg = true);
+    static bool initScript(const String& scriptName, const String& fileName, 
+	bool relPath = true, bool fromCfg = true, unsigned int instances = 0);
     static bool reloadScript(const String& scriptName);
-    static void loadScripts(const NamedList* sect);
+    static void loadScripts(const NamedList* sect, const NamedList* instSect);
     inline static ObjList& globals()
 	{ return s_globals; }
     inline static void unloadAll()
@@ -203,13 +251,14 @@ public:
 
 private:
     static bool buildNewScript(Lock& lck, ObjList* old, const String& scriptName,
-	const String& fileName, bool relPath, bool fromCfg, bool fromInit = false);
+	const String& fileName, bool relPath, bool fromCfg, bool fromInit = false, unsigned int instances = 0);
 
     JsParser m_jsCode;
-    RefPointer<ScriptContext> m_context;
     bool m_inUse;
     bool m_confLoaded;
     String m_file;
+    unsigned int m_instanceCount;
+    ObjList m_instances;
     static ObjList s_globals;
 };
 
@@ -520,6 +569,8 @@ public:
 	    params().addParam(new ExpFunction("htoa"));
 	    params().addParam(new ExpFunction("btoh"));
 	    params().addParam(new ExpFunction("htob"));
+	    params().addParam(new ExpFunction("instanceIndex"));
+	    params().addParam(new ExpFunction("instanceCount"));
 	    addConstructor(params(),"Semaphore",new JsSemaphore(mtx));
 	    addConstructor(params(),"HashList",new JsHashList(mtx));
 	    addConstructor(params(),"URI",new JsURI(mtx));
@@ -728,6 +779,7 @@ public:
 	    params().addParam(new ExpFunction("setFileTime"));
 	    params().addParam(new ExpFunction("getContent"));
 	    params().addParam(new ExpFunction("setContent"));
+	    params().addParam(new ExpFunction("listDirectory"));
 	}
     static void initialize(ScriptContext* context);
 protected:
@@ -752,6 +804,8 @@ public:
 	    params().addParam(new ExpFunction("getBoolValue"));
 	    params().addParam(new ExpFunction("setValue"));
 	    params().addParam(new ExpFunction("addValue"));
+	    params().addParam(new ExpFunction("setValues"));
+	    params().addParam(new ExpFunction("addValues"));
 	    params().addParam(new ExpFunction("clearSection"));
 	    params().addParam(new ExpFunction("clearKey"));
 	    params().addParam(new ExpFunction("keys"));
@@ -791,12 +845,72 @@ protected:
 	    params().addParam(new ExpFunction("getBoolValue"));
 	    params().addParam(new ExpFunction("setValue"));
 	    params().addParam(new ExpFunction("addValue"));
+	    params().addParam(new ExpFunction("setValues"));
+	    params().addParam(new ExpFunction("addValues"));
 	    params().addParam(new ExpFunction("clearKey"));
 	    params().addParam(new ExpFunction("keys"));
 	}
     bool runNative(ObjList& stack, const ExpOperation& oper, GenObject* context);
 private:
     RefPointer<JsConfigFile> m_owner;
+};
+
+/**
+ * XML path class
+ * @short Javascript XML path
+ */
+class JsXPath : public JsObject
+{
+public:
+    inline JsXPath(ScriptMutex* mtx)
+	: JsObject("XPath",mtx,true),
+	m_path(0,XPath::LateParse)
+	{
+	    XDebug(DebugAll,"JsXPath::JsXPath() [%p]",this);
+	    params().addParam(new ExpFunction("valid"));
+	    params().addParam(new ExpFunction("absolute"));
+	    params().addParam(new ExpFunction("getPath"));
+	    params().addParam(new ExpFunction("getItems"));
+	    params().addParam(new ExpFunction("getError"));
+	    params().addParam(new ExpFunction("describeError"));
+	}
+    virtual void* getObject(const String& name) const;
+    virtual JsObject* runConstructor(ObjList& stack, const ExpOperation& oper, GenObject* context);
+    virtual void initConstructor(JsFunction* construct)
+	{
+	    // Find contents
+	    construct->params().addParam(new ExpOperation((int64_t)XPath::FindXml,"FindXml"));
+	    construct->params().addParam(new ExpOperation((int64_t)XPath::FindText,"FindText"));
+	    construct->params().addParam(new ExpOperation((int64_t)XPath::FindAttr,"FindAttr"));
+	    construct->params().addParam(new ExpOperation((int64_t)XPath::FindAny,"FindAny"));
+	    // XPath flags
+	    construct->params().addParam(new ExpOperation((int64_t)XPath::StrictParse,"StrictParse"));
+	    construct->params().addParam(new ExpOperation((int64_t)XPath::IgnoreEmptyResult,"IgnoreEmptyResult"));
+	    construct->params().addParam(new ExpOperation((int64_t)XPath::NoXmlNameCheck,"NoXmlNameCheck"));
+	    // Static functions
+	    construct->params().addParam(new ExpFunction("escapeString"));
+	}
+    virtual const XPath& path() const
+	{ return m_path; }
+    virtual const String& toString() const
+	{ return m_path; }
+    static void initialize(ScriptContext* context);
+
+protected:
+    inline JsXPath(ScriptMutex* mtx, unsigned int line, const char* path, unsigned int flags = 0)
+	: JsObject(mtx,path,line),
+	  m_path(path,flags)
+	{ }
+    inline JsXPath(ScriptMutex* mtx, const char* name, unsigned int line, const XPath& path)
+	: JsObject(mtx,name,line),
+	  m_path(path)
+	{ }
+    virtual JsObject* clone(const char* name, const ExpOperation& oper) const
+	{ return new JsXPath(mutex(),name,oper.lineNumber(),m_path); }
+    bool runNative(ObjList& stack, const ExpOperation& oper, GenObject* context);
+
+private:
+    XPath m_path;
 };
 
 class JsXML : public JsObject
@@ -824,6 +938,10 @@ public:
 	    params().addParam(new ExpFunction("getText"));
 	    params().addParam(new ExpFunction("setText"));
 	    params().addParam(new ExpFunction("getChildText"));
+	    params().addParam(new ExpFunction("getChildByPath"));
+	    params().addParam(new ExpFunction("getChildrenByPath"));
+	    params().addParam(new ExpFunction("getTextByPath"));
+	    params().addParam(new ExpFunction("getAnyByPath"));
 	    params().addParam(new ExpFunction("xmlText"));
 	    params().addParam(new ExpFunction("replaceParams"));
 	    params().addParam(new ExpFunction("saveFile"));
@@ -865,6 +983,24 @@ public:
 protected:
     bool runNative(ObjList& stack, const ExpOperation& oper, GenObject* context);
 private:
+    inline ExpWrapper* xmlWrapper(const ExpOperation& oper, const XmlElement* xml)
+	{ return new ExpWrapper(new JsXML(mutex(),oper.lineNumber(),(XmlElement*)xml,owner())); }
+    inline ExpOperation* buildAny(const GenObject* gen, const ExpOperation& oper, GenObject* context) {
+	    if (!gen)
+		return 0;
+	    GenObject* g = (GenObject*)gen;
+	    XmlElement* xml = YOBJECT(XmlElement,g);
+	    if (xml)
+		return xmlWrapper(oper,xml);
+	    // Attribute ?
+	    NamedString* ns = YOBJECT(NamedString,g);
+	    if (!ns)
+		return new ExpOperation(g->toString().safe(),"text");
+	    JsObject* jso = new JsObject(context,oper.lineNumber(),mutex());
+	    jso->setStringField("name",ns->name());
+	    jso->setStringField("value",*ns);
+	    return new ExpWrapper(jso,"attribute");
+	}
     static XmlElement* getXml(const String* obj, bool take);
     static XmlElement* buildXml(const String* name, const String* text = 0);
     XmlElement* m_xml;
@@ -1141,6 +1277,7 @@ static void contextInit(ScriptRun* runner, const char* name = 0, JsAssist* assis
     JsJSON::initialize(ctx);
     JsDNS::initialize(ctx);
     JsShared::initialize(ctx);
+    JsXPath::initialize(ctx);
     if (s_autoExt)
 	contextLoad(ctx,name);
 }
@@ -1153,6 +1290,24 @@ static int counterSort(GenObject* obj1, GenObject* obj2, void* context)
     int c1 = s1 ? s1->count() : 0;
     int c2 = s2 ? s2->count() : 0;
     return c1 < c2 ? 1 : (c1 > c2 ? -1 : 0);
+}
+
+// Sort and dump a list of object counters
+static void dumpAllocations(String& out, ObjList* counters, unsigned int count, ScriptCode* code)
+{
+    if (!(counters && code))
+	return;
+    counters->sort(counterSort);
+
+    unsigned int i = 0;
+    for (ObjList* o = counters->skipNull(); o && i < count; o = o->skipNext(), i++) {
+	NamedCounter* c = static_cast<NamedCounter*>(o->get());
+	uint64_t line = c->toString().toUInt64();
+	String fn;
+	unsigned int fl = 0;
+	code->getFileLine(line,fn,fl,false);
+	out << "\r\n" << fn << ":" << fl << " " << c->count();
+    }
 }
 
 // Obtain a string with top object allocations from context ctx
@@ -1168,22 +1323,46 @@ static bool evalCtxtAllocations(String& retVal, unsigned int count, ScriptContex
 	retVal << "Script '" << scrName << "' has no active object tracking\r\n";
 	return true;
     }
-    objCounters->sort(counterSort);
     String tmp;
-    unsigned int i = 0;
-    for (ObjList* o = objCounters->skipNull(); o && i < count; o = o->skipNext(), i++) {
-	NamedCounter* c = static_cast<NamedCounter*>(o->get());
-	uint64_t line = c->toString().toUInt64();
-	String fn;
-	unsigned int fl = 0;
-	code->getFileLine(line,fn,fl,false);
-	tmp << "\r\n" << fn << ":" << fl << " " << c->count();
-    }
+    dumpAllocations(tmp,objCounters,count,code);
     if (!tmp)
 	retVal << "Script '" << scrName << "' has no active object tracking counters\r\n";
     else
 	retVal << "Top " << count << " object allocations for '" << scrName <<"':" << tmp << "\r\n";
     TelEngine::destruct(objCounters);
+    return true;
+}
+
+// Obtain a string with top object allocations from all script instances contexts 
+static bool evalInstanceAllocations(String& retVal, unsigned int count, ObjList& list,
+		ScriptCode* code, const String& scrName)
+{
+    if (!code) {
+	retVal << "Script '" << scrName << "' has no associated code\r\n";
+	return true;
+    }
+    ObjList objCounters;
+
+    for (ObjList* o = list.skipNull(); o; o = o->skipNext()) {
+	ObjList* l = static_cast<ObjList*>(o->get());
+	for (ObjList* j = l->skipNull(); j; j = j->skipNext()) {
+	    NamedCounter* nInt = static_cast<NamedCounter*>(j->get());
+	    NamedCounter* total = static_cast<NamedCounter*>(objCounters[nInt->toString()]);
+	    if (total)
+		total->add(nInt->count());
+	    else {
+		j->set(0,false);
+		objCounters.insert(nInt);
+	    }
+	}
+	o->set(0);
+    }
+    String tmp;
+    dumpAllocations(tmp,&objCounters,count,code);
+    if (!tmp)
+	retVal << "Script '" << scrName << "' has no active object tracking counters\r\n";
+    else
+	retVal << "Top " << count << " object allocations for '" << scrName <<"':" << tmp << "\r\n";
     return true;
 }
 
@@ -1200,7 +1379,8 @@ static inline const NamedList* getReplaceParams(GenObject* gen)
 }
 
 // Build a tabular dump of an Object or Array
-static void dumpTable(const ExpOperation& oper, String& str, const char* eol)
+static void dumpTable(const ExpOperation& oper, String& str, const char* eol,
+    const NamedList* hdrMap = 0, bool forceEmpty = false, bool allHeaders = false)
 {
     class Header : public ObjList
     {
@@ -1216,8 +1396,13 @@ static void dumpTable(const ExpOperation& oper, String& str, const char* eol)
 	    { return m_rows; }
 	inline void setWidth(unsigned int w)
 	    { if (m_width < w) m_width = w; }
-	inline void addString(const String& val, unsigned int row)
-	    {
+	inline void setName(const char* n) {
+		if (TelEngine::null(n))
+		    return;
+		*m_name = n;
+		setWidth(m_name->length());
+	    }
+	inline void addString(const String& val, unsigned int row) {
 		if (row <= m_rows)
 		    return;
 		setWidth(val.length());
@@ -1288,6 +1473,7 @@ static void dumpTable(const ExpOperation& oper, String& str, const char* eol)
 		}
 		continue;
 	    }
+	    // Array of objects
 	    row++;
 	    for (ObjList* l = jso->params().paramList()->skipNull(); l; l = l->skipNext()) {
 		const NamedString* ns = static_cast<const NamedString*>(l->get());
@@ -1320,10 +1506,45 @@ static void dumpTable(const ExpOperation& oper, String& str, const char* eol)
 	    }
 	}
     }
+    if (!header.skipNull()) {
+	if (!(hdrMap && forceEmpty))
+	    return;
+	for (ObjList* o = hdrMap->paramList()->skipNull(); o; o = o->skipNext()) {
+	    NamedString* ns = static_cast<NamedString*>(o->get());
+	    if (ns->name() != JsObject::protoName())
+		header.append(new Header(ns->name()));
+	}
+	if (!header.skipNull())
+	    return;
+    }
+    // Re-arrange headers
+    ObjList* hdrs = &header;
+    ObjList newHdrs;
+    if (hdrMap) {
+	hdrs = &newHdrs;
+	ObjList* hAdd = hdrs;
+	for (ObjList* o = hdrMap->paramList()->skipNull(); o; o = o->skipNext()) {
+	    NamedString* ns = static_cast<NamedString*>(o->get());
+	    if (ns->name() == JsObject::protoName())
+		continue;
+	    ObjList* oh = header.find(ns->name());
+	    Header* h = oh ? static_cast<Header*>(oh->remove(false)) : new Header(ns->name());
+	    h->setName(*ns);
+	    hAdd = hAdd->append(h);
+	}
+	if (allHeaders) {
+	    while (true) {
+		ObjList* o = header.skipNull();
+		if (!o)
+		    break;
+		hAdd = hAdd->append(o->remove(false));
+	    }
+	}
+    }
     str.clear();
     String tmp;
     unsigned int rows = 0;
-    for (ObjList* l = header.skipNull(); l; l = l->skipNext()) {
+    for (ObjList* l = hdrs->skipNull(); l; l = l->skipNext()) {
 	Header* h = static_cast<Header*>(l->get());
 	if (rows < h->rows())
 	    rows = h->rows();
@@ -1333,13 +1554,15 @@ static void dumpTable(const ExpOperation& oper, String& str, const char* eol)
 	    str << String(' ',sp);
 	tmp.append(String('-',h->width())," ",true);
     }
-    if (!rows)
+    if (!tmp)
+	return;
+    if (!(rows || forceEmpty))
 	return;
     str << eol << tmp << eol;
     for (unsigned int r = 0; r < rows; r++) {
 	tmp.clear();
 	// add each row data
-	for (ObjList* l = header.skipNull(); l; l = l->skipNext()) {
+	for (ObjList* l = hdrs->skipNull(); l; l = l->skipNext()) {
 	    Header* h = static_cast<Header*>(l->get());
 	    const String* s = h->getString(r);
 	    if (!s)
@@ -1764,27 +1987,30 @@ bool JsEngine::runNative(ObjList& stack, const ExpOperation& oper, GenObject* co
 	printRecursive(run ? run->context() : context,
 	    flags ? flags->valInteger(DumpPropOnly) : DumpPropOnly);
     }
-    else if (oper.name() == YSTRING("dump_t")) {
-	if (oper.number() != 1)
+    else if (oper.name() == YSTRING("dump_t") || oper.name() == YSTRING("print_t")) {
+	ObjList args;
+	ExpOperation* opObj = 0;
+	ExpOperation* opHdrMap = 0;
+	ExpOperation* params = 0;
+	if (!extractStackArgs(1,this,stack,oper,context,args,&opObj,&opHdrMap,&params))
 	    return false;
-	ExpOperation* op = popValue(stack,context);
-	if (!op)
-	    return false;
+	NamedList* hdrMap = 0;
+	bool forceEmpty = false;
+	bool allHeaders = false;
+	JsObject* jso = YOBJECT(JsObject,opHdrMap);
+	if (jso)
+	    hdrMap = jso->nativeParams() ? jso->nativeParams() : &jso->params();
+	jso = YOBJECT(JsObject,params);
+	if (jso) {
+	    jso->getBoolField(YSTRING("force_empty"),forceEmpty);
+	    jso->getBoolField(YSTRING("all_headers"),allHeaders);
+	}
 	String buf;
-	dumpTable(*op,buf,"\r\n");
-	TelEngine::destruct(op);
-	ExpEvaluator::pushOne(stack,new ExpOperation(buf));
-    }
-    else if (oper.name() == YSTRING("print_t")) {
-	if (oper.number() != 1)
-	    return false;
-	ExpOperation* op = popValue(stack,context);
-	if (!op)
-	    return false;
-	String buf;
-	dumpTable(*op,buf,"\r\n");
-	TelEngine::destruct(op);
-	Output("%s",buf.safe());
+	dumpTable(*opObj,buf,"\r\n",hdrMap,forceEmpty,allHeaders);
+	if (oper.name() == YSTRING("dump_t"))
+	    ExpEvaluator::pushOne(stack,new ExpOperation(buf));
+	else
+	    Output("%s",buf.safe());
     }
     else if (oper.name() == YSTRING("debugName")) {
 	if (oper.number() == 0)
@@ -2208,6 +2434,18 @@ bool JsEngine::runNative(ObjList& stack, const ExpOperation& oper, GenObject* co
 	}
 	else
 	    ExpEvaluator::pushOne(stack,new ExpOperation(false));
+    }
+    else if (oper.name() == YSTRING("instanceIndex")) {
+	ScriptRun* runner = YOBJECT(ScriptRun,context);
+	if (!(runner && runner->context()))
+	    return false;
+	ExpEvaluator::pushOne(stack,new ExpOperation((int64_t)runner->context()->instanceIndex()));
+    }
+    else if (oper.name() == YSTRING("instanceCount")) {
+		ScriptRun* runner = YOBJECT(ScriptRun,context);
+	if (!(runner && runner->context()))
+	    return false;
+	ExpEvaluator::pushOne(stack,new ExpOperation((int64_t)runner->context()->instanceCount()));
     }
     else
 	return JsObject::runNative(stack,oper,context);
@@ -3330,6 +3568,7 @@ bool JsMessageQueue::matchesFilters(const NamedList& filters)
 bool JsFile::runNative(ObjList& stack, const ExpOperation& oper, GenObject* context)
 {
     XDebug(&__plugin,DebugAll,"JsFile::runNative '%s'(" FMT64 ")",oper.name().c_str(),oper.number());
+    ObjList args;
     if (oper.name() == YSTRING("exists")) {
 	if (oper.number() != 1)
 	    return false;
@@ -3515,6 +3754,33 @@ bool JsFile::runNative(ObjList& stack, const ExpOperation& oper, GenObject* cont
 	TelEngine::destruct(cont);
 	ExpEvaluator::pushOne(stack,new ExpOperation(wr));
     }
+    else if (oper.name() == YSTRING("listDirectory")) {
+	// res = File.listDirectory(path[,params])
+	ExpOperation* path = 0;
+	ExpOperation* opParams = 0;
+	if (!extractStackArgs(1,this,stack,oper,context,args,&path,&opParams))
+	    return false;
+	bool file = true;
+	bool dir = false;
+	JsObject* jso = YOBJECT(JsObject,opParams);
+	if (jso) {
+	    jso->getBoolField(YSTRING("list_file"),file);
+	    if (!file)
+		jso->getBoolField(YSTRING("list_dir"),dir);
+	}
+	ObjList res;
+	JsArray* jsa = new JsArray(context,oper.lineNumber(),mutex());
+	if (dir || file) {
+	    if (File::listDirectory(*path,dir ? &res : 0,file ? &res : 0))
+		jsa->push(res);
+	    else
+		TelEngine::destruct(jsa);
+	}
+	if (jsa)
+	    ExpEvaluator::pushOne(stack,new ExpWrapper(jsa,"list"));
+	else
+	    ExpEvaluator::pushOne(stack,JsParser::nullClone());
+    }
     else
 	return JsObject::runNative(stack,oper,context);
     return true;
@@ -3640,6 +3906,47 @@ void* JsConfigFile::getObject(const String& name) const
     if (!obj)
 	obj = m_config.getObject(name);
     return obj;
+}
+
+static inline void handleCfgSetValues(bool set, Configuration& cfg, const String& sName,
+    GenObject* params, const String* prefix)
+{
+    const NamedList* pList = sName ? getReplaceParams(params) : 0;
+    if (!pList)
+	return;
+    NamedList* sect = cfg.createSection(sName);
+    if (TelEngine::null(prefix))
+	prefix = 0;
+    for (ObjList* o = pList->paramList()->skipNull(); o; o = o->skipNext()) {
+	NamedString* ns = static_cast<NamedString*>(o->get());
+	JsObject* jso = YOBJECT(JsObject,ns);
+	if (jso || ns->name() == JsObject::protoName())
+	    continue;
+	if (set) {
+	    if (prefix)
+		sect->setParam(*prefix + ns->name(),*ns);
+	    else
+		sect->setParam(ns->name(),*ns);
+	}
+	else if (prefix)
+	    sect->addParam(*prefix + ns->name(),*ns);
+	else
+	    sect->addParam(ns->name(),*ns);
+    }
+}
+
+static inline void handleCfgClearKey(Configuration& cfg, const String& sName, const String& kName,
+    const String* kVal = 0)
+{
+    NamedList* sect = cfg.getSection(sName);
+    if (!sect)
+	return;
+    if (kVal) {
+	JsRegExp* r = YOBJECT(JsRegExp,kVal);
+	if (r)
+	    kVal = static_cast<const String*>(&r->regexp());
+    }
+    sect->clearParam(kName,0,kVal);
 }
 
 bool JsConfigFile::runNative(ObjList& stack, const ExpOperation& oper, GenObject* context)
@@ -3782,6 +4089,16 @@ bool JsConfigFile::runNative(ObjList& stack, const ExpOperation& oper, GenObject
 	m_config.addValue(*static_cast<ExpOperation*>(args[0]),*static_cast<ExpOperation*>(args[1]),
 	    *static_cast<ExpOperation*>(args[2]));
     }
+    else if (oper.name() == YSTRING("setValues") || oper.name() == YSTRING("addValues")) {
+	// setValues(sect,params[,prefix])
+	// addValues(sect,params[,prefix])
+	ExpOperation* sName = 0;
+	ExpOperation* params = 0;
+	ExpOperation* prefix = 0;
+	if (!extractStackArgs(2,this,stack,oper,context,args,&sName,&params,&prefix))
+	    return false;
+	handleCfgSetValues(oper.name() == YSTRING("setValues"),m_config,*sName,params,prefix);
+    }
     else if (oper.name() == YSTRING("clearSection")) {
 	ExpOperation* op = 0;
 	switch (extractArgs(stack,oper,context,args)) {
@@ -3798,9 +4115,13 @@ bool JsConfigFile::runNative(ObjList& stack, const ExpOperation& oper, GenObject
 	m_config.clearSection(op ? (const char*)*op : 0);
     }
     else if (oper.name() == YSTRING("clearKey")) {
-	if (extractArgs(stack,oper,context,args) != 2)
+	// clearKey(sect,key[,matchValue])
+	ExpOperation* sect = 0;
+	ExpOperation* key = 0;
+	ExpOperation* matchValue = 0;
+	if (!extractStackArgs(2,this,stack,oper,context,args,&sect,&key,&matchValue))
 	    return false;
-	m_config.clearKey(*static_cast<ExpOperation*>(args[0]),*static_cast<ExpOperation*>(args[1]));
+	handleCfgClearKey(m_config,*sect,*key,matchValue);
     }
     else if (oper.name() == YSTRING("keys")) {
 	if (extractArgs(stack,oper,context,args) != 1)
@@ -3958,12 +4279,22 @@ bool JsConfigSection::runNative(ObjList& stack, const ExpOperation& oper, GenObj
 	if (sect)
 	    sect->addParam(*static_cast<ExpOperation*>(args[0]),*static_cast<ExpOperation*>(args[1]));
     }
-    else if (oper.name() == YSTRING("clearKey")) {
-	if (extractArgs(stack,oper,context,args) != 1)
+    else if (oper.name() == YSTRING("setValues") || oper.name() == YSTRING("addValues")) {
+	// setValues(params[,prefix])
+	// addValues(params[,prefix])
+	ExpOperation* params = 0;
+	ExpOperation* prefix = 0;
+	if (!extractStackArgs(1,this,stack,oper,context,args,&params,&prefix))
 	    return false;
-	NamedList* sect = m_owner->config().getSection(toString());
-	if (sect)
-	    sect->clearParam(*static_cast<ExpOperation*>(args[0]));
+	handleCfgSetValues(oper.name() == YSTRING("setValues"),m_owner->config(),toString(),params,prefix);
+    }
+    else if (oper.name() == YSTRING("clearKey")) {
+	// clearKey(key[,matchValue])
+	ExpOperation* key = 0;
+	ExpOperation* matchValue = 0;
+	if (!extractStackArgs(1,this,stack,oper,context,args,&key,&matchValue))
+	    return false;
+	handleCfgClearKey(m_owner->config(),toString(),*key,matchValue);
     }
     else if (oper.name() == YSTRING("keys")) {
 	if (extractArgs(stack,oper,context,args) != 0)
@@ -4110,6 +4441,121 @@ bool JsHasher::runNative(ObjList& stack, const ExpOperation& oper, GenObject* co
     return true;
 }
 
+void* JsXPath::getObject(const String& name) const
+{
+    void* obj = (name == YATOM("JsXPath")) ? const_cast<JsXPath*>(this)
+	: JsObject::getObject(name);
+    return obj ? obj : m_path.getObject(name);
+}
+
+JsObject* JsXPath::runConstructor(ObjList& stack, const ExpOperation& oper, GenObject* context)
+{
+    XDebug(&__plugin,DebugAll,"JsXPath::runConstructor '%s'(" FMT64 ") [%p]",
+	oper.name().c_str(),oper.number(),this);
+    ObjList args;
+    ExpOperation* pathOp = 0;
+    ExpOperation* second = 0;
+    if (!extractStackArgs(1,this,stack,oper,context,args,&pathOp,&second))
+	return 0;
+    JsXPath* obj = 0;
+    if (second) {
+	// XPath(str,flags)
+	obj = new JsXPath(mutex(),oper.lineNumber(),*pathOp,second->valInteger());
+    }
+    else {
+	// XPath(str) or XPath(JsXPath)
+	JsXPath* other = YOBJECT(JsXPath,pathOp);
+	if (other)
+	    obj = new JsXPath(mutex(),oper.lineNumber(),other->path());
+	else
+	    obj = new JsXPath(mutex(),oper.lineNumber(),*pathOp);
+    }
+    if (!ref()) {
+	TelEngine::destruct(obj);
+	return 0;
+    }
+    obj->params().addParam(new ExpWrapper(this,protoName()));
+    return obj;
+}
+
+bool JsXPath::runNative(ObjList& stack, const ExpOperation& oper, GenObject* context)
+{
+    XDebug(&__plugin,DebugAll,"JsXPath::runNative '%s'(" FMT64 ")",oper.name().c_str(),oper.number());
+    ObjList args;
+    if (oper.name() == YSTRING("valid"))
+	ExpEvaluator::pushOne(stack,new ExpOperation(0 == m_path.status()));
+    else if (oper.name() == YSTRING("absolute"))
+	ExpEvaluator::pushOne(stack,new ExpOperation(m_path.absolute()));
+    else if (oper.name() == YSTRING("getPath")) {
+	if (!m_path.status()) {
+	    String str;
+	    m_path.dump(str,true,"/",m_path.absolute());
+	    ExpEvaluator::pushOne(stack,new ExpOperation(str));
+	}
+	else
+	    ExpEvaluator::pushOne(stack,JsParser::nullClone());
+    }
+    else if (oper.name() == YSTRING("getItems")) {
+	// getItems([escape])
+	if (!m_path.status()) {
+	    ExpOperation* esc = 0;
+	    if (!extractStackArgs(0,this,stack,oper,context,args,&esc))
+		return false;
+	    ObjList lst;
+	    m_path.dump(lst,(esc && esc->isBoolean()) ? esc->toBoolean() : true);
+	    JsArray* jsa = new JsArray(context,oper.lineNumber(),mutex());
+	    jsa->push(lst);
+	    ExpEvaluator::pushOne(stack,new ExpWrapper(jsa,"items"));
+	}
+	else
+	    ExpEvaluator::pushOne(stack,JsParser::nullClone());
+    }
+    else if (oper.name() == YSTRING("getError")) {
+	if (m_path.status()) {
+	    JsObject* jso = new JsObject(context,oper.lineNumber(),mutex());
+	    jso->params().setParam(new ExpOperation((int64_t)m_path.status(),"status"));
+	    jso->params().setParam(new ExpOperation((int64_t)m_path.errorItem(),"errorItem"));
+	    if (m_path.error())
+		jso->params().setParam(new ExpOperation(m_path.error(),"error"));
+	    ExpEvaluator::pushOne(stack,new ExpWrapper(jso,"error"));
+	}
+	else
+	    ExpEvaluator::pushOne(stack,new ExpWrapper(0));
+    }
+    else if (oper.name() == YSTRING("describeError")) {
+	String tmp;
+	if (m_path.describeError(tmp))
+	    ExpEvaluator::pushOne(stack,new ExpOperation(tmp,"error"));
+	else
+	    ExpEvaluator::pushOne(stack,new ExpWrapper(0));
+    }
+    else if (oper.name() == YSTRING("escapeString")) {
+	// XPath.escapeString(str[quot[,literal=true]])
+	ExpOperation* str = 0;
+	ExpOperation* quot = 0;
+	ExpOperation* literal = 0;
+	if (!extractStackArgs(1,this,stack,oper,context,args,&str,&quot,&literal))
+	    return false;
+	char q = quot ? (*(String*)quot)[0] : '"';
+	String tmp;
+	XPath::escape(tmp,*str,q,literal ? literal->valBoolean() : true);
+	ExpEvaluator::pushOne(stack,new ExpOperation(tmp,"error"));
+    }
+    else
+	return JsObject::runNative(stack,oper,context);
+    return true;
+}
+
+void JsXPath::initialize(ScriptContext* context)
+{
+    if (!context)
+	return;
+    ScriptMutex* mtx = context->mutex();
+    Lock mylock(mtx);
+    NamedList& params = context->params();
+    if (!params.getParam(YSTRING("XPath")))
+	addConstructor(params,"XPath",new JsXPath(mtx));
+}
 
 void* JsXML::getObject(const String& name) const
 {
@@ -4157,7 +4603,7 @@ bool JsXML::runNative(ObjList& stack, const ExpOperation& oper, GenObject* conte
 	    return false;
 	XmlElement* xml = m_xml ? m_xml->parent() : 0;
 	if (xml)
-	    ExpEvaluator::pushOne(stack,new ExpWrapper(new JsXML(mutex(),oper.lineNumber(),xml,owner())));
+	    ExpEvaluator::pushOne(stack,xmlWrapper(oper,xml));
 	else
 	    ExpEvaluator::pushOne(stack,JsParser::nullClone());
     }
@@ -4299,7 +4745,7 @@ bool JsXML::runNative(ObjList& stack, const ExpOperation& oper, GenObject* conte
 	    xml = m_xml->findFirstChild(name,ns);
 	}
 	if (xml)
-	    ExpEvaluator::pushOne(stack,new ExpWrapper(new JsXML(mutex(),oper.lineNumber(),xml,owner())));
+	    ExpEvaluator::pushOne(stack,xmlWrapper(oper,xml));
 	else
 	    ExpEvaluator::pushOne(stack,JsParser::nullClone());
     }
@@ -4318,7 +4764,7 @@ bool JsXML::runNative(ObjList& stack, const ExpOperation& oper, GenObject* conte
 	if (xml) {
 	    JsArray* jsa = new JsArray(context,oper.lineNumber(),mutex());
 	    while (xml) {
-		jsa->push(new ExpWrapper(new JsXML(mutex(),oper.lineNumber(),xml,owner())));
+		jsa->push(xmlWrapper(oper,xml));
 		xml = m_xml->findNextChild(xml,name,ns);
 	    }
 	    ExpEvaluator::pushOne(stack,new ExpWrapper(jsa,"children"));
@@ -4377,17 +4823,94 @@ bool JsXML::runNative(ObjList& stack, const ExpOperation& oper, GenObject* conte
 	else
 	    ExpEvaluator::pushOne(stack,JsParser::nullClone());
     }
+    else if (oper.name() == YSTRING("getChildByPath") || oper.name() == YSTRING("getChildrenByPath")) {
+	// getChildByPath(op). op: JsXPath or string
+	// Return: XML or null
+	// getChildrenByPath(op). op: JsXPath or string
+	// Return: non empty array or null
+	ExpOperation* pathOp = 0;
+	if (!extractStackArgs(1,this,stack,oper,context,args,&pathOp))
+	    return false;
+	ExpOperation* ret = 0;
+	if (m_xml) {
+	    ObjList lst;
+	    bool single = oper.name() == YSTRING("getChildByPath");
+	    XPathTmpParam path(*pathOp);
+	    XmlElement* xml = path->findXml(*m_xml,single ? 0 : &lst);
+	    if (xml) {
+		if (single)
+		    ret = xmlWrapper(oper,xml);
+		else {
+		    ObjList* o = lst.skipNull();
+		    if (o) {
+			JsArray* jsa = new JsArray(context,oper.lineNumber(),mutex());
+			for (; o; o = o->skipNext())
+			    jsa->push(xmlWrapper(oper,static_cast<XmlElement*>(o->get())));
+			ret = new ExpWrapper(jsa,"children");
+		    }
+		}
+	    }
+	}
+	pushStackResNull(stack,ret);
+    }
+    else if (oper.name() == YSTRING("getTextByPath")) {
+	// getTextByPath(op). op: JsXPath or string
+	// Return: string or null
+	ExpOperation* pathOp = 0;
+	if (!extractStackArgs(1,this,stack,oper,context,args,&pathOp))
+	    return false;
+	ExpOperation* ret = 0;
+	if (m_xml) {
+	    XPathTmpParam path(*pathOp);
+	    const String* txt = path->findText(*m_xml);
+	    if (txt)
+		ret = new ExpOperation(*txt,"text");
+	}
+	pushStackResNull(stack,ret);
+    }
+    else if (oper.name() == YSTRING("getAnyByPath")) {
+	// getAnyByPath(op[,array[,what]]). op: JsXPath or string
+	// Return null or first found element (XML, string or object)
+	ExpOperation* pathOp = 0;
+	ExpOperation* destOp = 0;
+	ExpOperation* whatOp = 0;
+	if (!extractStackArgs(1,this,stack,oper,context,args,&pathOp,&destOp,&whatOp))
+	    return false;
+	ExpOperation* ret = 0;
+	if (m_xml) {
+	    XPathTmpParam path(*pathOp);
+	    JsArray* jsa = YOBJECT(JsArray,destOp);
+	    ObjList lst;
+	    unsigned int what = (whatOp && whatOp->isInteger()) ?
+		(unsigned int)whatOp->toNumber() : XPath::FindAny;
+	    ret = buildAny(path->find(*m_xml,what,jsa ? &lst : 0),oper,context);
+	    if (ret && jsa) {
+		for (ObjList* o = lst.skipNull(); o; o = o->skipNext())
+		    jsa->push(buildAny(o->get(),oper,context));
+	    }
+	}
+	pushStackResNull(stack,ret);
+    }
     else if (oper.name() == YSTRING("xmlText")) {
-	if (extractArgs(stack,oper,context,args) > 1)
+	if (extractArgs(stack,oper,context,args) > 2)
 	    return false;
 	if (m_xml) {
 	    int spaces = args[0] ? static_cast<ExpOperation*>(args[0])->number() : 0;
 	    const String* line = &String::empty();
 	    String indent;
+	    String allIndent;
 	    if (spaces > 0) {
 		static const String crlf = "\r\n";
 		line = &crlf;
 		indent.assign(' ',spaces);
+		if (args[1]) {
+		    spaces = static_cast<ExpOperation*>(args[1])->number();
+		    if (spaces > 0) {
+			allIndent.assign(' ',spaces);
+			allIndent = line + allIndent;
+			line = &allIndent;
+		    }
+		}
 	    }
 	    ExpOperation* op = new ExpOperation("",m_xml->unprefixedTag());
 	    m_xml->toString(*op,true,*line,indent);
@@ -5751,14 +6274,56 @@ void JsAssist::msgPostExecute(const Message& msg, bool handled)
     runFunction("onPostExecute",const_cast<Message&>(msg),&handled);
 }
 
+JsGlobalInstance::JsGlobalInstance(JsGlobal* owner, unsigned int index)
+    : m_owner(owner), m_instance(index)
+{
+    m_name << owner->toString();
+    if (index)
+	m_name << "/" << index;
+    Debug(&__plugin,DebugInfo,"JsGlobalInstance::JsGlobalInstance(%p,%u) Created script instance '%s' [%p]",
+		m_owner,index,m_name.c_str(),this);
+}
+
+JsGlobalInstance::~JsGlobalInstance()
+{
+    Debug(&__plugin,DebugInfo,"JsGlobalInstance::~JsGlobalInstance() '%s' destroyed [%p]",m_name.c_str(),this);
+    if (m_owner->parser().callable("onUnload")) {
+	ScriptRun* runner = m_owner->parser().createRunner(m_context,NATIVE_TITLE);
+	if (runner) {
+	    ObjList args;
+	    runner->call("onUnload",args);
+	    TelEngine::destruct(runner);
+	}
+    }
+    if (m_context) {
+	Lock mylock(m_context->mutex());
+	m_context->params().clearParams();
+    }
+}
+  
+unsigned int JsGlobalInstance::runMain()
+{
+    DDebug(&__plugin,DebugInfo,"JsGlobalInstance::runMain() Start instance %s",toString().c_str());
+    ScriptRun* runner = m_owner->parser().createRunner(m_context,0,m_instance,m_owner->instances());
+    if (!runner)
+	return ScriptRun::Failed;
+    if (!m_context)
+	m_context = runner->context();
+    m_context->trackObjs(s_trackCreation);
+    contextInit(runner,toString());
+    ScriptRun::Status st = runner->run();
+    TelEngine::destruct(runner);
+    return st;
+}
 
 ObjList JsGlobal::s_globals;
 Mutex JsGlobal::s_mutex(false,"JsGlobal");
 bool JsGlobal::s_keepOldOnFail = false;
 
-JsGlobal::JsGlobal(const char* scriptName, const char* fileName, bool relPath, bool fromCfg)
+JsGlobal::JsGlobal(const char* scriptName, const char* fileName, bool relPath,
+		   bool fromCfg, unsigned int instances)
     : NamedString(scriptName,fileName),
-      m_inUse(true), m_confLoaded(fromCfg), m_file(fileName)
+      m_inUse(true), m_confLoaded(fromCfg), m_file(fileName), m_instanceCount(instances)
 {
     m_jsCode.basePath(s_basePath,s_libsPath);
     if (relPath)
@@ -5771,18 +6336,7 @@ JsGlobal::JsGlobal(const char* scriptName, const char* fileName, bool relPath, b
 JsGlobal::~JsGlobal()
 {
     DDebug(&__plugin,DebugAll,"Unloading global Javascript '%s'",name().c_str());
-    if (m_jsCode.callable("onUnload")) {
-	ScriptRun* runner = m_jsCode.createRunner(m_context,NATIVE_TITLE);
-	if (runner) {
-	    ObjList args;
-	    runner->call("onUnload",args);
-	    TelEngine::destruct(runner);
-	}
-    }
-    if (m_context) {
-	Lock mylock(m_context->mutex());
-	m_context->params().clearParams();
-    }
+    m_instances.clear();
 }
 
 bool JsGlobal::load()
@@ -5800,6 +6354,21 @@ bool JsGlobal::load()
 bool JsGlobal::fileChanged(const char* fileName) const
 {
     return m_jsCode.scriptChanged(fileName,s_basePath,s_libsPath);
+}
+
+bool JsGlobal::updateInstances(unsigned int instances)
+{
+    // 0 means that it was called from some place where config was not read, so no change
+    // or no change in number of instances
+    if (!instances || instances == m_instanceCount)
+	return true;
+    // we already now that current instance is different from what is requested
+    // so if instances is 1 => m_instance count > 1, m_instanceCount == 1 => instance = 1
+    // so we need to completely reload the script
+    if (instances == 1 || m_instanceCount == 1)
+	return false;
+    m_instanceCount = instances;
+    return runMain();
 }
 
 void JsGlobal::markUnused()
@@ -5837,12 +6406,13 @@ void JsGlobal::reloadDynamic()
 	}
 }
 
-bool JsGlobal::initScript(const String& scriptName, const String& fileName, bool relPath, bool fromCfg)
+bool JsGlobal::initScript(const String& scriptName, const String& fileName, bool relPath,
+			  bool fromCfg, unsigned int instances)
 {
     if (fileName.null())
 	return false;
-    DDebug(&__plugin,DebugInfo,"Initialize %s script '%s' from %s file '%s'",(fromCfg ? "configured" : "dynamically loaded"),
-               scriptName.c_str(),(relPath ? "relative" : "absolute"),fileName.c_str());
+    DDebug(&__plugin,DebugInfo,"Initialize %s script '%s' from %s file '%s' instances=%u",(fromCfg ? "configured" : "dynamically loaded"),
+               scriptName.c_str(),(relPath ? "relative" : "absolute"),fileName.c_str(),instances);
     Lock mylock(JsGlobal::s_mutex);
     ObjList* o = s_globals.find(scriptName);
     if (o) {
@@ -5854,12 +6424,16 @@ bool JsGlobal::initScript(const String& scriptName, const String& fileName, bool
 	    return false;
 	}
 	if (!script->fileChanged(fileName)) {
+	    unsigned int ret = script->updateInstances(instances);
 	    script->m_inUse = true;
 	    script->m_confLoaded = fromCfg;
-	    return true;
+	    // if positive, we can return. otherwise, it's a transition 
+	    // from multiple instances to one or viceversa and we reload the whole script
+	    if (ret)
+		return true;
 	}
     }
-    return buildNewScript(mylock,o,scriptName,fileName,relPath,fromCfg,true);
+    return buildNewScript(mylock,o,scriptName,fileName,relPath,fromCfg,true,instances);
 }
 
 bool JsGlobal::reloadScript(const String& scriptName)
@@ -5875,7 +6449,7 @@ bool JsGlobal::reloadScript(const String& scriptName)
     return fileName && buildNewScript(mylock,o,scriptName,fileName,false,script->m_confLoaded);
 }
 
-void JsGlobal::loadScripts(const NamedList* sect)
+void JsGlobal::loadScripts(const NamedList* sect, const NamedList* instSect)
 {
     if (!sect)
 	return;
@@ -5886,33 +6460,65 @@ void JsGlobal::loadScripts(const NamedList* sect)
 	    continue;
 	String tmp = *n;
 	Engine::runParams().replaceParams(tmp);
-	JsGlobal::initScript(n->name(),tmp);
+	JsGlobal::initScript(n->name(),tmp,true,true,instSect ? instSect->getIntValue(n->name(),0,0) : 0);
     }
 }
 
 bool JsGlobal::runMain()
 {
-    ScriptRun* runner = m_jsCode.createRunner(m_context);
-    if (!runner)
-	return false;
-    if (!m_context)
-	m_context = runner->context();
-    m_context->trackObjs(s_trackCreation);
-    contextInit(runner,name());
-    ScriptRun::Status st = runner->run();
-    TelEngine::destruct(runner);
-    return (ScriptRun::Succeeded == st);
+    DDebug(&__plugin,DebugInfo,"JsGlobal::runMain() Load and run %u instances, current number of instances:%u",
+		m_instanceCount,m_instances.count());
+    if (m_instanceCount <= 1) {
+	JsGlobalInstance* inst = new JsGlobalInstance(this,0);
+	if(ScriptRun::Succeeded != inst->runMain()) {
+	    TelEngine::destruct(inst);
+	    return false;
+	}
+	m_instances.append(inst);
+    }
+    else {
+	unsigned int lCount = m_instances.count();
+	// add instances if m_instancesCount is increased
+	for (unsigned int i = 0; i < m_instanceCount; i++) {
+	    JsGlobalInstance* inst = getInstance(i + 1);
+	    // get instance returns a refcounted instance
+	    if (inst) {
+		TelEngine::destruct(inst);
+		continue;
+	    }
+	    inst = new JsGlobalInstance(this,i + 1);
+	    if(ScriptRun::Succeeded != inst->runMain()) {
+		TelEngine::destruct(inst);
+		return false;
+	    }
+	    m_instances.append(inst);
+
+	}
+	// remove instances if m_instances was decreased
+	for (unsigned int i = m_instanceCount; i < lCount; i++) {
+	    JsGlobalInstance* inst = getInstance(i + 1);
+	    if (!inst)
+		continue;
+	    m_instances.remove(inst);
+	    TelEngine::destruct(inst);
+	}
+	
+    }
+    return true;
 }
 
 bool JsGlobal::buildNewScript(Lock& lck, ObjList* old, const String& scriptName,
-    const String& fileName, bool relPath, bool fromCfg, bool fromInit)
+    const String& fileName, bool relPath, bool fromCfg, bool fromInit, unsigned int instances)
 {
     bool objCount = s_trackObj && getObjCounting();
     NamedCounter* saved = 0;
     if (objCount)
 	saved = Thread::setCurrentObjCounter(getObjCounter("js:" + scriptName,true));
     JsGlobal* oldScript = old ? static_cast<JsGlobal*>(old->get()) : 0;
-    JsGlobal* script = new JsGlobal(scriptName,fileName,relPath,fromCfg);
+    if (0 == instances) // keep number of instances if none is given
+	instances = oldScript ? oldScript->instances() : 1;
+    
+    JsGlobal* script = new JsGlobal(scriptName,fileName,relPath,fromCfg,instances);
     bool ok = false;
     if (script->load() || !s_keepOldOnFail || !old) {
 	if (old)
@@ -6004,7 +6610,10 @@ bool JsModule::commandExecute(String& retVal, const String& line)
 	Lock lck(JsGlobal::s_mutex);
 	for (ObjList* o = JsGlobal::globals().skipNull(); o ; o = o->skipNext()) {
 	    JsGlobal* script = static_cast<JsGlobal*>(o->get());
-	    retVal << script->name() << " = " << *script << "\r\n";
+	    retVal << script->name() << " = " << *script;
+	    if (script->instances() > 1)
+		retVal << ":" << script->instances();
+	    retVal << "\r\n";
 	}
 	lck.acquire(this);
 	for (unsigned int i = 0; i < calls().length(); i++) {
@@ -6025,12 +6634,18 @@ bool JsModule::commandExecute(String& retVal, const String& line)
 	cmd.extractTo(" ",scr).trimSpaces();
 	if (scr.null() || cmd.null())
 	    return false;
+	int pos = scr.find("/");
+	String baseScr = scr.substr(0,pos);
 	Lock mylock(JsGlobal::s_mutex);;
-	JsGlobal* script = static_cast<JsGlobal*>(JsGlobal::globals()[scr]);
+	JsGlobal* script = static_cast<JsGlobal*>(JsGlobal::globals()[baseScr]);
 	if (script) {
-	    RefPointer<ScriptContext> ctxt = script->context();
-	    mylock.drop();
-	    return evalContext(retVal,cmd,ctxt);
+	    JsGlobalInstance* inst = script->getInstance(scr);
+	    if (inst) {
+		RefPointer<ScriptContext> ctxt = inst->context();
+		mylock.drop();
+		TelEngine::destruct(inst);
+		return evalContext(retVal,cmd,ctxt);
+	    }
 	}
 	mylock.acquire(this);
 	JsAssist* assist = static_cast<JsAssist*>(calls()[scr]);
@@ -6046,7 +6661,34 @@ bool JsModule::commandExecute(String& retVal, const String& line)
     if (cmd.startSkip("eval") && cmd.trimSpaces())
 	return evalContext(retVal,cmd);
 
-    if (cmd.startSkip("allocations") && cmd.trimSpaces()) {
+    if (cmd.startSkip("allocations instance") && cmd.trimSpaces()) {
+	String scr;
+	cmd.extractTo(" ",scr).trimSpaces();
+	String baseScr = scr.substr(0,scr.find("/"));
+	unsigned int top = cmd.toInteger(25,0,1,100);
+	if (scr.null())
+	    return false;
+	Lock mylock(JsGlobal::s_mutex);;
+	JsGlobal* script = static_cast<JsGlobal*>(JsGlobal::globals()[baseScr]);
+	if (script) {
+	    JsGlobalInstance* inst = script->getInstance(scr);
+	    if (inst) {
+		bool ret = evalCtxtAllocations(retVal,top,inst->context(),script->parser().code(),scr);
+		TelEngine::destruct(inst);
+		return ret;
+	    }
+	}
+	mylock.acquire(this);
+	RefPointer<JsAssist> assist = static_cast<JsAssist*>(calls()[scr]);
+	if (assist) {
+	    mylock.drop();
+	    return assist->evalAllocations(retVal,top);
+	}
+	retVal << "Cannot find script context: " << scr << "\n\r";
+	return true;
+    }
+
+    if (cmd.startSkip("allocations total") && cmd.trimSpaces()) {
 	String scr;
 	cmd.extractTo(" ",scr).trimSpaces();
 	unsigned int top = cmd.toInteger(25,0,1,100);
@@ -6054,8 +6696,20 @@ bool JsModule::commandExecute(String& retVal, const String& line)
 	    return false;
 	Lock mylock(JsGlobal::s_mutex);;
 	JsGlobal* script = static_cast<JsGlobal*>(JsGlobal::globals()[scr]);
-	if (script)
-	    return evalCtxtAllocations(retVal,top,script->context(),script->parser().code(),scr);
+	if (script) {
+	    ObjList list;
+	    for (unsigned int i = 0; i <= script->instances(); i++) {
+		JsGlobalInstance* inst = script->getInstance(i);
+		if (inst) {
+		    ObjList* c = inst->context() ? inst->context()->countAllocations() : 0;
+		    if (c)
+			list.insert(c);
+		    TelEngine::destruct(inst);
+		}
+	    }
+	    mylock.drop();
+	    return evalInstanceAllocations(retVal,top,list,script->parser().code(),scr);
+	}
 	mylock.acquire(this);
 	RefPointer<JsAssist> assist = static_cast<JsAssist*>(calls()[scr]);
 	if (assist) {
@@ -6149,8 +6803,15 @@ bool JsModule::commandComplete(Message& msg, const String& partLine, const Strin
 	    Lock lck(JsGlobal::s_mutex);
 	    for (ObjList* o = JsGlobal::globals().skipNull(); o ; o = o->skipNext()) {
 		JsGlobal* script = static_cast<JsGlobal*>(o->get());
-		if (script->name())
-		    itemComplete(msg.retValue(),s_eval + script->name(),partWord);
+		if (script->name()) {
+		    for (unsigned int i = 0; i <= script->instances(); i++) {
+			JsGlobalInstance* inst = script->getInstance(i);
+			if (inst) {
+			    itemComplete(msg.retValue(),s_eval + inst->toString(),partWord);
+			    TelEngine::destruct(inst);
+			}
+		    }
+		}
 	    }
 	    lck.acquire(this);
 	    for (unsigned int i = 0; i < calls().length(); i++) {
@@ -6166,7 +6827,7 @@ bool JsModule::commandComplete(Message& msg, const String& partLine, const Strin
 	    itemComplete(msg.retValue(),*list,partWord);
 	return true;
     }
-    else if (partLine == YSTRING("javascript reload") || partLine == YSTRING("javascript allocations")) {
+    else if (partLine == YSTRING("javascript reload") || partLine == YSTRING("javascript allocations total")) {
 	Lock lck(JsGlobal::s_mutex);
 	for (ObjList* o = JsGlobal::globals().skipNull(); o ; o = o->skipNext()) {
 	    JsGlobal* script = static_cast<JsGlobal*>(o->get());
@@ -6174,6 +6835,27 @@ bool JsModule::commandComplete(Message& msg, const String& partLine, const Strin
 		itemComplete(msg.retValue(),script->name(),partWord);
 	}
 	return true;
+    }
+    else if (partLine == YSTRING("javascript allocations instance")) {
+	Lock lck(JsGlobal::s_mutex);
+	for (ObjList* o = JsGlobal::globals().skipNull(); o ; o = o->skipNext()) {
+	    JsGlobal* script = static_cast<JsGlobal*>(o->get());
+	    if (script && script->instances() > 1) {
+		for (unsigned int i = 0; i <= script->instances(); i++) {
+		    JsGlobalInstance* inst = script->getInstance(i);
+		    if (inst) {
+			itemComplete(msg.retValue(),inst->toString(),partWord);
+			TelEngine::destruct(inst);
+		    }
+		}
+	    }
+	}
+	return true;
+    }
+    else if (partLine == YSTRING("javascript allocations")) {
+	itemComplete(msg.retValue(),"total",partWord);
+	itemComplete(msg.retValue(),"instance",partWord);
+	return 0;
     }
     return Module::commandComplete(msg,partLine,partWord);
 }
@@ -6259,7 +6941,7 @@ bool JsModule::received(Message& msg, int id)
 	    if (!m_started) {
 		m_started = true;
 		Configuration cfg(Engine::configFile("javascript"));
-		JsGlobal::loadScripts(cfg.getSection("late_scripts"));
+		JsGlobal::loadScripts(cfg.getSection("late_scripts"),cfg.getSection("instances"));
 	    }
 	    return false;
     } // switch (id)
@@ -6348,9 +7030,9 @@ void JsModule::initialize()
     }
     JsGlobal::markUnused();
     lck.drop();
-    JsGlobal::loadScripts(cfg.getSection("scripts"));
+    JsGlobal::loadScripts(cfg.getSection("scripts"),cfg.getSection("instances"));
     if (m_started)
-	JsGlobal::loadScripts(cfg.getSection("late_scripts"));
+	JsGlobal::loadScripts(cfg.getSection("late_scripts"),cfg.getSection("instances"));
     JsGlobal::reloadDynamic();
     JsGlobal::freeUnused();
 }

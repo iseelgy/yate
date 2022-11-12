@@ -1603,7 +1603,7 @@ public:
      * @param name Name of the context
      */
     inline explicit ScriptContext(const char* name = 0)
-	: m_params(name)
+	: m_params(name), m_instIdx(0), m_instCount(1)
 	{ }
 
     /**
@@ -1776,8 +1776,22 @@ public:
     virtual ObjList* countAllocations()
 	{ return 0; }
 
+    virtual void setInstance(unsigned int idx, unsigned int count)
+    {
+        m_instIdx = idx;
+        m_instCount = count;
+    }
+
+    virtual unsigned int instanceIndex() const
+        { return m_instIdx; }
+
+    virtual unsigned int instanceCount() const
+        { return m_instCount; }
+
 private:
     NamedList m_params;
+    unsigned int m_instIdx; // instance index
+    unsigned int m_instCount; // total number of instances
 };
 
 /**
@@ -2155,25 +2169,31 @@ public:
      * Create a context adequate for the parsed code
      * @return A new script context
      */
-    virtual ScriptContext* createContext() const;
+    virtual ScriptContext* createContext(unsigned int instIdx = 0, unsigned int maxInst = 1) const;
 
     /**
      * Create a runner adequate for a block of parsed code
      * @param code Parsed code block
      * @param context Script context, an empty one will be allocated if NULL
      * @param title An optional name for the runner
+     * @param instIdx Javascript context instance
+     * @param maxInst Number of context instances
      * @return A new script runner, NULL if code is NULL
      */
-    virtual ScriptRun* createRunner(ScriptCode* code, ScriptContext* context = 0, const char* title = 0) const;
+    virtual ScriptRun* createRunner(ScriptCode* code, ScriptContext* context = 0, const char* title = 0,
+                            unsigned int instIdx = 0, unsigned int maxInst = 1) const;
 
     /**
      * Create a runner adequate for the parsed code
      * @param context Script context, an empty one will be allocated if NULL
      * @param title An optional name for the runner
+     * @param instIdx Javascript context instance
+     * @param maxInst Number of context instances
      * @return A new script runner, NULL if code is not yet parsed
      */
-    inline ScriptRun* createRunner(ScriptContext* context = 0, const char* title = 0) const
-	{ return createRunner(code(),context,title); }
+    inline ScriptRun* createRunner(ScriptContext* context = 0, const char* title = 0, 
+                            unsigned int instIdx = 0, unsigned int maxInst = 1) const
+	{ return createRunner(code(),context,title,instIdx,maxInst); }
 
     /**
      * Check if a script has a certain function or method
@@ -2225,6 +2245,22 @@ public:
 	// Masks
 	DumpFuncOnly = DumpRecursive | DumpProto | DumpFunc,
 	DumpPropOnly = DumpRecursive | DumpPropObjType | DumpProp,
+    };
+
+    /**
+     * Copy properties flags
+     */
+    enum AssignFlags {
+	AssignSkipPrefix = 0x01,           // Skip prefix if given when copying
+	AssignSkipNull = 0x02,             // Do not copy properties with 'null' value
+	AssignSkipUndefined = 0x04,        // Do not copy properties with 'undefined' value
+	AssignSkipEmpty = 0x08,            // Do not copy properties evaluating to empty strings
+	AssignSkipObject = 0x10,           // Do not copy Object properties
+	AssignSkipArrayProps = 0x20,       // Do not copy Array properties
+	AssignSkipArrayIndex = 0x40,       // Do not copy Array indexes
+	// Masks
+	AssignFilled = AssignSkipNull | AssignSkipUndefined | AssignSkipEmpty,
+	AssignFilledSkipObject = AssignFilled | AssignSkipObject,
     };
 
     /**
@@ -2501,6 +2537,22 @@ public:
      */
     inline unsigned int lineNo() const
 	{ return m_lineNo; }
+
+    /**
+     * Copy object properties
+     * @param src Source object
+     * @param flags Copy flags (see AssignFlags)
+     * @param props Optional list of properties to copy
+     * @param prefix Optional prefix.
+     *   'props' given: Skip this prefix in handled properties starting with it if requested in flags
+     *   'props' not given: Copy only properties starting with it. Skip this prefix if requested in flags
+     * @param addPrefix Optional prefix to add to properties when copied
+     * @param context Pointer to an execution context
+     * @return Number of copied properties, negative on error (object is frozen on first assign attempt)
+     */
+    int assignProps(JsObject* src, unsigned int flags = 0, ObjList* props = 0,
+	const String& prefix = String::empty(), const String& addPrefix = String::empty(),
+	GenObject* context = 0);
 
     /**
      * Helper static method that adds an object to a parent
@@ -2841,6 +2893,15 @@ public:
     void push(ExpOperation* item);
 
     /**
+     * Add string items at the end of the array
+     * @param lst List with items to push
+     */
+    inline void push(const ObjList& lst) {
+	    for (const ObjList* o = lst.skipNull(); o; o = o->skipNext())
+		push(new ExpOperation(o->get()->toString()));
+	}
+
+    /**
      * Deep copy method
      * @param mtx Pointer to the mutex that serializes the copied array
      * @param oper ExpOperation that required the copy operation
@@ -2881,6 +2942,14 @@ public:
      * @return New created and populated Javascript Array object
      */
     virtual JsObject* runConstructor(ObjList& stack, const ExpOperation& oper, GenObject* context);
+
+    /**
+     * Add values to a string list
+     * @param list Destination list
+     * @param emptyOk Add empty strings
+     * @return The number of added items
+     */
+    unsigned int toStringList(ObjList& list, bool emptyOk = true);
 
 protected:
 
@@ -3139,25 +3208,31 @@ public:
      * Create a context adequate for Javascript code
      * @return A new Javascript context
      */
-    virtual ScriptContext* createContext() const;
+    virtual ScriptContext* createContext(unsigned int instIdx = 0, unsigned int maxInst = 1) const;
 
     /**
      * Create a runner adequate for a block of parsed Javascript code
      * @param code Parsed code block
      * @param context Javascript context, an empty one will be allocated if NULL
      * @param title An optional name for the runner
+     * @param instIdx Javascript context instance
+     * @param maxInst Number of context instances
      * @return A new Javascript runner, NULL if code is NULL
      */
-    virtual ScriptRun* createRunner(ScriptCode* code, ScriptContext* context = 0, const char* title = 0) const;
+    virtual ScriptRun* createRunner(ScriptCode* code, ScriptContext* context = 0, const char* title = 0, 
+                            unsigned int instIdx = 0, unsigned int maxInst = 1) const;
 
     /**
      * Create a runner adequate for the parsed Javascript code
      * @param context Javascript context, an empty one will be allocated if NULL
      * @param title An optional name for the runner
+     * @param instIdx Javascript context instance
+     * @param maxInst Number of context instances
      * @return A new Javascript runner, NULL if code is not yet parsed
      */
-    inline ScriptRun* createRunner(ScriptContext* context = 0, const char* title = 0) const
-	{ return createRunner(code(),context,title); }
+    inline ScriptRun* createRunner(ScriptContext* context = 0, const char* title = 0, 
+                            unsigned int instIdx = 0, unsigned int maxInst = 1) const
+	{ return createRunner(code(),context,title,instIdx,maxInst); }
 
     /**
      * Check if a script has a certain function or method
@@ -3333,6 +3408,22 @@ public:
      */
     inline static bool isFilled(const ExpOperation* oper)
 	{ return !isEmpty(oper); }
+
+    /**
+     * Check if an operation is present and holds an object
+     * @param oper Operation to check
+     * @return JsObject pointer, 0 if not
+     */
+    inline static JsObject* objPresent(const ExpOperation& oper)
+	{ return isPresent(oper) ? YOBJECT(JsObject,&oper) : 0; }
+
+    /**
+     * Check if an operation is present and holds an object
+     * @param oper Operation to check
+     * @return JsObject pointer, 0 if not
+     */
+    inline static JsObject* objPresent(const ExpOperation* oper)
+	{ return oper ? objPresent(*oper) : 0; }
 
 private:
     String m_basePath;
