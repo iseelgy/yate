@@ -148,12 +148,12 @@ namespace TelEngine {
 		logger::get().log(loc, lvl, (prefix + _stream.str()).c_str());
 	}
 
-	logger::logger() :
-		_log_level(yate_log_level_trace)
+	logger::logger() 
 	{
 		auto abc_sink = std::make_shared<abc_sink_mt>();
 		loger_ = std::make_shared< spdlog::logger>( "yate", abc_sink);
 		loger_->set_pattern("[%L %D %T.%e %P#%t] %s(%#) %v");
+		set_level(yate_log_level_trace);
 	}
 
 	template <typename... Args>
