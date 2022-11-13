@@ -1478,7 +1478,7 @@ public:
      */
     //inline static const String& modulePath()
 	//{ return s_modpath; }
-	inline static const String& modulePath();
+	static const String& modulePath();
 
     /**
      * Add a relative extra module loading path. The list is empty by default
