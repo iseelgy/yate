@@ -1382,32 +1382,29 @@ public:
      * Get the running mode of the engine
      * @return Engine's run mode as enumerated value
      */
-    static RunMode mode()
-	{ return s_mode; }
+	static RunMode mode();
+	//{ return s_mode; }
 
     /**
      * Get call accept status
      * @return Engine's call accept status as enumerated value
      */
-    inline static CallAccept accept() {
-	return (s_congestion && (s_accept < Congestion)) ? Congestion : s_accept;
-    }
+	static CallAccept accept();
+	//{return (getCongestion() && (s_accept < Congestion)) ? Congestion : s_accept;}
 
     /**
      * Set call accept status
      * @param ca New call accept status as enumerated value
      */
-    inline static void setAccept(CallAccept ca) {
-	s_accept = ca;
-    }
+	static void setAccept(CallAccept ca);
+	//{s_accept = ca;}
 
     /**
      * Get call accept states
      * @return states Pointer to the call accept states TokenDict
      */
-    inline static const TokenDict* getCallAcceptStates() {
-	return s_callAccept;
-    }
+	static const TokenDict* getCallAcceptStates();
+	//{	return s_callAccept;    }
 
     /**
      * Alter the congestion state counter.
@@ -1419,15 +1416,15 @@ public:
      * Get the congestion state counter
      * @return Zero if not congested else the number of congested components
      */
-    static unsigned int getCongestion()
-	{ return s_congestion; }
+	static unsigned int getCongestion();
+	//{ return s_congestion; }
 
     /**
      * Check if the engine is running as telephony client
      * @return True if the engine is running in client mode
      */
     inline static bool clientMode()
-	{ return (s_mode == Client) || (s_mode == ClientProxy); }
+	{ return (mode() == Client) || (mode() == ClientProxy); }
 
     /**
      * Register or unregister a plugin to the engine.
@@ -1441,15 +1438,17 @@ public:
      * Get the server node name, should be unique in a cluster
      * @return Node identifier string, defaults to host name
      */
-    inline static const String& nodeName()
-	{ return s_node; }
+    //inline static const String& nodeName()
+	//{ return s_node; }
+	static const String& nodeName();
 
     /**
      * Get the application's shared directory path
      * @return The base path for shared files and directories
      */
-    inline static const String& sharedPath()
-	{ return s_shrpath; }
+    //inline static const String& sharedPath()
+	//{ return s_shrpath; }
+	static const String& sharedPath();
 
     /**
      * Get the filename for a specific configuration
@@ -1470,14 +1469,16 @@ public:
      * Get the configuration file suffix
      * @return The suffix for configuration files
      */
-    inline static const String& configSuffix()
-	{ return s_cfgsuffix; }
+    //inline static const String& configSuffix()
+	//{ return s_cfgsuffix; }
+	static const String& configSuffix();
 
     /**
      * The module loading path
      */
-    inline static const String& modulePath()
-	{ return s_modpath; }
+    //inline static const String& modulePath()
+	//{ return s_modpath; }
+	inline static const String& modulePath();
 
     /**
      * Add a relative extra module loading path. The list is empty by default
@@ -1498,8 +1499,9 @@ public:
      * Get the module filename suffix
      * @return The suffix for module files
      */
-    inline static const String& moduleSuffix()
-	{ return s_modsuffix; }
+    //inline static const String& moduleSuffix()
+	//{ return s_modsuffix; }
+	static const String& moduleSuffix();
 
     /**
      * Get the canonical path element separator for the operating system
@@ -1526,8 +1528,9 @@ public:
      * Get the engine parameters specific to this run.
      * @return A reference to the list of run specific parameters
      */
-    inline static const NamedList& runParams()
-	{ return s_params; }
+    //inline static const NamedList& runParams()
+	//{ return s_params; }
+	static const NamedList& runParams();
 
     /**
      * Reinitialize the plugins
@@ -1559,15 +1562,15 @@ public:
      * Check if the engine was started
      * @return True if the engine has gone through the start phase
      */
-    static bool started()
-	{ return s_started; }
+	static bool started();
+	//{ return s_started; }
 
     /**
      * Check if the engine is currently exiting
      * @return True if exiting, false in normal operation
      */
-    static bool exiting()
-	{ return (s_haltcode != -1); }
+	static bool exiting();
+	//{ return (s_haltcode != -1); }
 
     /**
      * Installs a handler in the dispatcher.
@@ -1636,8 +1639,9 @@ public:
      * Retrieve the tracker parameter name
      * @return Name of the parameter used to track message dispatching
      */
-    inline static const String& trackParam()
-	{ return s_self ? s_self->m_dispatcher.trackParam() : String::empty(); }
+    //inline static const String& trackParam()
+	//{ return s_self ? s_self->m_dispatcher.trackParam() : String::empty(); }
+	static const String& trackParam();
 
     /**
      * Appends a new message hook to the hooks list.
@@ -1786,8 +1790,9 @@ public:
      * Retrieve common Engine dispatcher
      * @return MessageDispatcher pointer, NULL if not set
      */
-    static inline MessageDispatcher* dispatcher()
-	{ return s_self ? &(s_self->m_dispatcher) : 0; }
+    //static inline MessageDispatcher* dispatcher()
+	//{ return s_self ? &(s_self->m_dispatcher) : 0; }
+	static MessageDispatcher* dispatcher();
 
 protected:
     /**
@@ -1841,6 +1846,8 @@ private:
     static unsigned int s_congestion;
     static CallAccept s_accept;
     static const TokenDict s_callAccept[];
+public:
+
 };
 
 }; // namespace TelEngine

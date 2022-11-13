@@ -39,6 +39,12 @@ Cipher::~Cipher()
 {
 }
 
+const TokenDict* Cipher::directions()
+{
+	return s_directions;
+}
+
+
 void* Cipher::getObject(const String& name) const
 {
     if (name == YATOM("Cipher"))

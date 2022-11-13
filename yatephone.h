@@ -1391,15 +1391,15 @@ public:
      * Retrieve the global update notification delay
      * @return Update delay value in seconds
      */
-    inline static unsigned int updateDelay()
-	{ return s_delay; }
+	static unsigned int updateDelay();
+	//{ return s_delay; }
 
     /**
      * Set the global update notification delay
      * @param delay New update delay value in seconds, 0 to disable
      */
-    inline static void updateDelay(unsigned int delay)
-	{ s_delay = delay; }
+	static void updateDelay(unsigned int delay);
+	//{ s_delay = delay; }
 
     /**
      * Check if a debug filter is installed
@@ -1472,8 +1472,8 @@ protected:
      * @param name Name of the Relay to search for
      * @return ID of the Relay, zero if not found
      */
-    static inline int relayId(const char* name)
-	{ return lookup(name,s_messages); }
+	static int relayId(const char* name);
+	//{ return lookup(name,s_messages); }
 
     /**
      * Constructor
@@ -2227,8 +2227,8 @@ private:
     void init();
     Channel(); // no default constructor please
     // Just in case we are going to (re)move the channel data mutex!
-    static inline Mutex* chanDataMutex()
-	{ return &s_chanDataMutex; }
+	static Mutex* chanDataMutex();
+	//{ return &s_chanDataMutex; }
 public:
 	static Mutex s_chanDataMutex;
 };

@@ -1115,15 +1115,17 @@ public:
      * Get the global state of object counting
      * @return True if object counting is enabled
      */
-    static inline bool getObjCounting()
-	{ return s_counting; }
+    //static inline bool getObjCounting()
+	//{ return s_counting; }
+	static bool getObjCounting();
 
     /**
      * Set the global state of object counting
      * @param enable True to enable object counting, false to disable
      */
-    static inline void setObjCounting(bool enable)
-	{ s_counting = enable; }
+    //static inline void setObjCounting(bool enable)
+	//{ s_counting = enable; }
+	static void setObjCounting(bool enable);
 
     /**
      * Get the counter of this object
@@ -3984,15 +3986,17 @@ public:
      * Get the capturing state of the output and debug messages
      * @return True if output and debug messages are being captured
      */
-    inline static bool capturing()
-	{ return s_capturing; }
+    //inline static bool capturing()
+	//{ return s_capturing; }
+	static bool capturing();
 
     /**
      * Get the list of captured events
      * @return List of events captured from output and debugging
      */
     inline static const ObjList& events()
-	{ return s_events; }
+	{ return eventsRw(); }
+	
 
     /**
      * Add an event to the captured events list
@@ -4000,22 +4004,24 @@ public:
      * @param text Text description of the event, must not be empty
      */
     inline static void append(int level, const char* text)
-	{ if (text && *text) s_events.append(new CapturedEvent(level,text)); }
+	{ if (text && *text) eventsRw().append(new CapturedEvent(level,text)); }
 
 protected:
     /**
      * Get a writable list of captured events
      * @return List of events captured from output and debugging
      */
-    inline static ObjList& eventsRw()
-	{ return s_events; }
+    //inline static ObjList& eventsRw()
+	//{ return s_events; }
+	static ObjList& eventsRw();
 
     /**
      * Enable or disable capturing of output and debug messages
      * @param capture True to capture internally the debugging messages
      */
-    inline static void capturing(bool capture)
-	{ s_capturing = capture; }
+    //inline static void capturing(bool capture)
+	//{ s_capturing = capture; }
+	static void capturing(bool capture);
 
 private:
     int m_level;
@@ -7569,7 +7575,7 @@ public:
      * @return Address family name
      */
     static inline const char* lookupFamily(int family)
-	{ return lookup(family,s_familyName); }
+	{ return lookup(family, dictFamilyName()); }
 
     /**
      * Retrieve IPv4 null address
@@ -7593,8 +7599,9 @@ public:
      * Retrieve the string for interface name extra URI escape in address
      * @return Interface name extra URI escape in address
      */
-    static inline const char* ifaceNameExtraEscape()
-	{ return s_ifaceNameExtraEscape; }
+    //static inline const char* ifaceNameExtraEscape()
+	//{ return s_ifaceNameExtraEscape; }
+	static const char* ifaceNameExtraEscape();
 
     /**
      * Escape an interface name
@@ -8751,8 +8758,9 @@ public:
      * Retrieve available features
      * @return Available features mask
      */
-    static inline unsigned int features()
-	{ return s_features; }
+    //static inline unsigned int features()
+	//{ return s_features; }
+	static unsigned int features();
 
 protected:
 
@@ -9306,8 +9314,9 @@ public:
      * Get the dictionary of cipher directions
      * @return Pointer to the dictionary of cipher directions
      */
-    inline static const TokenDict* directions()
-	{ return s_directions; }
+    //inline static const TokenDict* directions()
+	//{ return s_directions; }
+	static const TokenDict* directions();
 
     /**
      * Get a direction from the dictionary given the name
@@ -9316,7 +9325,7 @@ public:
      * @return Direction associated with the given name
      */
     inline static Direction direction(const char* name, Direction defdir = Bidir)
-	{ return (Direction)TelEngine::lookup(name,s_directions,defdir); }
+	{ return (Direction)TelEngine::lookup(name, directions(),defdir); }
 
     /**
      * Destructor

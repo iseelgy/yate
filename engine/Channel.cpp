@@ -1026,6 +1026,12 @@ bool Channel::toneDetect(const char* sniffer)
     return Engine::dispatch(m);
 }
 
+Mutex* Channel::chanDataMutex()
+{
+	return &s_chanDataMutex;
+}
+
+
 bool Channel::setDebug(Message& msg)
 {
     String str = msg.getValue("line");
@@ -1095,6 +1101,12 @@ const char* Module::messageName(int id)
 	return 0;
     return lookup(id,s_messages);
 }
+
+int Module::relayId(const char* name)
+{
+	return lookup(name, s_messages);
+}
+
 
 Module::Module(const char* name, const char* type, bool earlyInit)
     : Plugin(name,earlyInit), Mutex(true,"Module"),
@@ -1216,6 +1228,21 @@ void Module::changed()
     if (s_delay && !m_changed)
 	m_changed = Time::now() + s_delay*(u_int64_t)1000000;
 }
+
+unsigned int Module::updateDelay()
+{
+	return s_delay;
+}
+
+/**
+ * Set the global update notification delay
+ * @param delay New update delay value in seconds, 0 to disable
+ */
+void Module::updateDelay(unsigned int delay)
+{
+	s_delay = delay;
+}
+
 
 void Module::msgTimer(Message& msg)
 {

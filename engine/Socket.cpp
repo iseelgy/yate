@@ -742,6 +742,12 @@ const TokenDict* SocketAddr::dictFamilyName()
     return s_familyName;
 }
 
+const char* SocketAddr::ifaceNameExtraEscape()
+{
+	return s_ifaceNameExtraEscape;
+}
+
+
 void SocketAddr::stringify()
 {
     m_host.clear();
@@ -1760,6 +1766,12 @@ int Socket::socketError()
     return -1;
 #endif
 }
+
+unsigned int Socket::features()
+{
+	return s_features;
+}
+
 
 void Socket::copyError()
 {

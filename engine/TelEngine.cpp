@@ -195,6 +195,22 @@ static Thread* s_thr = 0;
 bool CapturedEvent::s_capturing = false;
 ObjList CapturedEvent::s_events;
 
+void CapturedEvent::capturing(bool capture)
+{
+	s_capturing = capture;
+}
+
+bool CapturedEvent::capturing()
+{
+	return s_capturing;
+}
+
+ObjList& CapturedEvent::eventsRw()
+{
+	return s_events;
+}
+
+
 static bool reentered()
 {
     if (!s_thr)
@@ -1227,6 +1243,17 @@ void GenObject::destruct()
 {
     delete this;
 }
+
+bool GenObject::getObjCounting()
+{
+	return s_counting;
+}
+
+void GenObject::setObjCounting(bool enable)
+{
+	s_counting = enable;
+}
+
 
 NamedCounter* GenObject::setObjCounter(NamedCounter* counter)
 {

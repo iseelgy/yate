@@ -2108,6 +2108,28 @@ Engine* Engine::self()
     return s_self;
 }
 
+Engine::RunMode Engine::mode()
+{
+	return s_mode;
+}
+
+Engine::CallAccept Engine::accept() {
+	return (getCongestion() && (s_accept < Congestion)) ? Congestion : s_accept;
+}
+
+/**
+ * Set call accept status
+ * @param ca New call accept status as enumerated value
+ */
+void Engine::setAccept(CallAccept ca) {
+	s_accept = ca;
+}
+
+const TokenDict* Engine::getCallAcceptStates() {
+	return s_callAccept;
+}
+
+
 void Engine::setCongestion(const char* reason)
 {
     unsigned int cong = 2;
@@ -2131,6 +2153,12 @@ void Engine::setCongestion(const char* reason)
     }
 }
 
+unsigned int Engine::getCongestion()
+{
+	return s_congestion;
+}
+
+
 const char* Engine::pathSeparator()
 {
     return PATH_SEP;
@@ -2149,6 +2177,17 @@ const String& Engine::configPath(bool user)
     }
     return s_cfgpath;
 }
+
+const String& Engine::configSuffix()
+{
+	return s_cfgsuffix;
+}
+
+const String& Engine::modulePath()
+{
+	return s_modpath;
+}
+
 
 String Engine::configFile(const char* name, bool user)
 {
@@ -2182,6 +2221,18 @@ bool Engine::Register(const Plugin* plugin, bool reg)
 	p->remove(false);
     return true;
 }
+
+const String& Engine::nodeName()
+{
+	return s_node;
+}
+
+const String& Engine::sharedPath()
+{
+	return s_shrpath;
+}
+
+
 
 bool Engine::loadPlugin(const char* file, bool local, bool nounload)
 {
@@ -2369,6 +2420,12 @@ void Engine::userPath(const String& path)
 	Debug(DebugWarn,"Engine::userPath('%s') called too late!",path.c_str());
 }
 
+const String& Engine::moduleSuffix()
+{
+	return s_modsuffix;
+}
+
+
 void Engine::halt(unsigned int code)
 {
     if (s_haltcode == -1)
@@ -2413,6 +2470,18 @@ bool Engine::init(const String& name)
     }
     return ok;
 }
+
+
+bool Engine::started()
+{
+	return s_started;
+}
+
+bool Engine::exiting()
+{
+	return (s_haltcode != -1);
+}
+
 
 bool Engine::install(MessageHandler* handler)
 {
@@ -2469,6 +2538,17 @@ bool Engine::dispatch(const char* name, bool broadcast)
     return s_self->m_dispatcher.dispatch(msg);
 }
 
+MessageDispatcher* Engine::dispatcher()
+{
+	return s_self ? &(s_self->m_dispatcher) : 0;
+}
+
+const String& Engine::trackParam()
+{
+	return s_self ? s_self->m_dispatcher.trackParam() : String::empty();
+}
+
+
 bool Engine::installHook(MessageHook* hook)
 {
     Lock myLock(s_hooksMutex);
@@ -2491,6 +2571,12 @@ unsigned int Engine::runId()
 {
     return s_runid;
 }
+
+const NamedList& Engine::runParams()
+{
+	return s_params;
+}
+
 
 const ObjList* Engine::events(const String& type)
 {
