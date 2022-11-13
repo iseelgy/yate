@@ -29,7 +29,6 @@
 #include <limits.h>
 #include <sys/types.h>
 #include <stddef.h>
-#include <unistd.h>
 #include <errno.h>
 #include <stdarg.h>
 
@@ -137,6 +136,7 @@ typedef unsigned long in_addr_t;
 
 #else /* _WINDOWS */
 
+#include <unistd.h>
 #include <sys/time.h>
 #include <sys/socket.h>
 
