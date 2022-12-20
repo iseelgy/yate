@@ -2204,7 +2204,7 @@ const Configuration& Engine::config()
 
 bool Engine::Register(const Plugin* plugin, bool reg)
 {
-    DDebug(DebugInfo,"Engine::Register(%p,%d)",plugin,reg);
+    DDebug(DebugInfo,"Engine::Register(%p,%s,%d)",plugin,plugin->name().safe(), reg);
     ObjList *p = plugins.find(plugin);
     if (reg) {
 	if (p)
