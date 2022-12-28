@@ -4,13 +4,23 @@
 #
 #===================================================================
 
-PID_FILE=./yate.pid
-LOG_FILE=./yate.log
 
 EGREP="egrep"
-OSERBIN="./run.cmake"
 
 ## LD_LIBRARY_PATH="$wd":$LD_LIBRARY_PATH
+
+#echo "${BASH_SOURCE[0]}"
+#echo "${BASH_SOURCE}"
+#echo "$(dirname "${BASH_SOURCE[0]}")"
+# echo "$(cd "${dirname BASH_SOURCE[0]}" && pwd)"
+
+FULL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+OSERBIN="$FULL_DIR/run.console"
+PID_FILE="$FULL_DIR/yate.pid"
+LOG_FILE="$FULL_DIR/yate.log"
+
+# echo "FULL_DIR $FULL_DIR"
 
 #
 ##### ------------------------------------------------ #####
@@ -19,11 +29,21 @@ OSERBIN="./run.cmake"
 yate_start() {
 	echo
 	echo "Starting yate : "
+		
 	if [ -r $PID_FILE ] ; then
-		ps axw | $EGREP yate
-		# ls -l $PID_FILE
-		echo "PID file exists ($PID_FILE)! yate already running?"
-		exit 1
+	
+		pid_value=`cat $PID_FILE`
+		ps_out=`ps -ef | grep yate | grep $pid_value`
+		ps_result=$(echo $ps_out | grep "yate")
+		
+		#echo "Running $ps_result"
+		
+		if [ "$ps_result" == "" ] ; then
+			echo "$pid_value PID file exists ($PID_FILE)! but yate not running!"
+		else
+			echo "$pid_value PID file exists ($PID_FILE)! yate already running?"
+			exit 1
+		fi
 	fi
 	
 	if [ ! -x "$OSERBIN" ] ; then
@@ -32,10 +52,8 @@ yate_start() {
 		echo "set OSERBIN to the path of yate in $0"
 		exit 1
 	fi
-	
-	## $OSERBIN -d -vv -p $PID_FILE -l $LOG_FILE 
-	
-	$OSERBIN -d -vv -s -r -p $PID_FILE -l $LOG_FILE 
+		
+	$OSERBIN --there -d -vv -s -r -p $PID_FILE -l $LOG_FILE 
 
 	sleep 3
 	
@@ -57,12 +75,40 @@ yate_stop() {
 	if [ -r $PID_FILE ] ; then
 		echo "Stopping yate (pid: `cat $PID_FILE`)"
 		kill `cat $PID_FILE`
+		sleep 3
 		echo "stopped"
 		rm "$PID_FILE"
 	else
 		echo
 		echo "No PID file found ($PID_FILE)! yate probably not running"
-		echo "check with 'ps axw | $EGREP yate'"
+		#echo "check with 'ps axw | $EGREP yate'"
+		exit 1
+	fi
+}
+
+##### ------------------------------------------------ #####
+### yate_state
+#
+yate_state() {
+
+	if [ -r $PID_FILE ] ; then
+	
+		pid_value=`cat $PID_FILE`
+		ps_out=`ps -ef | grep yate | grep $pid_value`
+		ps_result=$(echo $ps_out | grep "yate")
+		
+		#echo "Running $ps_result"
+		
+		if [ "$ps_result" == "" ] ; then
+			echo "stopped, $pid_value PID file exists ($PID_FILE)! but yate not running!"
+			exit 1
+		else
+			echo "running"
+			exit 0
+		fi
+		
+	else
+		echo "stopped"
 		exit 1
 	fi
 }
@@ -71,11 +117,12 @@ usage() {
 	
 	echo ""
 	echo "Existing commands:"
-	echo "    -- command 'start|stop|restart'"
+	echo "    -- command 'start|stop|restart|state'"
 	echo ""
 	echo "    restart .............. restart yate"
 	echo "    start ................ start yate"
 	echo "    stop ................. stop yate"
+	echo "    state ................ state yate"
 
 }
 
@@ -96,6 +143,10 @@ case $1 in
 
 	stop)
 		yate_stop
+		;;
+
+	state)
+		yate_state
 		;;
 
 	version)

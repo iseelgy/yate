@@ -28,6 +28,11 @@ set_conf="-c ./conf.d"
 set_mods="-m ./modules"
 set_share="-e ./share"
 
+set_ccc=`dirname "$0"`
+
+echo "script dir is: $set_ccc"
+
+
 if [ -z "$MYDIR" ] ; then
 	MYDIR=`dirname $0`
 fi
