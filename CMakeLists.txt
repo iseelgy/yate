@@ -36,8 +36,6 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 #SET(SPDLOG_INSTALL ON)
 
-##find_package(fmt REQUIRED)
-##find_package(spdlog REQUIRED)
 
 if( _DISABLE_YATE_SDP_LOG_ )
 

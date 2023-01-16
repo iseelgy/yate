@@ -2349,10 +2349,18 @@ String& String::changeStringData(char* data, unsigned int len)
     return *this;
 }
 
+bool String::stripBOM()
+{
+	return checkBOM(c_str()) && &(*this = c_str() + 3);
+}
+
+
 void globalDestroyString()
 {
 	s_mutex.~Mutex();
 
 }
+
+
 
 /* vi: set ts=8 sw=4 sts=4 noet: */
