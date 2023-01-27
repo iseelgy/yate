@@ -159,7 +159,9 @@ else()
 endif()
 		
 if(ANDROID)
-	ADD_DEFINITIONS(-D_OS_ANDROID_)
+	ADD_DEFINITIONS(-D_OS_ANDROID_)	
+	set(CMAKE_C_FLAGS “${CMAKE_C_FLAGS} -Os -Wall -s”)
+	set(CMAKE_CXX_FLAGS “${CMAKE_CXX_FLAGS} -Os -Wall -s”)
 endif()
 
 
