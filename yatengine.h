@@ -1848,6 +1848,8 @@ private:
     static const TokenDict s_callAccept[];
 public:
 
+    static void staticDestroy();
+
 };
 
 }; // namespace TelEngine

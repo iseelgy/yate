@@ -1573,30 +1573,8 @@ void globalDestroyThread();
 void globalDestroyURI();
 void globalDestroyXML();
 
-
-Engine::~Engine()
+void globalDestroyYate()
 {
-#ifdef DEBUG
-    Debugger debug("Engine::~Engine()"," libs=%u plugins=%u [%p]",
-	m_libs.count(),plugins.count(),this);
-#endif
-    assert(this == s_self);
-    m_dispatcher.clear();
-    m_libs.clear();
-    s_events.clear();
-
-
-	// ========================
-	//
-	s_cfgsuffix.clear();
-	s_modpath.clear();
-	s_modsuffix.clear();
-	s_node.clear();
-	s_shrpath.clear();
-
-	s_params.clear();
-	s_params.clearParams();
-
 	globalDestroyEngine();
 	globalDestroyClientLogic();
 	globalDestroyClient();
@@ -1611,6 +1589,39 @@ Engine::~Engine()
 	globalDestroyString();
 	globalDestroyThread();
 
+	Engine::staticDestroy();
+}
+
+
+void Engine::staticDestroy()
+{
+	Engine::s_cfgsuffix.clear();
+	Engine::s_modpath.clear();
+	Engine::s_modsuffix.clear();
+	Engine::s_node.clear();
+	Engine::s_shrpath.clear();
+
+	Engine::s_params.clear();
+	Engine::s_params.clearParams();
+
+}
+
+Engine::~Engine()
+{
+#ifdef DEBUG
+    Debugger debug("Engine::~Engine()"," libs=%u plugins=%u [%p]",
+	m_libs.count(),plugins.count(),this);
+#endif
+    assert(this == s_self);
+    m_dispatcher.clear();
+    m_libs.clear();
+
+    s_events.clear();
+
+
+	// ========================
+	//
+	globalDestroyYate();
 	//
 	// ========================
 	

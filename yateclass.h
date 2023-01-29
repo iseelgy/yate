@@ -9664,7 +9664,10 @@ public:
 
 };
 
+
 }; // namespace TelEngine
+
+YATE_API void globalDestroyYate();
 
 #endif /* __YATECLASS_H */
 
