@@ -1021,7 +1021,7 @@ File::File()
     DDebug(DebugAll,"File::File() [%p]",this);
 }
 
-File::File(HANDLE handle)
+File::File(Y_HANDLE handle)
     : m_handle(handle)
 {
     DDebug(DebugAll,"File::File(%d) [%p]",(int)handle,this);
@@ -1041,7 +1041,7 @@ bool File::valid() const
 bool File::terminate()
 {
     bool ret = true;
-    HANDLE tmp = m_handle;
+    Y_HANDLE tmp = m_handle;
     if (tmp != invalidHandle()) {
 	DDebug(DebugAll,"File::terminate() handle=%d [%p]",(int)m_handle,this);
 	m_handle = invalidHandle();
@@ -1061,7 +1061,7 @@ bool File::terminate()
     return ret;
 }
 
-void File::attach(HANDLE handle)
+void File::attach(Y_HANDLE handle)
 {
     DDebug(DebugAll,"File::attach(%d) [%p]",(int)handle,this);
     if (handle == m_handle)
@@ -1071,16 +1071,16 @@ void File::attach(HANDLE handle)
     clearError();
 }
 
-HANDLE File::detach()
+Y_HANDLE File::detach()
 {
     DDebug(DebugAll,"File::detach() handle=%d [%p]",(int)m_handle,this);
-    HANDLE tmp = m_handle;
+    Y_HANDLE tmp = m_handle;
     m_handle = invalidHandle();
     clearError();
     return tmp;
 }
 
-HANDLE File::invalidHandle()
+Y_HANDLE File::invalidHandle()
 {
 #ifdef _WINDOWS
     return INVALID_HANDLE_VALUE;
@@ -1188,7 +1188,7 @@ bool File::openPath(const char* name, bool canWrite, bool canRead,
 	mode |= S_IRGRP|S_IROTH;
     if (pubWritable)
 	mode |= S_IWGRP|S_IWOTH;
-    HANDLE h = ::open(name,flags,mode);
+    Y_HANDLE h = ::open(name,flags,mode);
     if (h == invalidHandle()) {
 	copyError();
 	return false;
@@ -1313,7 +1313,7 @@ bool File::createPipe(File& reader, File& writer)
 	return true;
     }
 #else
-    HANDLE fifo[2];
+    Y_HANDLE fifo[2];
     if (!::pipe(fifo)) {
 	reader.attach(fifo[0]);
 	writer.attach(fifo[1]);

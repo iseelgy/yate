@@ -134,6 +134,12 @@ typedef unsigned long in_addr_t;
 #define FMT64 "%I64d"
 #define FMT64U "%I64u"
 
+
+#ifndef Y_HANDLE
+typedef HANDLE Y_HANDLE;
+#endif
+
+
 #else /* _WINDOWS */
 
 #include <unistd.h>
@@ -156,8 +162,8 @@ typedef unsigned long in_addr_t;
 #ifndef SOCKET
 typedef int SOCKET;
 #endif
-#ifndef HANDLE
-typedef int HANDLE;
+#ifndef Y_HANDLE
+typedef int Y_HANDLE;
 #endif
 
 #ifndef O_BINARY
@@ -7965,7 +7971,7 @@ public:
      * Constructor from an existing handle
      * @param handle Operating system handle to an open file
      */
-    explicit File(HANDLE handle);
+    explicit File(Y_HANDLE handle);
 
     /**
      * Destructor, closes the file
@@ -7998,19 +8004,19 @@ public:
      * Attach an existing handle to the file, closes any existing first
      * @param handle Operating system handle to an open file
      */
-    void attach(HANDLE handle);
+    void attach(Y_HANDLE handle);
 
     /**
      * Detaches the object from the file handle
      * @return The handle previously owned by this object
      */
-    HANDLE detach();
+    Y_HANDLE detach();
 
     /**
      * Get the operating system handle to the file
      * @return File handle
      */
-    inline HANDLE handle() const
+    inline Y_HANDLE handle() const
 	{ return m_handle; }
 
     /**
@@ -8029,7 +8035,7 @@ public:
      * Get the operating system specific handle value for an invalid file
      * @return Handle value for an invalid file
      */
-    static HANDLE invalidHandle();
+    static Y_HANDLE invalidHandle();
 
     /**
      * Set the blocking or non-blocking operation mode of the file
@@ -8181,7 +8187,7 @@ protected:
      */
     void copyError();
 
-    HANDLE m_handle;
+    Y_HANDLE m_handle;
 };
 
 /**
