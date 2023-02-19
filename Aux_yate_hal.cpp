@@ -19,7 +19,7 @@ void show_data(void * data, int size)
 	int i;
 	std::string info;
 	char show[64];
-	u8* buf = (u8*)data;
+	U8* buf = (U8*)data;
 	for (i = 0; i < size; i++) {
 		if ((i % 16) == 0) {
 			info += "\r\n""        ";
@@ -36,7 +36,7 @@ void show_data_x(void * data, int size)
 	int i;
 	std::string info;
 	char show[64];
-	u8 * buf = (u8*)data;
+	U8 * buf = (U8*)data;
 	for (i = 0; i < size; i++) {
 		if ((i % 16) == 0) {
 			info += "\r\n""        ";
