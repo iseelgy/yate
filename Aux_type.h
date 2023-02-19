@@ -35,18 +35,6 @@ typedef unsigned int U32;
 typedef long long S64 ;
 typedef unsigned long long U64 ;
 
-typedef char s8;
-typedef unsigned char u8;
-
-typedef short s16;
-typedef unsigned short u16;
-
-typedef int s32;
-typedef unsigned int u32;
-
-typedef long long s64;
-typedef unsigned long long u64 ;
-
 #ifndef BYTE
 typedef unsigned char BYTE;
 #endif
