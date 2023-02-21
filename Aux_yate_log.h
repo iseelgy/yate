@@ -186,7 +186,7 @@ namespace TelEngine {
 }
 
 
-// FMT ∏Ò Ω
+// FMT 
 //#define f_debug(msg,...) TelEngine::logger::get().log({__FILE__, __LINE__, __FUNCTION__}, yate_log_level_debug, msg, ##__VA_ARGS__)
 //#define f_info(msg,...)  TelEngine::logger::get().log({__FILE__, __LINE__, __FUNCTION__}, yate_log_level_info, msg, ##__VA_ARGS__)
 //#define f_warn(msg,...)  TelEngine::logger::get().log({__FILE__, __LINE__, __FUNCTION__}, yate_log_level_warn, msg, ##__VA_ARGS__)

@@ -68,7 +68,7 @@ protected:
 };
 
 /*
-* withDebugEnabler() 需要在各自组件内部定义
+* withDebugEnabler() need to define in module
 * 
 */
 TelEngine::DebugEnabler * withDebugEnabler();
