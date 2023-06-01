@@ -71,15 +71,20 @@ typedef unsigned short USHORT;
 
 #define _DEFINE_SHARED_PTR(x) \
     typedef x* x##_np;     \
-    typedef std::shared_ptr<x> x##_sp;     \
     typedef std::list<x##_np> x##_npl;    \
     typedef std::vector<x##_np> x##_npv;    \
     typedef std::list<x##_np>::iterator x##_npli;    \
     typedef std::vector<x##_np>::iterator x##_npvi;    \
+    typedef std::shared_ptr<x> x##_sp;     \
     typedef std::list<x##_sp> x##_spl;    \
     typedef std::vector<x##_sp> x##_spv;    \
     typedef std::list<x##_sp>::iterator x##_spli;    \
     typedef std::vector<x##_sp>::iterator x##_spvi;    \
+    typedef std::unique_ptr<x> x##_up; \
+    typedef std::list<x##_up> x##_upl;    \
+    typedef std::vector<x##_up> x##_upv;    \
+    typedef std::list<x##_up>::iterator x##_upli;    \
+    typedef std::vector<x##_up>::iterator x##_upvi;    \
 
 
 
