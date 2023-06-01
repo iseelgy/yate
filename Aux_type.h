@@ -6,8 +6,7 @@
 #include <stddef.h>
 #include <errno.h>
 #include <stdarg.h>
-
-#include <sys/types.h>
+#include <stdint.h>
 
 #include <list>
 #include <vector>
@@ -16,7 +15,6 @@
 #include <string>
 #include <cstring>
 #include <memory>
-#include <stdint.h>
 
 
 #ifndef BOOL
@@ -85,6 +83,11 @@ typedef unsigned short USHORT;
     typedef std::vector<x##_up> x##_upv;    \
     typedef std::list<x##_up>::iterator x##_upli;    \
     typedef std::vector<x##_up>::iterator x##_upvi;    \
+    typedef std::weak_ptr<x> x##_wp; \
+    typedef std::list<x##_wp> x##_wpl;    \
+    typedef std::vector<x##_wp> x##_wpv;    \
+    typedef std::list<x##_wp>::iterator x##_wpli;    \
+    typedef std::vector<x##_wp>::iterator x##_wpvi;    \
 
 
 

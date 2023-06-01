@@ -33,7 +33,7 @@
 #include <stdarg.h>
 
 #ifndef _WORDSIZE
-#if defined(__arch64__) || defined(__x86_64__) \
+#if defined(__arch64__) || defined(__x86_64__) || defined(_WIN64) \
     || defined(__amd64__) || defined(__ia64__) \
     || defined(__alpha__) || defined(__sparcv9) || defined(__mips64)
 #define _WORDSIZE 64
