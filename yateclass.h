@@ -6292,7 +6292,7 @@ public:
      * @return Valid array index
      */
     inline unsigned int index(void* ptr) const
-	{ return ((unsigned int)(unsigned long)ptr) % m_length; }
+	{ return ((unsigned int)(uintptr_t)ptr) % m_length; }
 
     /**
      * Retrieve the mutex associated with a given pointer.
