@@ -129,7 +129,7 @@ if(MSVC)
 
 #	set(CMAKE_CXX_FLAGS_RELEASE "/MT")
 #	set(CMAKE_CXX_FLAGS_DEBUG "/MTd")  
-#	SET(CMAKE_CXX_FLAGS "/EHsc")
+	SET(CMAKE_CXX_FLAGS "/EHsc")
 
 	add_definitions(-DATOMIC_OPS)
 	add_definitions(-DHAVE_DNS_NAPTR_DATA)
