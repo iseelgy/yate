@@ -210,37 +210,37 @@ namespace TelEngine {
 #define s_fatal() TelEngine::log_stream({__FILE__, __LINE__, __FUNCTION__},  yate_log_level_fatal, "")
 
 #define S_TRACE(message) do { \
-	if( TelEngine::logger::get().level() <= yate_log_level_trace ){		\
+	if( TelEngine::debugLevel() > TelEngine::DebugAll ){		\
 		s_trace() << message; \
 	}		\
 }while(0)
 
 #define S_DEBUG(message) do { \
-	if( TelEngine::logger::get().level() <= yate_log_level_debug ){		\
+	if( TelEngine::debugLevel() >= TelEngine::DebugAll ){		\
 		s_debug() << message; \
 	}		\
 }while(0)
 
 #define S_INFO(message) do { \
-	if( TelEngine::logger::get().level() <= yate_log_level_info ){		\
+	if( TelEngine::debugLevel() >= TelEngine::DebugInfo ){		\
 		s_info() << message; \
 	}		\
 }while(0)
 
 #define S_WARN(message) do { \
-	if( TelEngine::logger::get().level() <= yate_log_level_warn ){		\
+	if( TelEngine::debugLevel() >= TelEngine::DebugWarn ){		\
 		s_warn() << message; \
 	}		\
 }while(0)
 
 #define S_ERROR(message) do { \
-	if( TelEngine::logger::get().level() <= yate_log_level_error ){		\
+	if( TelEngine::debugLevel() >= TelEngine::DebugCrit ){		\
 		s_error() << message; \
 	}		\
 }while(0)
 
 #define S_FATAL(message) do { \
-	if( TelEngine::logger::get().level() <= yate_log_level_fatal ){		\
+	if( TelEngine::debugLevel() >= TelEngine::DebugFail ){		\
 		s_fatal() << message; \
 	}		\
 }while(0)
